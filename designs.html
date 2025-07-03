@@ -89,38 +89,47 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyKGxVmUwvG-xfdzkYHng5ut_VvgwrrSl6otIOIIWw5M75Z205rPLnwoI8X4xopV7ufyQ/exec?callback=handleDriveData";
 
         fetch(WEB_APP_URL)
-            .then(response => response.json())
-            .then(data => {
-                const designs = data.designs || [];
-                const gallery = document.getElementById("design-gallery");
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Resposta da rede não foi OK");
+        }
+        return response.json();
+    })
+    .then(data => {
+        const designs = data.designs || [];
+        const gallery = document.getElementById("design-gallery");
 
-                if (designs.length === 0) {
-                    gallery.innerHTML = "<p>Não foram encontrados designs.</p>";
-                    return;
-                }
+        if (designs.length === 0) {
+            gallery.innerHTML = "<p>Não foram encontrados designs.</p>";
+            return;
+        }
 
-                designs.forEach(design => {
-                    const div = document.createElement("div");
-                    div.className = "design-item";
+        designs.forEach(design => {
+            const div = document.createElement("div");
+            div.className = "design-item";
 
-                    const img = document.createElement("img");
-                    img.src = design.url;
-                    img.alt = design.name;
-                    img.loading = "lazy";
+            const title = document.createElement("h3");
+            title.textContent = design.name;
 
-                    const caption = document.createElement("p");
-                    caption.textContent = design.name;
+            const desc = document.createElement("p");
+            desc.textContent = design.description;
 
-                    div.appendChild(img);
-                    div.appendChild(caption);
+            const img = document.createElement("img");
+            img.src = design.url;
+            img.alt = design.name;
 
-                    gallery.appendChild(div);
-                });
-            })
-            .catch(err => {
-                console.error("Erro a carregar designs:", err);
-                document.getElementById("design-gallery").innerHTML = "<p>Erro ao carregar os designs.</p>";
-            });
+            div.appendChild(title);
+            div.appendChild(desc);
+            div.appendChild(img);
+
+            gallery.appendChild(div);
+        });
+    })
+    .catch(err => {
+        console.error("Erro a carregar designs:", err);
+        document.getElementById("design-gallery").innerHTML = "<p>Erro ao carregar os designs.</p>";
+    });
+
     </script>
 
     <script src="./main.js" type="module"></script>
