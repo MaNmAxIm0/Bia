@@ -50,9 +50,10 @@
                 </button>
                 <ul class="nav-links">
                     <li><a href="./index.html">Início</a></li>
-                    <li><a href="./videos.html">Vídeos</a></li>
-                    <li><a href="./photos.html">Fotografias</a></li>
                     <li><a href="./presentations.html" class="active">Apresentações</a></li>
+                    <li><a href="./designs.html">Designs</a></li>
+                    <li><a href="./photos.html">Fotografias</a></li>
+                    <li><a href="./videos.html">Vídeos</a></li>
                     <li><a href="./contact.html">Contactos</a></li>
                 </ul>
             </nav>
@@ -74,6 +75,7 @@
             <div class="social-links">
                 <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                 <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://wa.me/351925451131" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                 <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
             </div>
             <p>&copy; 2025 Beatriz Rodrigues. Todos os direitos reservados.</p>
@@ -81,12 +83,12 @@
     </footer>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxofBITkLA9NytV8VS_DyXg-nlp244FKHnaH2IzB1C98Qj7F5CgCCvAMT51Gyvxearz/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyKGxVmUwvG-xfdzkYHng5ut_VvgwrrSl6otIOIIWw5M75Z205rPLnwoI8X4xopV7ufyQ/exec";
 
         fetch(WEB_APP_URL)
             .then(response => response.json())
             .then(data => {
-                const presentations = data.presentations || [];
+                const presentations = data.apresentacoes || [];
                 const gallery = document.getElementById("presentation-gallery");
 
                 if (presentations.length === 0) {
@@ -101,16 +103,12 @@
                     const title = document.createElement("h3");
                     title.textContent = presentation.name;
 
-                    const desc = document.createElement("p");
-                    desc.textContent = presentation.description;
-
                     const iframe = document.createElement("iframe");
                     iframe.src = presentation.url;
                     iframe.allowFullscreen = true;
                     iframe.title = presentation.name;
 
                     div.appendChild(title);
-                    div.appendChild(desc);
                     div.appendChild(iframe);
 
                     gallery.appendChild(div);
