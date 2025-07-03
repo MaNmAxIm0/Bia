@@ -56,11 +56,9 @@
         const data = await response.json();
 
         renderVideos("video-gallery", data.videos);
-        renderGallery("design-gallery", data.designs);
       } catch (error) {
         console.error("Erro ao carregar conteúdo:", error);
         document.getElementById("video-gallery").innerHTML = "<p>Não foi possível carregar os vídeos.</p>";
-        document.getElementById("design-gallery").innerHTML = "<p>Não foi possível carregar os designs.</p>";
       }
     }
 
