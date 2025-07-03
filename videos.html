@@ -1,128 +1,109 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Beatriz Rodrigues - Vídeos</title>
-    <link rel="stylesheet" href="./style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <script type="importmap">
-        {
-          "imports": {
-            "carousel": "./carousel.js"
-          }
-        }
-    </script>
-    <style>
-        /* Estilo para galeria de vídeos */
-        .video-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1rem;
-            padding: 1rem 0;
-        }
-        .video-item iframe, .video-item video {
-            width: 100%;
-            height: 280px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .video-item {
-            position: relative;
-        }
-        .video-overlay {
-            position: absolute;
-            bottom: 0;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            width: 100%;
-            padding: 0.5rem;
-            font-family: 'Montserrat', sans-serif;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .video-item:hover .video-overlay {
-            opacity: 1;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Beatriz Rodrigues - Vídeos e Designs</title>
+  <link rel="stylesheet" href="./style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 </head>
 <body>
-    <header class="main-header">
-        <div class="container">
-            <h1 class="logo"><a href="./index.html">Beatriz Rodrigues</a></h1>
-            <nav class="main-nav">
-                <button class="menu-toggle" aria-label="Toggle navigation">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <ul class="nav-links">
-                    <li><a href="./index.html">Início</a></li>
-                    <li><a href="./videos.html" class="active">Vídeos</a></li>
-                    <li><a href="./photos.html">Fotografias</a></li>
-                    <li><a href="./presentations.html">Apresentações</a></li>
-                    <li><a href="./contact.html">Contactos</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+  <header class="main-header">
+    <div class="container">
+      <h1 class="logo"><a href="index.html">Beatriz Rodrigues</a></h1>
+      <nav class="main-nav">
+        <button class="menu-toggle" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
+        <ul class="nav-links">
+          <li><a href="index.html">Início</a></li>
+          <li><a href="videos.html">Vídeos</a></li>
+          <li><a href="photos.html">Fotografias</a></li>
+          <li><a href="presentations.html">Apresentações</a></li>
+          <li><a href="contact.html">Contactos</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
-    <main class="page-content">
-        <section class="section-videos container">
-            <h2>Galeria de Vídeos</h2>
-            <p class="section-description">Uma seleção dos meus melhores trabalhos em vídeo, desde curtas-metragens a documentários e vídeos promocionais.</p>
-            <div class="video-gallery" id="video-gallery"></div>
-        </section>
-    </main>
+  <main class="page-content">
+    <section class="section-videos container">
+      <h2>Meus Vídeos</h2>
+      <p class="section-description">Uma seleção de vídeos que demonstram os meus projetos, apresentações e momentos captados.</p>
+      <div id="video-gallery" class="video-gallery"></div>
+    </section>
 
-    <footer class="main-footer">
-        <div class="container">
-            <div class="social-links">
-                <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-            </div>
-            <p>&copy; 2025 Beatriz Rodrigues. Todos os direitos reservados.</p>
-        </div>
-    </footer>
+    <section class="section-designs container">
+      <h2>Designs Criados</h2>
+      <p class="section-description">Criações gráficas, layouts e elementos visuais desenvolvidos em Canva e outras ferramentas.</p>
+      <div id="design-gallery" class="photo-gallery"></div>
+    </section>
+  </main>
 
-    <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxofBITkLA9NytV8VS_DyXg-nlp244FKHnaH2IzB1C98Qj7F5CgCCvAMT51Gyvxearz/exec";
+  <footer class="main-footer">
+    <div class="container">
+      <div class="social-links">
+        <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+      </div>
+      <p>&copy; 2025 Beatriz Rodrigues. Todos os direitos reservados.</p>
+    </div>
+  </footer>
 
-        fetch(WEB_APP_URL)
-            .then(response => response.json())
-            .then(data => {
-                const videos = data.videos || [];
-                const gallery = document.getElementById("video-gallery");
+  <script>
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbyKGxVmUwvG-xfdzkYHng5ut_VvgwrrSl6otIOIIWw5M75Z205rPLnwoI8X4xopV7ufyQ/exec";
 
-                if (videos.length === 0) {
-                    gallery.innerHTML = "<p>Não foram encontrados vídeos.</p>";
-                    return;
-                }
+    async function fetchContent() {
+      try {
+        const response = await fetch(webAppUrl);
+        const data = await response.json();
 
-                videos.forEach(video => {
-                    const div = document.createElement("div");
-                    div.className = "video-item";
+        renderVideos("video-gallery", data.videos);
+        renderGallery("design-gallery", data.designs);
+      } catch (error) {
+        console.error("Erro ao carregar conteúdo:", error);
+        document.getElementById("video-gallery").innerHTML = "<p>Não foi possível carregar os vídeos.</p>";
+        document.getElementById("design-gallery").innerHTML = "<p>Não foi possível carregar os designs.</p>";
+      }
+    }
 
-                    const iframe = document.createElement("iframe");
-                    iframe.src = video.url;
-                    iframe.frameBorder = "0";
-                    iframe.allowFullscreen = true;
-                    iframe.title = video.name;
+    function renderVideos(containerId, videos) {
+      const container = document.getElementById(containerId);
+      if (!videos || videos.length === 0) {
+        container.innerHTML = "<p>Sem vídeos disponíveis no momento.</p>";
+        return;
+      }
 
-                    const overlay = document.createElement("div");
-                    overlay.className = "video-overlay";
-                    overlay.textContent = video.name;
+      videos.forEach(video => {
+        const div = document.createElement("div");
+        div.className = "video-item";
+        div.innerHTML = `
+          <iframe src="${video.url}" frameborder="0" allowfullscreen title="${video.name}"></iframe>
+          <p>${video.name}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
 
-                    div.appendChild(iframe);
-                    div.appendChild(overlay);
-                    gallery.appendChild(div);
-                });
-            })
-            .catch(err => {
-                console.error("Erro a carregar vídeos:", err);
-                document.getElementById("video-gallery").innerHTML = "<p>Erro ao carregar os vídeos.</p>";
-            });
-    </script>
-    <script src="./main.js" type="module"></script>
+    function renderGallery(containerId, items) {
+      const container = document.getElementById(containerId);
+      if (!items || items.length === 0) {
+        container.innerHTML = "<p>Sem itens disponíveis no momento.</p>";
+        return;
+      }
+
+      items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "photo-item";
+        div.innerHTML = `
+          <img src="${item.url}" alt="${item.name}" loading="lazy" />
+          <p>${item.name}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    fetchContent();
+  </script>
 </body>
 </html>
