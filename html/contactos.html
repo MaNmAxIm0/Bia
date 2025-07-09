@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="contact_page_title">Beatriz Rodrigues - Contactos</title>
+    <link rel="stylesheet" href="../css/estilo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="importmap">
+        {
+          "imports": {
+            "carousel": "../js/carrosel.js",
+            "gallery": "../js/galeria.js",
+            "lightbox": "../js/pop-up.js",
+            "ferramentas": "../js/ferramentas.js",
+            "config": "../js/configuracoes.js",
+            "linguagem": "../js/linguagem.js"
+          }
+        }
+    </script>
+</head>
+<body data-page-title-key="contact_page_title">
+    <header class="main-header">
+        <div class="container">
+            <h1 class="logo"><a href="../pt/index.html"><img src="../imagens/logo.png" alt="Beatriz Rodrigues"></a></h1>
+            <nav class="main-nav">
+                <!-- ...existing content... -->
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <section class="section-contact container">
+            <h2 data-lang-key="contact_section_title">Contacte-me</h2>
+            <p class="section-description" data-lang-key="contact_section_description">Se tiver alguma questão, projeto em mente ou simplesmente quiser dizer olá, utilize o formulário abaixo ou os contactos alternativos.</p>
+
+            <div class="contact-grid">
+                <div class="contact-form-container">
+                    <h3 data-lang-key="send_message_title">Envie uma Mensagem</h3>
+                    <form class="contact-form" action="#" method="POST">
+                        <div class="form-group">
+                            <label for="name" data-lang-key="form_name_label">Nome:</label>
+                            <input type="text" id="name" name="name" required data-lang-key="form_name_placeholder" placeholder="O seu nome">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" data-lang-key="form_email_label">Email:</label>
+                            <input type="email" id="email" name="email" required data-lang-key="form_email_placeholder" placeholder="O seu email">
+                        </div>
+                        <div class="form-group">
+                            <label for="message" data-lang-key="form_message_label">Mensagem:</label>
+                            <textarea id="message" name="message" rows="6" required data-lang-key="form_message_placeholder" placeholder="A sua mensagem"></textarea>
+                        </div>
+                        <button type="submit" class="btn" data-lang-key="send_message_button">Enviar Mensagem <i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+
+                <div class="contact-info-container">
+                    <h3 data-lang-key="alternative_contact_title">Informações de Contacto Alternativas</h3>
+                    <p data-lang-key="alternative_contact_intro">Pode também contactar-me através dos seguintes meios:</p>
+                    <ul>
+                        <li><i class="fas fa-envelope icon"></i> Email: <a href="mailto:rod357571@gmail.com"> rod357571@gmail.com</a></li>
+                        <li><i class="fas fa-phone icon"></i> Telemóvel: <a href="tel:+351925451131" data-lang-key="phone_number"> +351 925 451 131</a></li>
+                        <li><i class="fab fa-whatsapp icon"></i> WhatsApp: <a href="https://wa.me/351925451131" target="_blank" data-lang-key="whatsapp_link_text"> Enviar mensagem</a></li>
+                        <li><i class="fab fa-linkedin-in icon"></i> LinkedIn: <a href="https://linkedin.com/in/yourprofile" target="_blank"> linkedin.com/in/yourprofile</a></li>
+                        <li><i class="fab fa-instagram icon"></i> Instagram: <a href="https://instagram.com/beatrizpssantos" target="_blank"> instagram.com/beatrizpssantos</a></li>
+                    </ul>
+                    <p class="note" data-lang-key="contact_note">Responderei o mais breve possível. Agradeço o seu interesse!</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer"></footer>
+    <script src="../js/principal.js" type="module"></script>
+</body>
+</html>
