@@ -1,24 +1,30 @@
 import { WEB_APP_URL } from './configuracoes.js';
 import { getDirectGoogleDriveUrl, createWatermarkElement } from 'ferramentas';
 import { openLightbox } from 'lightbox';
+import { getTranslation } from 'gestor-de-linguagem';
 
 export async function loadGalleryContent(type, containerId) {
+    console.log(`galeria.js: loadGalleryContent called for type: ${type}, containerId: ${containerId}`);
     const galleryContainer = document.getElementById(containerId);
-    if (!galleryContainer) return;
+    if (!galleryContainer) {
+        console.error(`galeria.js: Gallery container with ID '${containerId}' not found on this page.`);
+        return;
+    }
 
-    // Determine loading message based on current page language
-    const currentLang = window.location.pathname.includes('/en/') ? 'en' : 'pt';
-    const loadingMessage = currentLang === 'en' ? 'Loading content...' : 'A carregar conteúdo...';
+    const loadingMessage = getTranslation('loading_content');
     
     galleryContainer.innerHTML = `<p id="loadingMessage" style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
     const loadingMessageEl = galleryContainer.querySelector('#loadingMessage');
 
     try {
+        console.log(`galeria.js: Fetching data from ${WEB_APP_URL}`);
         const response = await fetch(WEB_APP_URL);
         if (!response.ok) {
+            console.error(`galeria.js: HTTP error! status: ${response.status} for ${WEB_APP_URL}`);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log(`galeria.js: Data received for ${type}:`, data);
         let items = [];
 
         if (type === 'photos') {
@@ -32,8 +38,9 @@ export async function loadGalleryContent(type, containerId) {
         if (loadingMessageEl) loadingMessageEl.style.display = 'none';
 
         if (items.length === 0) {
-            const noContentMessage = currentLang === 'en' ? `No content for '${type}' found.` : `Nenhum conteúdo para '${type}' encontrado.`;
+            const noContentMessage = getTranslation('no_content_found', {type: getTranslation(type)});
             galleryContainer.innerHTML = `<p style="text-align: center; color: var(--light-text-color);">${noContentMessage}</p>`;
+            console.warn(`galeria.js: No items found for type: ${type}.`);
             return;
         }
 
@@ -58,7 +65,7 @@ export async function loadGalleryContent(type, containerId) {
             if (mediaItemType === 'image') {
                 const img = document.createElement('img');
                 img.src = getDirectGoogleDriveUrl(url);
-                const fallbackTitle = currentLang === 'en' ? `${type.slice(0, -1)} Title` : `Título do ${type.slice(0, -1)}`;
+                const fallbackTitle = getTranslation(`${type.slice(0, -1)}_title`);
                 img.alt = item.title || item.name || fallbackTitle;
                 img.loading = "lazy";
                 img.oncontextmenu = () => false; // Disable right-click for image
@@ -73,7 +80,7 @@ export async function loadGalleryContent(type, containerId) {
                 h3.textContent = item.title || item.name || fallbackTitle;
 
                 const p = document.createElement('p');
-                const fallbackDescription = currentLang === 'en' ? `${type.slice(0, -1)} Description.` : `Descrição do ${type.slice(0, -1)}.`;
+                const fallbackDescription = getTranslation(`${type.slice(0, -1)}_description`);
                 p.textContent = item.description || fallbackDescription;
 
                 overlay.appendChild(h3);
@@ -100,7 +107,7 @@ export async function loadGalleryContent(type, containerId) {
                 iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
                 iframe.allowFullscreen = true;
                 iframe.frameBorder = "0";
-                const videoFallbackTitle = currentLang === 'en' ? 'Video Title' : 'Título do Vídeo';
+                const videoFallbackTitle = getTranslation('video_title');
                 iframe.title = item.name || videoFallbackTitle;
                 iframe.loading = "lazy"; 
                 iframe.oncontextmenu = () => false; // Disable right-click for iframe (limited effectiveness)
@@ -112,6 +119,10 @@ export async function loadGalleryContent(type, containerId) {
                 itemDiv.appendChild(title);
 
                 itemDiv.addEventListener('click', (e) => {
+                    // Prevent lightbox opening if the click originated from within the iframe (which is hard to reliably detect cross-origin)
+                    // The main goal is to open lightbox on itemDiv click, but if the iframe is clicked, its default behavior should take precedence.
+                    // However, due to security restrictions, clicking an iframe's content often doesn't bubble up.
+                    // A simple check if the click target is the iframe itself might be sufficient for preventing double action.
                     if (e.target !== iframe) {
                         openLightbox(url, 'video', item.name, '');
                     }
@@ -121,8 +132,8 @@ export async function loadGalleryContent(type, containerId) {
         });
 
     } catch (error) {
-        console.error(`Erro ao carregar ${type}:`, error);
-        const errorMessage = currentLang === 'en' ? `Error loading ${type}. Please try again later.` : `Erro ao carregar ${type}. Por favor, tente novamente mais tarde.`;
+        console.error(`galeria.js: Error loading ${type}:`, error);
+        const errorMessage = getTranslation('error_loading_content', {type: getTranslation(type)});
         if (loadingMessageEl) {
             loadingMessageEl.textContent = errorMessage;
             loadingMessageEl.style.color = 'red';
@@ -134,25 +145,32 @@ export async function loadGalleryContent(type, containerId) {
 }
 
 export async function loadPresentations() {
+    console.log("galeria.js: loadPresentations called.");
     const gallery = document.getElementById("presentation-gallery");
-    if (!gallery) return;
+    if (!gallery) {
+        console.error("galeria.js: Presentation gallery container not found on this page.");
+        return;
+    }
 
-    const currentLang = window.location.pathname.includes('/en/') ? 'en' : 'pt';
-    const loadingMessage = currentLang === 'en' ? 'Loading presentations...' : 'A carregar apresentações...';
+    const loadingMessage = getTranslation('loading_presentations');
     
     gallery.innerHTML = `<p style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
 
     try {
+        console.log(`galeria.js: Fetching presentations from ${WEB_APP_URL}`);
         const response = await fetch(WEB_APP_URL);
         if (!response.ok) {
+            console.error(`galeria.js: HTTP error! status: ${response.status} for ${WEB_APP_URL}`);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log("galeria.js: Data received for presentations:", data);
         const presentations = data.apresentacoes || [];
 
         if (presentations.length === 0) {
-            const noContentMessage = currentLang === 'en' ? 'No presentations found.' : 'Não foram encontradas apresentações.';
+            const noContentMessage = getTranslation('no_presentations_found');
             gallery.innerHTML = `<p style='text-align: center; color: var(--light-text-color);'>${noContentMessage}</p>`;
+            console.warn("galeria.js: No presentations found.");
             return;
         }
 
@@ -194,8 +212,8 @@ export async function loadPresentations() {
             gallery.appendChild(div);
         });
     } catch (err) {
-        console.error("Erro a carregar apresentações:", err);
-        const errorMessage = currentLang === 'en' ? 'Error loading presentations. Please try again later.' : 'Erro ao carregar apresentações. Por favor, tente novamente mais tarde.';
+        console.error("galeria.js: Error loading presentations:", err);
+        const errorMessage = getTranslation('error_loading_content', {type: getTranslation('presentations')});
         gallery.innerHTML = `<p style='text-align: center; color: red;'>${errorMessage}</p>`;
     }
 }

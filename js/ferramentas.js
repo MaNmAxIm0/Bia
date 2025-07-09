@@ -1,5 +1,3 @@
-import { getTranslation } from 'linguagem'; 
-
 // Helper function to get direct Google Drive URL for embedding
 export function getDirectGoogleDriveUrl(url) {
     // If it's already a direct 'uc' link or lh3 link, use it directly

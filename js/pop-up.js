@@ -1,4 +1,5 @@
 import { getDirectGoogleDriveUrl, createWatermarkElement } from 'ferramentas';
+import { getTranslation } from 'gestor-de-linguagem'; // Import getTranslation and getCurrentLanguage from language-manager
 
 // Lightbox variables
 let currentLightbox = null;
@@ -42,8 +43,7 @@ export function openLightbox(mediaUrl, mediaType, title = '', description = '') 
     closeBtn.innerHTML = '&times;'; // 'X' character
     
     // Determine close button label based on current page language
-    const currentLang = window.location.pathname.includes('/en/') ? 'en' : 'pt';
-    const closeLabel = currentLang === 'en' ? 'Close' : 'Fechar';
+    const closeLabel = getTranslation('close');
     closeBtn.setAttribute('aria-label', closeLabel);
     closeBtn.addEventListener('click', closeLightbox);
 
@@ -51,7 +51,7 @@ export function openLightbox(mediaUrl, mediaType, title = '', description = '') 
     if (mediaType === 'image') {
         mediaElement = document.createElement('img');
         mediaElement.src = getDirectGoogleDriveUrl(mediaUrl); // Apply conversion here
-        const fallbackTitle = currentLang === 'en' ? 'Photo Title' : 'Título da Foto';
+        const fallbackTitle = getTranslation('photo_title');
         mediaElement.alt = title || fallbackTitle;
         mediaElement.oncontextmenu = () => false; // Disable right-click for image
     } else if (mediaType === 'video') {
@@ -74,7 +74,7 @@ export function openLightbox(mediaUrl, mediaType, title = '', description = '') 
         mediaElement.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         mediaElement.allowFullscreen = true;
         mediaElement.frameBorder = "0";
-        const videoFallbackTitle = currentLang === 'en' ? 'Video Title' : 'Título do Vídeo';
+        const videoFallbackTitle = getTranslation('video_title');
         mediaElement.title = title || videoFallbackTitle;
         mediaElement.classList.add('lightbox-video');
         mediaElement.oncontextmenu = () => false; // Disable right-click for iframe content (may not work on all browsers/embeds)
