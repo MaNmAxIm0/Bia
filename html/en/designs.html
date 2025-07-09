@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-ZW5DLGF7RF');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Título da página específico para cada página e idioma -->
@@ -42,39 +51,39 @@
 
   <!-- Importmap para módulos JavaScript -->
   <script type="importmap">
-      {
-        "imports": {
-          "carousel": "../../js/carrosel.js",
-          "gallery": "../../js/galeria.js",
-          "lightbox": "../../js/pop-up.js",
-          "ferramentas": "../../js/ferramentas.js",
-          "config": "../../js/configuracoes.js",
-          "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
-          "linguagem": "../../js/linguagem.js"
-        }
+    {
+      "imports": {
+      "carousel": "../../js/carrosel.js",
+      "gallery": "../../js/galeria.js",
+      "lightbox": "../../js/pop-up.js",
+      "ferramentas": "../../js/ferramentas.js",
+      "config": "../../js/configuracoes.js",
+      "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
+      "linguagem": "../../js/linguagem.js"
       }
+    }
   </script>
 </head>
 <body data-page-title-key="designs_page_title">
   <header class="main-header">
     <div class="container">
-        <h1 class="logo"><a href="index.html"><img src="../../imagens/logo.png" alt="Beatriz Rodrigues"></a></h1>
-        <nav class="main-nav">
-            <button class="menu-toggle" aria-label="Toggle navigation" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
-            <ul class="nav-links">
-                <li><a href="index.html" data-lang-key="home">Home</a></li>
-                <li><a href="presentations.html" data-lang-key="presentations">Presentations</a></li>
-                <li><a href="designs.html" data-lang-key="designs">Designs</a></li>
-                <li><a href="photos.html" data-lang-key="photos">Photos</a></li>
-                <li><a href="videos.html" data-lang-key="videos">Videos</a></li>
-                <li><a href="about-me.html" data-lang-key="about_me">About Me</a></li>
-                <li><a href="contacts.html" data-lang-key="contact">Contact</a></li>
-            </ul>
-            <div class="language-switcher">
-                <a href="../pt/designs.html" class="lang-btn">PT</a>
-                <a href="designs.html" class="lang-btn active">EN</a>
-            </div>
-        </nav>
+      <h1 class="logo"><a href="index.html"><img src="../../imagens/logo.png" alt="Beatriz Rodrigues"></a></h1>
+      <nav class="main-nav">
+        <button class="menu-toggle" aria-label="Toggle navigation" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
+        <ul class="nav-links">
+          <li><a href="index.html" data-lang-key="home">Home</a></li>
+          <li><a href="presentations.html" data-lang-key="presentations">Presentations</a></li>
+          <li><a href="designs.html" data-lang-key="designs">Designs</a></li>
+          <li><a href="photos.html" data-lang-key="photos">Photos</a></li>
+          <li><a href="videos.html" data-lang-key="videos">Videos</a></li>
+          <li><a href="about-me.html" data-lang-key="about_me">About Me</a></li>
+          <li><a href="contacts.html" data-lang-key="contact">Contact</a></li>
+        </ul>
+        <div class="language-switcher">
+          <a href="../pt/designs.html" class="lang-btn">PT</a>
+          <a href="designs.html" class="lang-btn active">EN</a>
+        </div>
+      </nav>
     </div>
   </header>
 
@@ -91,16 +100,15 @@
 
   <footer class="main-footer">
     <div class="container">
-        <div class="social-links">
-            <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-            <a href="https://wa.me/351925451131" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-            <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-        </div>
-        <p data-lang-key="all_rights_reserved">&copy; 2025 Beatriz Rodrigues. All rights reserved.</p>
+      <div class="social-links">
+        <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://wa.me/351925451131" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+      </div>
+      <p data-lang-key="all_rights_reserved">&copy; 2025 Beatriz Rodrigues. All rights reserved.</p>
     </div>
   </footer>
-
   <script src="../../js/principal.js" type="module"></script>
 </body>
 </html>
