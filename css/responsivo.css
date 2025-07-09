@@ -1,0 +1,230 @@
+/* Responsive Design */
+@media (max-width: 992px) {
+    .main-nav ul {
+        margin-left: 10px;
+    }
+    .main-nav ul li {
+        margin-left: 20px;
+    }
+    .carousel-slide img {
+        height: 400px;
+    }
+    .carousel-caption {
+        padding: 20px 30px;
+    }
+    .carousel-caption h2 {
+        font-size: 2em;
+    }
+    .carousel-caption p {
+        font-size: 1em;
+    }
+
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    h2 {
+        font-size: 1.8em;
+    }
+    .section-description {
+        font-size: 1em;
+        margin-bottom: 2em;
+    }
+
+    /* Header & Nav */
+    .main-header .container {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .logo {
+        margin-right: auto;
+    }
+    .main-nav {
+        width: 100%; /* Take full width */
+        flex-direction: column; /* Stack nav items and language switcher */
+        align-items: flex-end; /* Align right */
+        gap: 15px; /* Space between elements */
+    }
+    .main-nav .nav-links {
+        display: none; /* Hide by default on mobile */
+        flex-direction: column;
+        width: 100%;
+        background-color: var(--surface-color);
+        position: static; /* No longer absolute */
+        box-shadow: none; /* No shadow */
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        animation: none; /* No animation */
+        transform-origin: top;
+        z-index: 100;
+    }
+
+    .main-nav .nav-links.active {
+        display: flex; /* Show when active */
+    }
+
+    .main-nav ul {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .main-nav ul li {
+        margin: 0;
+        border-bottom: 1px solid var(--border-color);
+        text-align: center;
+    }
+    .main-nav ul li:last-child {
+        border-bottom: none;
+    }
+    .main-nav ul li a {
+        display: block;
+        padding: 15px 0;
+        font-size: 1em;
+    }
+    .main-nav ul li a::after {
+        content: none; /* Remove underline animation on mobile */
+    }
+    .main-nav ul li a:hover {
+        background-color: var(--background-color);
+    }
+
+    .menu-toggle {
+        display: block; /* Show menu toggle on mobile */
+        position: static;
+        transform: none;
+        padding: 5px 10px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        z-index: 1001; /* Ensure button is above other elements */
+    }
+
+    .menu-toggle:hover {
+        color: var(--accent-color);
+    }
+
+    .language-switcher {
+        margin-left: 0; /* Remove left margin for better stacking */
+        margin-top: 10px; /* Add some top margin to separate from toggle */
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: scaleY(0);
+        }
+        to {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+    }
+
+    .page-content {
+        padding-top: 90px; /* Adjusted to keep consistent with fixed header */
+    }
+
+    /* Carousel */
+    .carousel-slide img {
+        height: 300px;
+    }
+    .carousel-caption {
+        padding: 15px 20px;
+    }
+    .carousel-caption h2 {
+        font-size: 1.5em;
+    }
+    .carousel-caption p {
+        font-size: 0.9em;
+    }
+    .carousel-btn {
+        padding: 10px;
+        font-size: 1.5em;
+        width: 40px;
+        height: 40px;
+    }
+    .carousel-btn.prev {
+        left: 10px;
+    }
+    .carousel-btn.next {
+        right: 10px;
+    }
+    .carousel-dots {
+        bottom: 10px;
+    }
+    .dot {
+        width: 10px;
+        height: 10px;
+    }
+
+    /* Grid layouts */
+    .best-works-grid,
+    .section-preview-grid,
+    .video-gallery,
+    .photo-gallery,
+    .presentation-gallery,
+    .design-gallery {
+        grid-template-columns: 1fr;
+        padding: 0 10px;
+    }
+    .work-item,
+    .video-item,
+    .photo-item,
+    .presentation-item,
+    .preview-item,
+    .design-item {
+        margin: 0 auto;
+        max-width: 400px; /* Constrain width on smaller screens for better readability */
+    }
+
+    /* Remove fixed heights for gallery items, aspect-ratio handles this */
+    .video-item iframe,
+    .photo-item img,
+    .design-item img,
+    .design-item iframe {
+        height: auto; /* Let aspect-ratio define height */
+    }
+    .presentation-item iframe {
+        height: auto; /* Let aspect-ratio define height */
+    }
+    .contact-form-container,
+    .contact-info-container {
+        padding: 20px;
+    }
+    .contact-form-container h3,
+    .contact-info-container h3 {
+        font-size: 1.5em;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 15px;
+    }
+    .btn {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+    .carousel-slide img {
+        height: 250px;
+    }
+    .carousel-caption h2 {
+        font-size: 1.2em;
+    }
+    .carousel-caption p {
+        font-size: 0.8em;
+    }
+    .main-header .container {
+        padding: 10px 15px; /* Adjust header padding */
+    }
+    .language-switcher {
+        width: 100%;
+        justify-content: center; /* Center buttons horizontally */
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .main-nav .nav-links.active {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Re-add shadow for the dropdown */
+    }
+}

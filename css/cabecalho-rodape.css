@@ -1,0 +1,154 @@
+/* Header & Navigation */
+.main-header {
+    background-color: var(--surface-color);
+    padding: 15px 0;
+    box-shadow: var(--box-shadow);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.main-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 1.5em; 
+    color: var(--primary-color);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    max-height: 40px; /* Changed from height to max-height for responsiveness */
+    width: auto;
+    object-fit: contain;
+    max-width: 100%; /* Ensure image scales down within its container */
+}
+
+.main-nav {
+    display: flex; /* Make main-nav a flex container */
+    align-items: center; /* Align items vertically */
+    gap: 20px; /* Space between nav links and language switcher */
+}
+
+.main-nav ul {
+    list-style: none;
+    display: flex;
+}
+
+.main-nav ul li {
+    margin-left: 30px;
+}
+
+.main-nav ul li a {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    font-size: 1.1em;
+    color: var(--primary-color);
+    position: relative;
+    padding-bottom: 5px;
+}
+
+.main-nav ul li a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+}
+
+.main-nav ul li a:hover::after,
+.main-nav ul li a.active::after {
+    width: 100%;
+}
+
+.menu-toggle {
+    display: none; 
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.menu-toggle:hover {
+    color: var(--accent-color);
+}
+
+/* Language Switcher */
+.language-switcher {
+    display: flex;
+    gap: 5px;
+    margin-left: 20px;
+}
+
+.language-switcher .lang-btn {
+    background-color: transparent;
+    color: var(--text-color);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    font-size: 0.9em;
+    transition: color 0.2s ease;
+    text-decoration: none;
+    position: relative;
+}
+
+.language-switcher .lang-btn::after {
+    content: '/';
+    margin: 0 0 0 8px;
+    color: var(--border-color);
+}
+
+.language-switcher .lang-btn:last-child::after {
+    content: '';
+    margin: 0;
+}
+
+.language-switcher .lang-btn:hover {
+    color: var(--accent-color);
+}
+
+.language-switcher .lang-btn.active {
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+/* Footer */
+.main-footer {
+    background-color: var(--secondary-color);
+    color: var(--background-color);
+    padding: 30px 0;
+    text-align: center;
+    margin-top: auto; 
+}
+
+.main-footer .social-links {
+    margin-bottom: 15px;
+}
+
+.main-footer .social-links a {
+    color: var(--background-color);
+    font-size: 1.8em;
+    margin: 0 15px;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.main-footer .social-links a:hover {
+    color: var(--accent-color);
+    transform: translateY(-3px);
+}

@@ -1,0 +1,100 @@
+/* Contact Section */
+.section-contact {
+    padding: 60px 0;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    padding: 0 20px;
+}
+
+.contact-form-container,
+.contact-info-container {
+    background-color: var(--surface-color);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.contact-form-container h3,
+.contact-info-container h3 {
+    text-align: center;
+    margin-bottom: 1.5em;
+    font-size: 1.8em;
+}
+
+.contact-form .form-group {
+    margin-bottom: 20px;
+}
+
+.contact-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-form input[type="text"]:focus,
+.contact-form input[type="email"]:focus,
+.contact-form textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.contact-form .btn {
+    width: auto;
+    margin-top: 10px;
+}
+
+.contact-info-container ul {
+    list-style: none;
+    margin-top: 20px;
+}
+
+.contact-info-container ul li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    color: var(--text-color);
+}
+
+.contact-info-container ul li .icon {
+    font-size: 1.4em;
+    color: var(--accent-color);
+    margin-right: 15px;
+    width: 25px; /* Fixed width for icon alignment */
+    text-align: center;
+}
+
+.contact-info-container ul li a {
+    color: var(--primary-color);
+    word-break: break-all; /* For long emails/links */
+}
+
+.contact-info-container .note {
+    margin-top: 30px;
+    font-style: italic;
+    color: var(--light-text-color);
+    text-align: center;
+}
