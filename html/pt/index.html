@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beatriz Rodrigues - Início</title>
+    <link rel="stylesheet" href="../../css/estilo.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script type="importmap">
+        {
+          "imports": {
+            "carousel": "../../js/carrosel.js",
+            "gallery": "../../js/galeria.js",
+            "lightbox": "../../js/pop-up.js",
+            "ferramentas": "../../js/ferramentas.js",
+            "config": "../../js/configuracoes.js",
+            "linguagem": "../../js/linguagem.js"
+          }
+        }
+    </script>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1 class="logo"><a href="index.html"><img src="../../imagens/logo.png" alt="Beatriz Rodrigues"></a></h1>
+            <nav class="main-nav">
+                <button class="menu-toggle" aria-label="Alternar navegação"><i class="fas fa-bars"></i></button>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Início</a></li>
+                    <li><a href="../sobre-mim.html">Sobre Mim</a></li>
+                    <li><a href="../apresentacoes.html">Apresentações</a></li>
+                    <li><a href="../designs.html">Designs</a></li>
+                    <li><a href="../fotos.html">Fotografias</a></li>
+                    <li><a href="../videos.html">Vídeos</a></li>
+                    <li><a href="../contactos.html">Contactos</a></li>
+                </ul>
+                <div class="language-switcher">
+                    <a href="index.html" class="lang-btn active">PT</a>
+                    <a href="../en/index.html" class="lang-btn">EN</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <section class="hero-carousel">
+            <div class="carousel-container">
+                <div class="carousel-slides">
+                    <div class="carousel-slide">
+                        <img src="../../carousel_image_1.png" alt="Featured Work 1" />
+                        <div class="carousel-caption">
+                            <h2>Projecto A</h2>
+                            <p>Um trabalho inovador que combina design e tecnologia.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="../../carousel_image_2.png" alt="Featured Work 2" />
+                        <div class="carousel-caption">
+                            <h2>Filme Curto "O Regresso"</h2>
+                            <p>Uma narrativa visual emocionante e envolvente.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="../../carousel_image_3.png" alt="Featured Work 3" />
+                        <div class="carousel-caption">
+                            <h2>Apresentação Corporativa</h2>
+                            <p>Estratégias de marketing para o futuro.</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+                <div class="carousel-dots"></div>
+            </div>
+        </section>
+
+        <section class="section-highlight container">
+            <h2>Melhores Trabalhos</h2>
+            <div class="best-works-grid">
+                <div class="work-item">
+                    <img src="../../work_thumb_video.png" alt="Melhor Vídeo" />
+                    <h3>Documentário Urbano</h3>
+                    <p>Uma exploração profunda da vida na cidade, com entrevistas e imagens cativantes.</p>
+                    <a href="../videos.html" class="btn">Ver Vídeo <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="work-item">
+                    <img src="../../work_thumb_photo.png" alt="Melhor Fotografia" />
+                    <h3>Paisagens Naturais</h3>
+                    <p>Coleção de fotografias que capturam a beleza intocada da natureza.</p>
+                    <a href="../fotos.html" class="btn">Ver Fotografias <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="work-item">
+                    <img src="../../work_thumb_presentation.png" alt="Melhor Apresentação" />
+                    <h3>Workshop de Inovação</h3>
+                    <p>Uma apresentação interativa sobre as últimas tendências em inovação tecnológica.</p>
+                    <a href="../apresentacoes.html" class="btn">Ver Apresentação <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="work-item">
+                    <img src="../../work_thumb_design.png" alt="Melhor Design" />
+                    <h3>Criações em Design Gráfico</h3>
+                    <p>Designs criativos desenvolvidos em várias ferramentas, incluindo Canva.</p>
+                    <a href="../designs.html" class="btn">Ver Designs <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-previews container">
+            <h2>Descobrir Mais</h2>
+            <div class="section-preview-grid">
+                <a href="../videos.html" class="preview-item">
+                    <img src="../../work_thumb_video.png" alt="Vídeos" />
+                    <h3>Vídeos</h3>
+                    <p>Criações audiovisuais que contam histórias.</p>
+                </a>
+                <a href="../fotos.html" class="preview-item">
+                    <img src="../../work_thumb_photo.png" alt="Fotografias" />
+                    <h3>Fotografias</h3>
+                    <p>Galeria de imagens que capturam momentos únicos.</p>
+                </a>
+                <a href="../apresentacoes.html" class="preview-item">
+                    <img src="../../work_thumb_presentation.png" alt="Apresentações" />
+                    <h3>Apresentações</h3>
+                    <p>Projetos e ideias transformados em apresentações impactantes.</p>
+                </a>
+                <a href="../designs.html" class="preview-item">
+                    <img src="../../work_thumb_design.png" alt="Designs" />
+                    <h3>Designs</h3>
+                    <p>Elementos gráficos criativos e layouts profissionais.</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="social-links">
+                <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://wa.me/351925451131" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+            <p>&copy; 2025 Beatriz Rodrigues. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="../../js/principal.js" type="module"></script>
+</body>
+</html>
