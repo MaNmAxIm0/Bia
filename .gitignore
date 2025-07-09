@@ -1,0 +1,53 @@
+# Ignorar diretórios e ficheiros de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Ignorar ficheiros de configuração de IDEs (Ambientes de Desenvolvimento Integrado)
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Ignorar ficheiros de dependências de pacotes (se usar npm, yarn, etc. no futuro)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Ignorar ficheiros de cache e temporários
+*.log
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Ignorar ficheiros de backup
+*~
+*.bak
+*.old
+*.orig
+*.rej
+
+# Ignorar ficheiros gerados automaticamente (se aplicável)
+# Por exemplo, se você tivesse um processo de build que gera um diretório 'dist'
+# dist/
+# build/
+
+# Ignorar ficheiros de dados sensíveis ou específicos do ambiente local
+# Se você tiver algum ficheiro com chaves de API, credenciais, etc.
+# .env
+# config.local.js
+
+# Ignorar o próprio ficheiro .gitignore (opcional, mas comum)
+# .gitignore
+
+# Ignorar ficheiros de favicons que são gerados por ferramentas (se aplicável)
+# favicons/android-chrome-*.png
+# favicons/apple-touch-icon.png
+# favicons/favicon-*.png
+# favicons/mstile-*.png
+# favicons/safari-pinned-tab.svg
+# favicons/site.webmanifest
+# Se você gera os favicons e não quer versionar todos, pode ser mais específico.
+# No seu caso, parece que você os versiona, então talvez não precise desta secção.
