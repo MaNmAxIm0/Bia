@@ -1,18 +1,82 @@
----
-layout: base.html
-lang: pt
-titleKey: presentations_page_title
-description: Veja uma coleção de palestras, workshops e portfólios de apresentação de Beatriz Rodrigues, incorporados diretamente para sua visualização.
-ogTitle: Portfólio - Beatriz Rodrigues - Apresentações
-ogDescription: Veja uma coleção de palestras, workshops e portfólios de apresentação de Beatriz Rodrigues, incorporados diretamente para sua visualização.
-ogUrl: https://manmaxim0.github.io/Bia/html/pt/apresentacoes.html
-twitterTitle: Portfólio - Beatriz Rodrigues - Apresentações
-twitterDescription: Veja uma coleção de palestras, workshops e portfólios de apresentação de Beatriz Rodrigues, incorporados diretamente para sua visualização.
----
-<section class="section-presentations container">
-  <h2 data-lang-key="presentations_section_title">Minhas Apresentações</h2>
-  <p class="section-description" data-lang-key="presentations_section_description">Uma coleção das minhas palestras, workshops e portfólios de apresentação, incorporados diretamente para sua visualização.</p>
-  <div class="presentation-gallery" id="presentation-gallery">
-    <!-- Conteúdo será carregado dinamicamente -->
-  </div>
-</section>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag( ){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZW5DLGF7RF');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-lang-key="presentations_page_title">Beatriz Rodrigues - Apresentações</title>
+
+  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
+  <meta name="description" content="Veja uma coleção de palestras, workshops e portfólios de apresentação de Beatriz Rodrigues, incorporados diretamente para sua visualização.">
+  <meta property="og:title" content="Portfólio - Beatriz Rodrigues - Apresentações">
+  <meta property="og:description" content="Veja uma coleção de palestras, workshops e portfólios de apresentação de Beatriz Rodrigues, incorporados diretamente para sua visualização.">
+  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/pt/apresentacoes.html">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Portfólio - Beatriz Rodrigues - Apresentações">
+  <meta name="twitter:description" content="Veja uma coleção de palestras, workshops e portfólios de apresentação de Beatriz Rodrigues, incorporados diretamente para sua visualização.">
+  <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta name="robots" content="index, follow">
+
+  <!-- Links hreflang para SEO multilingue -->
+  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/apresentacoes.html" />
+  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/presentations.html" />
+
+  <!-- Links para folhas de estilo CSS -->
+  <link rel="stylesheet" href="../../css/estilo.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="../../css/galeria-das-paginas.css" />
+
+  <!-- Links para favicons -->
+  <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
+  <link rel="shortcut icon" href="../../favicons/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
+  <link rel="manifest" href="../../favicons/site.webmanifest" />
+
+  <!-- Importmap para módulos JavaScript -->
+  <script type="importmap">
+    {
+      "imports": {
+        "carrossel": "../../js/carrossel.js",
+        "gallery": "../../js/galeria.js",
+        "lightbox": "../../js/pop-up.js",
+        "ferramentas": "../../js/ferramentas.js",
+        "config": "../../js/configuracoes.js",
+        "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
+        "linguagem": "../../js/linguagem.js"
+      }
+    }
+  </script>
+</head>
+<body data-page-title-key="presentations_page_title">
+  <div id="header-placeholder"></div>
+
+  <main class="page-content">
+    <section class="section-presentations container">
+      <h2 data-lang-key="presentations_section_title">Minhas Apresentações</h2>
+      <p class="section-description" data-lang-key="presentations_section_description">Uma coleção das minhas palestras, workshops e portfólios de apresentação, incorporados diretamente para sua visualização.</p>
+      <div class="presentation-gallery" id="presentation-gallery">
+        <!-- Conteúdo será carregado dinamicamente -->
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../../js/html-injector.js"></script>
+  <script src="../../js/principal.js" type="module"></script>
+</body>
+</html>

@@ -1,25 +1,88 @@
----
-layout: base.html
-lang: pt
-titleKey: about_me_page_title
-description: Saiba mais sobre Beatriz Rodrigues, uma criadora de conteúdo apaixonada por contar histórias visuais e novas tecnologias.
-ogTitle: Portfólio - Beatriz Rodrigues - Sobre Mim
-ogDescription: Saiba mais sobre Beatriz Rodrigues, uma criadora de conteúdo apaixonada por contar histórias visuais e novas tecnologias.
-ogUrl: https://manmaxim0.github.io/Bia/html/pt/sobre-mim.html
-twitterTitle: Portfólio - Beatriz Rodrigues - Sobre Mim
-twitterDescription: Saiba mais sobre Beatriz Rodrigues, uma criadora de conteúdo apaixonada por contar histórias visuais e novas tecnologias.
----
-<section class="section-about container">
-  <h2 data-lang-key="about_me_section_title">Sobre Mim</h2>
-  <div class="about-me-grid">
-    <div class="about-me-pic">
-      <img src="/imagens/profile_picture.png" alt="Beatriz Rodrigues">
-    </div>
-    <div class="about-me-text">
-      <h3 data-lang-key="about_me_greeting">Olá, sou a Beatriz!</h3>
-      <p data-lang-key="about_me_paragraph_1">Sou uma criadora de conteúdo apaixonada por transformar ideias em realidade visual. Com uma base sólida em comunicação e uma curiosidade insaciável por novas tecnologias, dedico-me a criar apresentações, designs, fotografias e vídeos que não só informam, mas também inspiram e envolvem.</p>
-      <p data-lang-key="about_me_paragraph_2">A minha jornada começou com uma simples câmara e um desejo de contar histórias. Hoje, essa paixão evoluiu para um conjunto de competências diversificado que me permite abordar projetos de diferentes ângulos, sempre com um foco na clareza, estética e impacto.</p>
-      <p data-lang-key="about_me_paragraph_3">Neste portfólio, encontrará uma seleção dos meus trabalhos que refletem o meu percurso e a minha dedicação. Vamos criar algo incrível juntos!</p>
-    </div>
-  </div>
-</section>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag( ){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZW5DLGF7RF');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-lang-key="about_me_page_title">Beatriz Rodrigues - Sobre Mim</title>
+
+  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
+  <meta name="description" content="Saiba mais sobre Beatriz Rodrigues, uma criadora de conteúdo apaixonada por contar histórias visuais e novas tecnologias.">
+  <meta property="og:title" content="Portfólio - Beatriz Rodrigues - Sobre Mim">
+  <meta property="og:description" content="Saiba mais sobre Beatriz Rodrigues, uma criadora de conteúdo apaixonada por contar histórias visuais e novas tecnologias.">
+  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/pt/sobre-mim.html">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Portfólio - Beatriz Rodrigues - Sobre Mim">
+  <meta name="twitter:description" content="Saiba mais sobre Beatriz Rodrigues, uma criadora de conteúdo apaixonada por contar histórias visuais e novas tecnologias.">
+  <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta name="robots" content="index, follow">
+
+  <!-- Links hreflang para SEO multilingue -->
+  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/sobre-mim.html" />
+  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/about-me.html" />
+
+  <!-- Links para folhas de estilo CSS -->
+  <link rel="stylesheet" href="../../css/estilo.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+  <!-- Links para favicons -->
+  <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
+  <link rel="shortcut icon" href="../../favicons/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
+  <link rel="manifest" href="../../favicons/site.webmanifest" />
+
+  <!-- Importmap para módulos JavaScript -->
+  <script type="importmap">
+    {
+      "imports": {
+        "carrossel": "../../js/carrossel.js",
+        "gallery": "../../js/galeria.js",
+        "lightbox": "../../js/pop-up.js",
+        "ferramentas": "../../js/ferramentas.js",
+        "config": "../../js/configuracoes.js",
+        "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
+        "linguagem": "../../js/linguagem.js"
+      }
+    }
+  </script>
+</head>
+<body data-page-title-key="about_me_page_title">
+  <div id="header-placeholder"></div>
+
+  <main class="page-content">
+    <section class="section-about container">
+      <h2 data-lang-key="about_me_section_title">Sobre Mim</h2>
+      <div class="about-me-grid">
+        <div class="about-me-pic">
+          <img src="../../imagens/profile_picture.png" alt="Beatriz Rodrigues">
+        </div>
+        <div class="about-me-text">
+          <h3 data-lang-key="about_me_greeting">Olá, sou a Beatriz!</h3>
+          <p data-lang-key="about_me_paragraph_1">Sou uma criadora de conteúdo apaixonada por transformar ideias em realidade visual. Com uma base sólida em comunicação e uma curiosidade insaciável por novas tecnologias, dedico-me a criar apresentações, designs, fotografias e vídeos que não só informam, mas também inspiram e envolvem.</p>
+          <p data-lang-key="about_me_paragraph_2">A minha jornada começou com uma simples câmara e um desejo de contar histórias. Hoje, essa paixão evoluiu para um conjunto de competências diversificado que me permite abordar projetos de diferentes ângulos, sempre com um foco na clareza, estética e impacto.</p>
+          <p data-lang-key="about_me_paragraph_3">Neste portfólio, encontrará uma seleção dos meus trabalhos que refletem o meu percurso e a minha dedicação. Vamos criar algo incrível juntos!</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../../js/html-injector.js"></script>
+  <script src="../../js/principal.js" type="module"></script>
+</body>
+</html>

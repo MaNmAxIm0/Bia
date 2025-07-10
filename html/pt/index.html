@@ -1,97 +1,160 @@
----
-layout: base.html
-lang: pt
-titleKey: home
-description: Explore o portfólio de Beatriz Rodrigues, uma criadora de conteúdo que apresenta apresentações, designs, fotografias e vídeos.
-ogTitle: Portfólio - Beatriz Rodrigues - Início
-ogDescription: Explore o portfólio de Beatriz Rodrigues, uma criadora de conteúdo que apresenta apresentações, designs, fotografias e vídeos.
-ogUrl: https://manmaxim0.github.io/Bia/pt/
-twitterTitle: Portfólio - Beatriz Rodrigues - Início
-twitterDescription: Explore o portfólio de Beatriz Rodrigues, uma criadora de conteúdo que apresenta apresentações, designs, fotografias e vídeos.
----
-<section class="hero-carousel">
-  <div class="carousel-container">
-    <div class="carousel-slides">
-      <div class="carousel-slide">
-        <img src="{{ site.pathPrefix }}/imagens/carousel_image_1.png" alt="Featured Work 1" />
-        <div class="carousel-caption">
-          <h2 data-lang-key="project_a_title">Projecto A</h2>
-          <p data-lang-key="project_a_description">Um trabalho inovador que combina design e tecnologia.</p>
-        </div>
-      </div>
-      <div class="carousel-slide">
-        <img src="{{ site.pathPrefix }}/imagens/carousel_image_2.png" alt="Featured Work 2" />
-        <div class="carousel-caption">
-          <h2 data-lang-key="short_film_title">Filme Curto "O Regresso"</h2>
-          <p data-lang-key="short_film_description">Uma narrativa visual emocionante e envolvente.</p>
-        </div>
-      </div>
-      <div class="carousel-slide">
-        <img src="{{ site.pathPrefix }}/imagens/carousel_image_3.png" alt="Featured Work 3" />
-        <div class="carousel-caption">
-          <h2 data-lang-key="corporate_presentation_title">Apresentação Corporativa</h2>
-          <p data-lang-key="corporate_presentation_description">Estratégias de marketing para o futuro.</p>
-        </div>
-      </div>
-    </div>
-    <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
-    <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
-    <div class="carousel-dots"></div>
-  </div>
-</section>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag( ){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZW5DLGF7RF');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-lang-key="home">Beatriz Rodrigues - Início</title>
 
-<section class="section-highlight container">
-  <h2 data-lang-key="best_works">Melhores Trabalhos</h2>
-  <div class="best-works-grid">
-    <div class="work-item">
-      <img src="{{ site.pathPrefix }}/imagens/work_thumb_video.png" alt="Melhor Vídeo" />
-      <h3 data-lang-key="urban_documentary_title">Documentário Urbano</h3>
-      <p data-lang-key="urban_documentary_description">Uma exploração profunda da vida na cidade, com entrevistas e imagens cativantes.</p>
-      <a href="{{ site.pathPrefix }}/pt/videos/" class="btn" data-lang-key="view_video">Ver Vídeo <i class="fas fa-arrow-right"></i></a>
-    </div>
-    <div class="work-item">
-      <img src="{{ site.pathPrefix }}/imagens/work_thumb_photo.png" alt="Melhor Fotografia" />
-      <h3 data-lang-key="natural_landscapes_title">Paisagens Naturais</h3>
-      <p data-lang-key="natural_landscapes_description">Coleção de fotografias que capturam a beleza intocada da natureza.</p>
-      <a href="{{ site.pathPrefix }}/pt/fotos/" class="btn" data-lang-key="view_photos">Ver Fotografias <i class="fas fa-arrow-right"></i></a>
-    </div>
-    <div class="work-item">
-      <img src="{{ site.pathPrefix }}/imagens/work_thumb_presentation.png" alt="Melhor Apresentação" />
-      <h3 data-lang-key="innovation_workshop_title">Workshop de Inovação</h3>
-      <p data-lang-key="innovation_workshop_description">Uma apresentação interativa sobre as últimas tendências em inovação tecnológica.</p>
-      <a href="{{ site.pathPrefix }}/pt/apresentacoes/" class="btn" data-lang-key="view_presentation">Ver Apresentação <i class="fas fa-arrow-right"></i></a>
-    </div>
-    <div class="work-item">
-      <img src="{{ site.pathPrefix }}/imagens/asset_work_thumb_design.png" alt="Melhor Design" />
-      <h3 data-lang-key="graphic_design_creations_title">Criações em Design Gráfico</h3>
-      <p data-lang-key="graphic_design_creations_description">Designs criativos desenvolvidos em várias ferramentas, incluindo Canva.</p>
-      <a href="{{ site.pathPrefix }}/pt/designs/" class="btn" data-lang-key="view_designs">Ver Designs <i class="fas fa-arrow-right"></i></a>
-    </div>
-  </div>
-</section>
+  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
+  <meta name="description" content="Explore o portfólio de Beatriz Rodrigues, uma criadora de conteúdo que apresenta apresentações, designs, fotografias e vídeos.">
+  <meta property="og:title" content="Portfólio - Beatriz Rodrigues - Início">
+  <meta property="og:description" content="Explore o portfólio de Beatriz Rodrigues, uma criadora de conteúdo que apresenta apresentações, designs, fotografias e vídeos.">
+  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/pt/index.html">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Portfólio - Beatriz Rodrigues - Início">
+  <meta name="twitter:description" content="Explore o portfólio de Beatriz Rodrigues, uma criadora de conteúdo que apresenta apresentações, designs, fotografias e vídeos.">
+  <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta name="robots" content="index, follow">
 
-<section class="section-previews container">
-  <h2 data-lang-key="discover_more">Descobrir Mais</h2>
-  <div class="section-preview-grid">
-    <a href="{{ site.pathPrefix }}/pt/videos/" class="preview-item">
-      <img src="{{ site.pathPrefix }}/imagens/work_thumb_video.png" alt="Vídeos" />
-      <h3 data-lang-key="videos">Vídeos</h3>
-      <p data-lang-key="videos_thumb_desc">Criações audiovisuais que contam histórias.</p>
-    </a>
-    <a href="{{ site.pathPrefix }}/pt/fotos/" class="preview-item">
-      <img src="{{ site.pathPrefix }}/imagens/work_thumb_photo.png" alt="Fotografias" />
-      <h3 data-lang-key="photos">Fotografias</h3>
-      <p data-lang-key="photos_thumb_desc">Galeria de imagens que capturam momentos únicos.</p>
-    </a>
-    <a href="{{ site.pathPrefix }}/pt/apresentacoes/" class="preview-item">
-      <img src="{{ site.pathPrefix }}/imagens/work_thumb_presentation.png" alt="Apresentações" />
-      <h3 data-lang-key="presentations">Apresentações</h3>
-      <p data-lang-key="presentations_thumb_desc">Projetos e ideias transformados em apresentações impactantes.</p>
-    </a>
-    <a href="{{ site.pathPrefix }}/pt/designs/" class="preview-item">
-      <img src="{{ site.pathPrefix }}/imagens/asset_work_thumb_design.png" alt="Designs" />
-      <h3 data-lang-key="designs">Designs</h3>
-      <p data-lang-key="designs_thumb_desc">Elementos gráficos criativos e layouts profissionais.</p>
-    </a>
-  </div>
-</section>
+  <!-- Links hreflang para SEO multilingue -->
+  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/index.html" />
+  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/index.html" />
+
+  <!-- Links para folhas de estilo CSS -->
+  <link rel="stylesheet" href="../../css/estilo.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+  <!-- Links para favicons -->
+  <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
+  <link rel="shortcut icon" href="../../favicons/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
+  <link rel="manifest" href="../../favicons/site.webmanifest" />
+
+  <!-- Importmap para módulos JavaScript -->
+  <script type="importmap">
+    {
+      "imports": {
+        "carrossel": "../../js/carrossel.js",
+        "gallery": "../../js/galeria.js",
+        "lightbox": "../../js/pop-up.js",
+        "ferramentas": "../../js/ferramentas.js",
+        "config": "../../js/configuracoes.js",
+        "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
+        "linguagem": "../../js/linguagem.js"
+      }
+    }
+  </script>
+</head>
+<body data-page-title-key="home">
+  <div id="header-placeholder"></div>
+
+  <main class="page-content">
+    <section class="hero-carousel">
+      <div class="carousel-container">
+        <div class="carousel-slides">
+          <div class="carousel-slide">
+            <img src="../../imagens/carousel_image_1.png" alt="Featured Work 1" />
+            <div class="carousel-caption">
+              <h2 data-lang-key="project_a_title">Projecto A</h2>
+              <p data-lang-key="project_a_description">Um trabalho inovador que combina design e tecnologia.</p>
+            </div>
+          </div>
+          <div class="carousel-slide">
+            <img src="../../imagens/carousel_image_2.png" alt="Featured Work 2" />
+            <div class="carousel-caption">
+              <h2 data-lang-key="short_film_title">Filme Curto "O Regresso"</h2>
+              <p data-lang-key="short_film_description">Uma narrativa visual emocionante e envolvente.</p>
+            </div>
+          </div>
+          <div class="carousel-slide">
+            <img src="../../imagens/carousel_image_3.png" alt="Featured Work 3" />
+            <div class="carousel-caption">
+              <h2 data-lang-key="corporate_presentation_title">Apresentação Corporativa</h2>
+              <p data-lang-key="corporate_presentation_description">Estratégias de marketing para o futuro.</p>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+        <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+        <div class="carousel-dots"></div>
+      </div>
+    </section>
+
+    <section class="section-highlight container">
+      <h2 data-lang-key="best_works">Melhores Trabalhos</h2>
+      <div class="best-works-grid">
+        <div class="work-item">
+          <img src="../../imagens/work_thumb_video.png" alt="Melhor Vídeo" />
+          <h3 data-lang-key="urban_documentary_title">Documentário Urbano</h3>
+          <p data-lang-key="urban_documentary_description">Uma exploração profunda da vida na cidade, com entrevistas e imagens cativantes.</p>
+          <a href="videos.html" class="btn" data-lang-key="view_video">Ver Vídeo <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="work-item">
+          <img src="../../imagens/work_thumb_photo.png" alt="Melhor Fotografia" />
+          <h3 data-lang-key="natural_landscapes_title">Paisagens Naturais</h3>
+          <p data-lang-key="natural_landscapes_description">Coleção de fotografias que capturam a beleza intocada da natureza.</p>
+          <a href="fotos.html" class="btn" data-lang-key="view_photos">Ver Fotografias <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="work-item">
+          <img src="../../imagens/work_thumb_presentation.png" alt="Melhor Apresentação" />
+          <h3 data-lang-key="innovation_workshop_title">Workshop de Inovação</h3>
+          <p data-lang-key="innovation_workshop_description">Uma apresentação interativa sobre as últimas tendências em inovação tecnológica.</p>
+          <a href="apresentacoes.html" class="btn" data-lang-key="view_presentation">Ver Apresentação <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="work-item">
+          <img src="../../imagens/asset_work_thumb_design.png" alt="Melhor Design" />
+          <h3 data-lang-key="graphic_design_creations_title">Criações em Design Gráfico</h3>
+          <p data-lang-key="graphic_design_creations_description">Designs criativos desenvolvidos em várias ferramentas, incluindo Canva.</p>
+          <a href="designs.html" class="btn" data-lang-key="view_designs">Ver Designs <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-previews container">
+      <h2 data-lang-key="discover_more">Descobrir Mais</h2>
+      <div class="section-preview-grid">
+        <a href="videos.html" class="preview-item">
+          <img src="../../imagens/work_thumb_video.png" alt="Vídeos" />
+          <h3 data-lang-key="videos">Vídeos</h3>
+          <p data-lang-key="videos_thumb_desc">Criações audiovisuais que contam histórias.</p>
+        </a>
+        <a href="fotos.html" class="preview-item">
+          <img src="../../imagens/work_thumb_photo.png" alt="Fotografias" />
+          <h3 data-lang-key="photos">Fotografias</h3>
+          <p data-lang-key="photos_thumb_desc">Galeria de imagens que capturam momentos únicos.</p>
+        </a>
+        <a href="apresentacoes.html" class="preview-item">
+          <img src="../../imagens/work_thumb_presentation.png" alt="Apresentações" />
+          <h3 data-lang-key="presentations">Apresentações</h3>
+          <p data-lang-key="presentations_thumb_desc">Projetos e ideias transformados em apresentações impactantes.</p>
+        </a>
+        <a href="designs.html" class="preview-item">
+          <img src="../../imagens/asset_work_thumb_design.png" alt="Designs" />
+          <h3 data-lang-key="designs">Designs</h3>
+          <p data-lang-key="designs_thumb_desc">Elementos gráficos criativos e layouts profissionais.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../../js/html-injector.js"></script>
+  <script src="../../js/principal.js" type="module"></script>
+</body>
+</html>
