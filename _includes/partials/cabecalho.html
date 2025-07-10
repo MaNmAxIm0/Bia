@@ -1,21 +1,23 @@
 <header class="main-header">
   <div class="container">
-    <h1 class="logo"><a href="{{ '/html/pt/index.html' | url }}"><img src="{{ '/imagens/logo.png' | url }}" alt="Beatriz Rodrigues"></a></h1>
+    <!-- O link do logo aponta para a página inicial do idioma atual -->
+    <h1 class="logo"><a href="{{ site.pathPrefix }}/{{ lang }}/"><img src="{{ site.pathPrefix }}/imagens/logo.png" alt="Beatriz Rodrigues"></a></h1>
     <nav class="main-nav">
-      <button class="menu-toggle" aria-label="Toggle navigation" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
+      <button class="menu-toggle" aria-label="Alternar navegação" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
       <ul class="nav-links">
-        <li><a href="{{ '/html/pt/index.html' | url }}" data-lang-key="home">Início</a></li>
-        <li><a href="{{ '/html/pt/apresentacoes.html' | url }}" data-lang-key="presentations">Apresentações</a></li>
-        <li><a href="{{ '/html/pt/designs.html' | url }}" data-lang-key="designs">Designs</a></li>
-        <li><a href="{{ '/html/pt/fotos.html' | url }}" data-lang-key="photos">Fotografias</a></li>
-        <li><a href="{{ '/html/pt/videos.html' | url }}" data-lang-key="videos">Vídeos</a></li>
-        <li><a href="{{ '/html/pt/sobre-mim.html' | url }}" data-lang-key="about_me">Sobre Mim</a></li>
-        <li><a href="{{ '/html/pt/contactos.html' | url }}" data-lang-key="contact">Contactos</a></li>
+        <!-- Links de navegação para o idioma atual -->
+        <li><a href="{{ site.pathPrefix }}/{{ lang }}/" data-lang-key="home">Início</a></li>
+        <li><a href="{{ site.pathPrefix }}/{{ lang }}/apresentacoes/" data-lang-key="presentations">Apresentações</a></li>
+        <li><a href="{{ site.pathPrefix }}/{{ lang }}/designs/" data-lang-key="designs">Designs</a></li>
+        <li><a href="{{ site.pathPrefix }}/{{ lang }}/fotos/" data-lang-key="photos">Fotografias</a></li>
+        <li><a href="{{ site.pathPrefix }}/{{ lang }}/videos/" data-lang-key="videos">Vídeos</a></li>
+        <li><a href="{{ site.pathPrefix }}/{{ lang }}/sobre-mim/" data-lang-key="about_me">Sobre Mim</a></li>
+        <li><a href="{{ site.pathPrefix }}/{{ lang }}/contactos/" data-lang-key="contact">Contactos</a></li>
       </ul>
       <!-- Language Switcher -->
       <div class="language-switcher">
-        <a href="/html/pt/{{ page.fileSlug }}" class="lang-btn">PT</a>
-        <a href="/html/en/{{ page.fileSlug }}" class="lang-btn">EN</a>
+        <a href="{{ site.pathPrefix }}/pt/{{ page.fileSlug }}/" class="lang-btn">PT</a>
+        <a href="{{ site.pathPrefix }}/en/{{ page.fileSlug }}/" class="lang-btn">EN</a>
       </div>
     </nav>
   </div>
