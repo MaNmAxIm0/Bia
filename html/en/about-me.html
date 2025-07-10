@@ -1,119 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-ZW5DLGF7RF');
-  </script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Título da página específico para cada página e idioma -->
-  <title data-lang-key="about_me_page_title">Beatriz Rodrigues - About Me</title>
-
-  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
-  <meta name="description" content="Learn more about Beatriz Rodrigues, a content creator passionate about visual storytelling and new technologies.">
-  <meta property="og:title" content="Portfolio - Beatriz Rodrigues - About Me">
-  <meta property="og:description" content="Learn more about Beatriz Rodrigues, a content creator passionate about visual storytelling and new technologies.">
-  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/en/about-me.html">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Portfolio - Beatriz Rodrigues - About Me">
-  <meta name="twitter:description" content="Learn more about Beatriz Rodrigues, a content creator passionate about visual storytelling and new technologies.">
-  <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta name="robots" content="index, follow">
-
-  <!-- Links hreflang para SEO multilingue -->
-  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/sobre-mim.html" />
-  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/about-me.html" />
-
-  <!-- Links para folhas de estilo CSS -->
-  <link rel="stylesheet" href="../../css/estilo.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <!-- Não é uma página de galeria, então não precisa de galeria-das-paginas.css -->
-
-  <!-- Links para favicons -->
-  <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
-  <link rel="shortcut icon" href="../../favicons/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
-  <link rel="manifest" href="../../favicons/site.webmanifest" />
-
-  <!-- Importmap para módulos JavaScript -->
-  <script type="importmap">
-    {
-      "imports": {
-      "carrossel": "../../js/carrossel.js",
-      "gallery": "../../js/galeria.js",
-      "lightbox": "../../js/pop-up.js",
-      "ferramentas": "../../js/ferramentas.js",
-      "config": "../../js/configuracoes.js",
-      "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
-      "linguagem": "../../js/linguagem.js"
-      }
-    }
-  </script>
-</head>
-<body data-page-title-key="about_me_page_title">
-  <header class="main-header">
-    <div class="container">
-      <h1 class="logo"><a href="index.html"><img src="../../imagens/logo.png" alt="Beatriz Rodrigues"></a></h1>
-      <nav class="main-nav">
-        <button class="menu-toggle" aria-label="Toggle navigation" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
-        <ul class="nav-links">
-          <li><a href="index.html" data-lang-key="home">Home</a></li>
-          <li><a href="presentations.html" data-lang-key="presentations">Presentations</a></li>
-          <li><a href="designs.html" data-lang-key="designs">Designs</a></li>
-          <li><a href="photos.html" data-lang-key="photos">Photos</a></li>
-          <li><a href="videos.html" data-lang-key="videos">Videos</a></li>
-          <li><a href="about-me.html" data-lang-key="about_me">About Me</a></li>
-          <li><a href="contacts.html" data-lang-key="contact">Contact</a></li>
-        </ul>
-        <div class="language-switcher">
-          <a href="../pt/sobre-mim.html" class="lang-btn">PT</a>
-          <a href="about-me.html" class="lang-btn active">EN</a>
-        </div>
-      </nav>
+---
+layout: base.html
+lang: en
+titleKey: about_me_page_title
+description: Learn more about Beatriz Rodrigues, a content creator passionate about visual storytelling and new technologies.
+ogTitle: Portfolio - Beatriz Rodrigues - About Me
+ogDescription: Learn more about Beatriz Rodrigues, a content creator passionate about visual storytelling and new technologies.
+ogUrl: https://manmaxim0.github.io/Bia/html/en/about-me.html
+twitterTitle: Portfolio - Beatriz Rodrigues - About Me
+twitterDescription: Learn more about Beatriz Rodrigues, a content creator passionate about visual storytelling and new technologies.
+---
+<section class="section-about container">
+  <h2 data-lang-key="about_me_section_title">About Me</h2>
+  <div class="about-me-grid">
+    <div class="about-me-pic">
+      <img src="/imagens/profile_picture.png" alt="Beatriz Rodrigues">
     </div>
-  </header>
-
-  <main class="page-content">
-    <section class="section-about container">
-      <h2 data-lang-key="about_me_section_title">About Me</h2>
-      <div class="about-me-grid">
-        <div class="about-me-pic">
-            <img src="../../imagens/profile_picture.png" alt="Beatriz Rodrigues">
-        </div>
-        <div class="about-me-text">
-          <h3 data-lang-key="about_me_greeting">Hello, I'm Beatriz!</h3>
-          <p data-lang-key="about_me_paragraph_1">I'm a content creator passionate about turning ideas into visual reality. With a solid foundation in communication and an insatiable curiosity for new technologies, I dedicate myself to creating presentations, designs, photographs, and videos that not only inform but also inspire and engage.</p>
-          <p data-lang-key="about_me_paragraph_2">My journey began with a simple camera and a desire to tell stories. Today, this passion has evolved into a diverse set of skills that allows me to approach projects from different angles, always focusing on clarity, aesthetics, and impact.</p>
-          <p data-lang-key="about_me_paragraph_3">In this portfolio, you'll find a selection of my works that reflect my journey and dedication. Let's create something amazing together!</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="main-footer">
-    <div class="container">
-      <div class="social-links">
-        <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-        <a href="https://wa.me/351925451131" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-        <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-      </div>
-      <p data-lang-key="all_rights_reserved">&copy; 2025 Beatriz Rodrigues. All rights reserved.</p>
+    <div class="about-me-text">
+      <h3 data-lang-key="about_me_greeting">Hello, I'm Beatriz!</h3>
+      <p data-lang-key="about_me_paragraph_1">I'm a content creator passionate about turning ideas into visual reality. With a solid foundation in communication and an insatiable curiosity for new technologies, I dedicate myself to creating presentations, designs, photographs, and videos that not only inform but also inspire and engage.</p>
+      <p data-lang-key="about_me_paragraph_2">My journey began with a simple camera and a desire to tell stories. Today, this passion has evolved into a diverse set of skills that allows me to approach projects from different angles, always focusing on clarity, aesthetics, and impact.</p>
+      <p data-lang-key="about_me_paragraph_3">In this portfolio, you'll find a selection of my works that reflect my journey and dedication. Let's create something amazing together!</p>
     </div>
-  </footer>
-  <script src="../../js/principal.js" type="module"></script>
-</body>
-</html>
+  </div>
+</section>

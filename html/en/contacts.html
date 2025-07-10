@@ -1,143 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+---
+layout: base.html
+lang: en
+titleKey: contact_page_title
+description: Contact Beatriz Rodrigues for inquiries, projects, or collaborations. Find contact form, email, phone, and social media links.
+ogTitle: Portfolio - Beatriz Rodrigues - Contact
+ogDescription: Contact Beatriz Rodrigues for inquiries, projects, or collaborations. Find contact form, email, phone, and social media links.
+ogUrl: https://manmaxim0.github.io/Bia/html/en/contacts.html
+twitterTitle: Portfolio - Beatriz Rodrigues - Contact
+twitterDescription: Contact Beatriz Rodrigues for inquiries, projects, or collaborations. Find contact form, email, phone, and social media links.
+---
+<section class="section-contact container">
+  <h2 data-lang-key="contact_section_title">Get in Touch</h2>
+  <p class="section-description" data-lang-key="contact_section_description">If you have any questions, a project in mind, or simply want to say hello, use the form below or the alternative contacts.</p>
 
-    gtag('config', 'G-ZW5DLGF7RF');
-  </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Título da página específico para cada página e idioma -->
-  <title data-lang-key="contact_page_title">Beatriz Rodrigues - Contact</title>
-
-  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
-  <meta name="description" content="Contact Beatriz Rodrigues for inquiries, projects, or collaborations. Find contact form, email, phone, and social media links.">
-  <meta property="og:title" content="Portfolio - Beatriz Rodrigues - Contact">
-  <meta property="og:description" content="Contact Beatriz Rodrigues for inquiries, projects, or collaborations. Find contact form, email, phone, and social media links.">
-  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/en/contacts.html">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Portfolio - Beatriz Rodrigues - Contact">
-  <meta name="twitter:description" content="Contact Beatriz Rodrigues for inquiries, projects, or collaborations. Find contact form, email, phone, and social media links.">
-  <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta name="robots" content="index, follow">
-
-  <!-- Links hreflang para SEO multilingue -->
-  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/contactos.html" />
-  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/contacts.html" />
-
-  <!-- Links para folhas de estilo CSS -->
-  <link rel="stylesheet" href="../../css/estilo.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Não é uma página de galeria, então não precisa de galeria-das-paginas.css -->
-
-  <!-- Links para favicons -->
-  <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
-  <link rel="shortcut icon" href="../../favicons/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
-  <link rel="manifest" href="../../favicons/site.webmanifest" />
-
-  <!-- Importmap para módulos JavaScript -->
-  <script type="importmap">
-    {
-      "imports": {
-      "carrossel": "../../js/carrossel.js",
-      "gallery": "../../js/galeria.js",
-      "lightbox": "../../js/pop-up.js",
-      "ferramentas": "../../js/ferramentas.js",
-      "config": "../../js/configuracoes.js",
-      "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
-      "linguagem": "../../js/linguagem.js"
-      }
-    }
-  </script>
-</head>
-<body data-page-title-key="contact_page_title">
-  <header class="main-header">
-    <div class="container">
-      <h1 class="logo"><a href="index.html"><img src="../../imagens/logo.png" alt="Beatriz Rodrigues"></a></h1>
-      <nav class="main-nav">
-        <button class="menu-toggle" aria-label="Toggle navigation" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
-        <ul class="nav-links">
-          <li><a href="index.html" data-lang-key="home">Home</a></li>
-          <li><a href="presentations.html" data-lang-key="presentations">Presentations</a></li>
-          <li><a href="designs.html" data-lang-key="designs">Designs</a></li>
-          <li><a href="photos.html" data-lang-key="photos">Photos</a></li>
-          <li><a href="videos.html" data-lang-key="videos">Videos</a></li>
-          <li><a href="about-me.html" data-lang-key="about_me">About Me</a></li>
-          <li><a href="contacts.html" data-lang-key="contact">Contact</a></li>
-        </ul>
-        <div class="language-switcher">
-          <a href="../pt/contactos.html" class="lang-btn">PT</a>
-          <a href="contacts.html" class="lang-btn active">EN</a>
+  <div class="contact-grid">
+    <div class="contact-form-container">
+      <h3 data-lang-key="send_message_title">Send a Message</h3>
+      <form class="contact-form" action="#" method="POST">
+        <div class="form-group">
+          <label for="name" data-lang-key="form_name_label">Name:</label>
+          <input type="text" id="name" name="name" required data-lang-key="form_name_placeholder" placeholder="Your name">
         </div>
-      </nav>
+        <div class="form-group">
+          <label for="email" data-lang-key="form_email_label">Email:</label>
+          <input type="email" id="email" name="email" required data-lang-key="form_email_placeholder" placeholder="Your email">
+        </div>
+        <div class="form-group">
+          <label for="message" data-lang-key="form_message_label">Message:</label>
+          <textarea id="message" name="message" rows="6" required data-lang-key="form_message_placeholder" placeholder="Your message"></textarea>
+        </div>
+        <button type="submit" class="btn" data-lang-key="send_message_button">Send Message <i class="fas fa-paper-plane"></i></button>
+      </form>
     </div>
-  </header>
 
-  <main class="page-content">
-    <section class="section-contact container">
-      <h2 data-lang-key="contact_section_title">Get in Touch</h2>
-      <p class="section-description" data-lang-key="contact_section_description">If you have any questions, a project in mind, or simply want to say hello, use the form below or the alternative contacts.</p>
-
-      <div class="contact-grid">
-        <div class="contact-form-container">
-          <h3 data-lang-key="send_message_title">Send a Message</h3>
-          <form class="contact-form" action="#" method="POST">
-            <div class="form-group">
-              <label for="name" data-lang-key="form_name_label">Name:</label>
-              <input type="text" id="name" name="name" required data-lang-key="form_name_placeholder" placeholder="Your name">
-            </div>
-            <div class="form-group">
-              <label for="email" data-lang-key="form_email_label">Email:</label>
-              <input type="email" id="email" name="email" required data-lang-key="form_email_placeholder" placeholder="Your email">
-            </div>
-            <div class="form-group">
-              <label for="message" data-lang-key="form_message_label">Message:</label>
-              <textarea id="message" name="message" rows="6" required data-lang-key="form_message_placeholder" placeholder="Your message"></textarea>
-            </div>
-            <button type="submit" class="btn" data-lang-key="send_message_button">Send Message <i class="fas fa-paper-plane"></i></button>
-          </form>
-        </div>
-
-        <div class="contact-info-container">
-          <h3 data-lang-key="alternative_contact_title">Alternative Contact Information</h3>
-          <p data-lang-key="alternative_contact_intro">You can also contact me through the following means:</p>
-          <ul>
-            <li><i class="fas fa-envelope icon"></i> Email: <a href="mailto:rod357571@gmail.com"> rod357571@gmail.com</a></li>
-            <li><i class="fas fa-phone icon"></i> Mobile: <a href="tel:+351925451131" data-lang-key="phone_number"> +351 925 451 131</a></li>
-            <li><i class="fab fa-whatsapp icon"></i> WhatsApp: <a href="https://wa.me/351925451131" target="_blank" data-lang-key="whatsapp_link_text"> Send message</a></li>
-            <li><i class="fab fa-linkedin-in icon"></i> LinkedIn: <a href="https://linkedin.com/in/yourprofile" target="_blank"> linkedin.com/in/yourprofile</a></li>
-            <li><i class="fab fa-instagram icon"></i> Instagram: <a href="https://instagram.com/beatrizpssantos" target="_blank"> instagram.com/beatrizpssantos</a></li>
-          </ul>
-          <p class="note" data-lang-key="contact_note">I will respond as soon as possible. Thank you for your interest!</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="main-footer">
-    <div class="container">
-      <div class="social-links">
-        <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-        <a href="https://wa.me/351925451131" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-        <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-      </div>
-      <p data-lang-key="all_rights_reserved">&copy; 2025 Beatriz Rodrigues. All rights reserved.</p>
+    <div class="contact-info-container">
+      <h3 data-lang-key="alternative_contact_title">Alternative Contact Information</h3>
+      <p data-lang-key="alternative_contact_intro">You can also contact me through the following means:</p>
+      <ul>
+        <li><i class="fas fa-envelope icon"></i> Email: <a href="mailto:rod357571@gmail.com"> rod357571@gmail.com</a></li>
+        <li><i class="fas fa-phone icon"></i> Mobile: <a href="tel:+351925451131" data-lang-key="phone_number"> +351 925 451 131</a></li>
+        <li><i class="fab fa-whatsapp icon"></i> WhatsApp: <a href="https://wa.me/351925451131" target="_blank" data-lang-key="whatsapp_link_text"> Send message</a></li>
+        <li><i class="fab fa-linkedin-in icon"></i> LinkedIn: <a href="https://linkedin.com/in/yourprofile" target="_blank"> linkedin.com/in/yourprofile</a></li>
+        <li><i class="fab fa-instagram icon"></i> Instagram: <a href="https://instagram.com/beatrizpssantos" target="_blank"> instagram.com/beatrizpssantos</a></li>
+      </ul>
+      <p class="note" data-lang-key="contact_note">I will respond as soon as possible. Thank you for your interest!</p>
     </div>
-  </footer>
-  <script src="../../js/principal.js" type="module"></script>
-</body>
-</html>
+  </div>
+</section>
