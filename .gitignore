@@ -14,6 +14,7 @@ Thumbs.db
 node_modules/
 package-lock.json
 yarn.lock
+_site/
 
 # Ignorar ficheiros de cache e temporários
 *.log
