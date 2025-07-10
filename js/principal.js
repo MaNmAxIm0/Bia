@@ -1,4 +1,4 @@
-import { initCarousel } from 'carrosel';
+import { initCarousel } from 'carrossel';
 import { loadGalleryContent, loadPresentations } from 'gallery';
 import { createWatermarkElement } from 'ferramentas';
 import { applyTranslations } from 'linguagem'; // Only applyTranslations is exported from linguagem.js now
