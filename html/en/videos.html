@@ -1,16 +1,80 @@
----
-layout: base.html
-lang: en
-titleKey: videos_page_title
-description: A selection of videos by Beatriz Rodrigues, showcasing projects, presentations, and captured moments.
-ogTitle: Portfolio - Beatriz Rodrigues - Videos
-ogDescription: A selection of videos by Beatriz Rodrigues, showcasing projects, presentations, and captured moments.
-ogUrl: https://manmaxim0.github.io/Bia/html/en/videos.html
-twitterTitle: Portfolio - Beatriz Rodrigues - Videos
-twitterDescription: A selection of videos by Beatriz Rodrigues, showcasing projects, presentations, and captured moments.
----
-<section class="section-videos container">
-  <h2 data-lang-key="videos_section_title">My Videos</h2>
-  <p class="section-description" data-lang-key="videos_section_description">A selection of videos showcasing my projects, presentations, and captured moments.</p>
-  <div id="video-gallery" class="video-gallery"></div>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag( ){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZW5DLGF7RF');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title data-lang-key="videos_page_title">Beatriz Rodrigues - Videos</title>
+
+  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
+  <meta name="description" content="A selection of videos by Beatriz Rodrigues, showcasing projects, presentations, and captured moments.">
+  <meta property="og:title" content="Portfolio - Beatriz Rodrigues - Videos">
+  <meta property="og:description" content="A selection of videos by Beatriz Rodrigues, showcasing projects, presentations, and captured moments.">
+  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/en/videos.html">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Portfolio - Beatriz Rodrigues - Videos">
+  <meta name="twitter:description" content="A selection of videos by Beatriz Rodrigues, showcasing projects, presentations, and captured moments.">
+  <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta name="robots" content="index, follow">
+
+  <!-- Links hreflang para SEO multilingue -->
+  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/videos.html" />
+  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/videos.html" />
+
+  <!-- Links para folhas de estilo CSS -->
+  <link rel="stylesheet" href="../../css/estilo.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="../../css/galeria-das-paginas.css" />
+
+  <!-- Links para favicons -->
+  <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
+  <link rel="shortcut icon" href="../../favicons/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
+  <link rel="manifest" href="../../favicons/site.webmanifest" />
+
+  <!-- Importmap para módulos JavaScript -->
+  <script type="importmap">
+    {
+      "imports": {
+        "carrossel": "../../js/carrossel.js",
+        "gallery": "../../js/galeria.js",
+        "lightbox": "../../js/pop-up.js",
+        "ferramentas": "../../js/ferramentas.js",
+        "config": "../../js/configuracoes.js",
+        "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
+        "linguagem": "../../js/linguagem.js"
+      }
+    }
+  </script>
+</head>
+<body data-page-title-key="videos_page_title">
+  <div id="header-placeholder"></div>
+
+  <main class="page-content">
+    <section class="section-videos container">
+      <h2 data-lang-key="videos_section_title">My Videos</h2>
+      <p class="section-description" data-lang-key="videos_section_description">A selection of videos showcasing my projects, presentations, and captured moments.</p>
+      <div id="video-gallery" class="video-gallery"></div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../../js/html-injector.js"></script>
+  <script src="../../js/principal.js" type="module"></script>
+</body>
+</html>
