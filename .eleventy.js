@@ -18,6 +18,5 @@ module.exports = function(eleventyConfig) {
     markdownTemplateEngine: "njk",
     htmlTemplateEngine: "njk",
     dataTemplateEngine: "njk"
-    pathPrefix: "/Bia/"
   };
 };
