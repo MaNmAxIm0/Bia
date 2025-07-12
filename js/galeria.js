@@ -1,5 +1,3 @@
-// js/galeria.js
-
 import { WEB_APP_URL } from './configuracoes.js';
 import { getDirectGoogleDriveUrl, createWatermarkElement } from './ferramentas.js';
 import { openLightbox } from './pop-up.js';
