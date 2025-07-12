@@ -61,18 +61,21 @@ jobs:
             if ! rclone lsf "R2:bia-portfolio-assets/thumbs/" | grep -q "^${thumb_filename}$"; then
               echo "A gerar thumbnail para: ${video_filename}"
               
-              # --- CORREÇÃO PRINCIPAL AQUI ---
-              # Usa 'rclone copy' para descarregar o ficheiro para a pasta atual com o seu nome original
-              # Isto é mais robusto que 'copyto' com nomes temporários
-              if rclone copy "R2:bia-portfolio-assets/${video_path}" .; then
-                # O ficheiro foi descarregado com sucesso para a pasta local com o nome video_filename
-                ffmpeg -i "$video_filename" -ss 00:00:01 -vframes 1 "$local_thumb_path"
-                echo "Thumbnail gerada com sucesso."
+              # --- CORREÇÃO CRUCIAL AQUI ---
+              # Descarrega o ficheiro específico usando a flag --include
+              # Isto diz ao rclone para copiar da pasta 'Vídeos' APENAS o ficheiro com este nome.
+              if rclone copy "R2:bia-portfolio-assets/Vídeos" . --include "$video_filename"; then
                 
-                # Apaga o vídeo local após o uso
-                rm "$video_filename"
+                # Verifica se o ficheiro foi realmente descarregado
+                if [ -f "$video_filename" ]; then
+                  ffmpeg -i "$video_filename" -ss 00:00:01 -vframes 1 "$local_thumb_path"
+                  echo "Thumbnail gerada com sucesso."
+                  rm "$video_filename"
+                else
+                  echo "AVISO: O download parece ter falhado, o ficheiro local não foi encontrado. A ignorar."
+                fi
               else
-                echo "AVISO: Falha ao descarregar ${video_filename} do R2. A ignorar."
+                echo "AVISO: O comando rclone copy falhou para ${video_filename}. A ignorar."
               fi
             else
               echo "Thumbnail para ${video_filename} já existe. A ignorar."
