@@ -3,7 +3,7 @@ name: Sincronizar Drive, Gerar Thumbs e Dados
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 20 * * *' # Executa todos os dias às 20:00 UTC
+    - cron: '0 20 * * *'
 
 jobs:
   sync-and-build:
@@ -12,11 +12,12 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Instalar rclone e outras ferramentas
+      - name: Instalar a versão mais recente do rclone e outras ferramentas
         run: |
           sudo apt-get update
-          sudo apt-get install -y rclone ffmpeg jq
-          
+          sudo apt-get install -y ffmpeg jq unzip
+          curl https://rclone.org/install.sh | sudo bash
+
       - name: Configurar rclone
         env:
           RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
@@ -24,7 +25,6 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
-          
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
           echo "A sincronizar Google Drive para R2..."
@@ -42,13 +42,11 @@ jobs:
             rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
             
             if [ -f "./${video_file}" ]; then
-              dims=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "./${video_file}")
+              dims=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "./${video_file}" )
               width=$(echo $dims | cut -d'x' -f1)
               height=$(echo $dims | cut -d'x' -f2)
               echo "Dimensões do vídeo: ${width}x${height}"
 
-              # --- COMANDO CORRIGIDO AQUI ---
-              # Usa 'metadata set' para adicionar os metadados
               rclone metadata set "R2:bia-portfolio-assets/Vídeos/${video_file}" --metadata "width=${width},height=${height}"
               
               thumb_name="${video_file%.*}.jpg"
@@ -71,15 +69,11 @@ jobs:
                     width=$(echo $dims | cut -d'x' -f1)
                     height=$(echo $dims | cut -d'x' -f2)
                     echo "Dimensões da imagem: ${width}x${height}"
-                    
-                    # --- COMANDO CORRIGIDO AQUI ---
                     rclone metadata set "R2:bia-portfolio-assets/${dir}/${img_file}" --metadata "width=${width},height=${height}"
-                    
                     rm "./${img_file}"
                 fi
             done
           done
-
 
       - name: Gerar o ficheiro data.json
         run: |
