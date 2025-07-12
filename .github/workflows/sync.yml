@@ -2,9 +2,15 @@
 name: Sincronizar Ficheiros, Gerar JSON e Atualizar Site
 
 on:
-  workflow_dispatch: # Permite execução manual
+  workflow_dispatch:
   schedule:
-    - cron: '0 20 * * *' # Executa todos os dias às 20:00 UTC
+    - cron: '0 20 * * *'
+
+# --- INÍCIO DA ALTERAÇÃO ---
+# Adicione esta secção para dar permissões de escrita ao workflow
+permissions:
+  contents: write
+# --- FIM DA ALTERAÇÃO ---
 
 jobs:
   sync-and-build:
@@ -12,6 +18,8 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+
+      # ... o resto do ficheiro continua exatamente igual ...
 
       - name: Instalar rclone
         run: sudo -v ; curl https://rclone.org/install.sh | sudo bash
@@ -25,7 +33,6 @@ jobs:
 
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
-          # Substitua 'Drive:Bia' pelo seu remote do Drive e pasta principal
           rclone sync Drive:Bia R2:bia --progress
 
       - name: Configurar Python

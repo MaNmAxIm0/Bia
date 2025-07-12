@@ -1,37 +1,36 @@
-import { WEB_APP_URL } from './configuracoes.js';
-import { getDirectGoogleDriveUrl, createWatermarkElement } from './ferramentas.js';
-import { openLightbox } from './pop-up.js';
-import { getTranslation } from './gestor-de-linguagem.js';
+// js/galeria.js
 
+// Importa a nova fonte de dados e as ferramentas necessárias
+import { DATA_JSON_URL } from './configuracoes.js';
+import { createWatermarkElement } from './ferramentas.js'; // Assumindo que a função está em ferramentas.js
+import { openLightbox } from './pop-up.js';
+import { getTranslation, getCurrentLanguage } from './gestor-de-linguagem.js';
+
+// Função para carregar o conteúdo das galerias (fotos, designs, vídeos)
 export async function loadGalleryContent(type, containerId) {
-  console.log(`galeria.js: loadGalleryContent called for type: ${type}, containerId: ${containerId}`);
+  console.log(`galeria.js: A carregar conteúdo para tipo: ${type}`);
   const galleryContainer = document.getElementById(containerId);
   if (!galleryContainer) {
-    console.error(`galeria.js: Gallery container with ID '${containerId}' not found on this page.`);
+    console.error(`galeria.js: Contentor com ID '${containerId}' não encontrado.`);
     return;
   }
 
   const loadingMessage = getTranslation('loading_content');
   galleryContainer.innerHTML = `<p id="loadingMessage" style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
-  const loadingMessageEl = galleryContainer.querySelector('#loadingMessage');
-
+  
   try {
-    const response = await fetch(WEB_APP_URL);
+    // 1. ALTERAÇÃO PRINCIPAL: Buscar o data.json local
+    const response = await fetch(`../../${DATA_JSON_URL}`); // O ../../ sobe de /js/pt/ para a raiz
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    let items = [];
+    
+    // O 'type' corresponde às chaves no nosso data.json (fotografias, videos, etc.)
+    const items = data[type] || [];
+    const lang = getCurrentLanguage(); // Obtém o idioma atual (ex: 'pt')
 
-    if (type === 'photos') {
-      items = data.fotografias || [];
-    } else if (type === 'designs') {
-      items = data.designs || [];
-    } else if (type === 'videos') {
-      items = data.videos || [];
-    }
-
-    if (loadingMessageEl) loadingMessageEl.style.display = 'none';
+    galleryContainer.innerHTML = ''; // Limpa a mensagem de "a carregar"
 
     if (items.length === 0) {
       const noContentMessage = getTranslation('no_content_found', { type: getTranslation(type) });
@@ -39,79 +38,59 @@ export async function loadGalleryContent(type, containerId) {
       return;
     }
 
-    galleryContainer.innerHTML = '';
-
     items.forEach(item => {
       const itemDiv = document.createElement('div');
       itemDiv.classList.add(`${type.slice(0, -1)}-item`);
 
-      const url = item.url;
-      const isVideo = url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.mov') || url.toLowerCase().endsWith('.avi') || url.toLowerCase().endsWith('.webm') || url.toLowerCase().endsWith('.mkv') || url.includes('youtube.com') || url.includes('youtu.be') || (item.mime && item.mime.startsWith('video/')) || (url.includes('drive.google.com/file/d/') && (item.name?.toLowerCase().endsWith('.mp4') || item.name?.toLowerCase().endsWith('.mov') || item.name?.toLowerCase().endsWith('.mkv')));
-      const mediaItemType = isVideo ? 'video' : 'image';
+      // 2. ALTERAÇÃO PRINCIPAL: Usar os dados do novo JSON
+      const mediaUrl = item.url; // URL direto do R2
+      const title = item.titles[lang] || item.titles['pt']; // Título no idioma correto, com fallback para PT
+      const description = item.description || ''; // Descrição (se existir no futuro)
 
-      if (mediaItemType === 'image') {
-        // --- INÍCIO DA ALTERAÇÃO DA MARCA D'ÁGUA ---
+      const isVideo = mediaUrl.toLowerCase().endsWith('.mp4') || mediaUrl.toLowerCase().endsWith('.mov') || mediaUrl.toLowerCase().endsWith('.webm');
+
+      if (!isVideo) { // Lógica para Imagens (fotos, designs)
         const imageContainer = document.createElement('div');
         imageContainer.classList.add('image-container');
 
         const img = document.createElement('img');
-        img.src = getDirectGoogleDriveUrl(url);
-        const fallbackTitle = getTranslation(`${type.slice(0, -1)}_title`);
-        img.alt = item.title || item.name || fallbackTitle;
+        img.src = mediaUrl; // URL direto do R2
+        img.alt = title;
         img.loading = "lazy";
         img.oncontextmenu = () => false;
 
         imageContainer.appendChild(img);
         imageContainer.appendChild(createWatermarkElement());
-
         itemDiv.appendChild(imageContainer);
-        // --- FIM DA ALTERAÇÃO DA MARCA D'ÁGUA ---
 
         const overlay = document.createElement('div');
         overlay.classList.add(`${type.slice(0, -1)}-overlay`);
         const h3 = document.createElement('h3');
-        h3.textContent = item.title || item.name || fallbackTitle;
-        const p = document.createElement('p');
-        const fallbackDescription = getTranslation(`${type.slice(0, -1)}_description`);
-        p.textContent = item.description || fallbackDescription;
+        h3.textContent = title;
         overlay.appendChild(h3);
-        overlay.appendChild(p);
         itemDiv.appendChild(overlay);
 
-        itemDiv.addEventListener('click', () => openLightbox(url, 'image', item.title || item.name, item.description));
+        itemDiv.addEventListener('click', () => openLightbox(mediaUrl, 'image', title, description));
 
-      } else if (mediaItemType === 'video') {
+      } else { // Lógica para Vídeos
         const iframe = document.createElement('iframe');
-        let embedUrl = url;
-        if (url.includes('youtube.com/watch?v=')) {
-          embedUrl = url.replace('watch?v=', 'embed/');
-        } else if (url.includes('youtu.be/')) {
-          embedUrl = url.replace('youtu.be/', 'youtube.com/embed/');
-        }
-        if (embedUrl.includes('drive.google.com/file/d/')) {
-          const driveIdMatch = embedUrl.match(/(?:id=|file\/d\/)([a-zA-Z0-9_-]+)/);
-          if (driveIdMatch && driveIdMatch[1]) {
-            embedUrl = `https://drive.google.com/file/d/${driveIdMatch[1]}/preview`;
-          }
-        }
-        iframe.src = embedUrl;
+        iframe.src = mediaUrl; // O URL do R2 pode ser usado diretamente se o bucket for público
         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         iframe.allowFullscreen = true;
         iframe.frameBorder = "0";
-        const videoFallbackTitle = getTranslation('video_title' );
-        iframe.title = item.name || videoFallbackTitle;
+        iframe.title = title;
         iframe.loading = "lazy";
         iframe.oncontextmenu = () => false;
 
         itemDiv.appendChild(iframe);
 
-        const title = document.createElement('h3');
-        title.textContent = item.name || videoFallbackTitle;
-        itemDiv.appendChild(title);
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = title;
+        itemDiv.appendChild(titleElement);
 
         itemDiv.addEventListener('click', (e) => {
           if (e.target !== iframe) {
-            openLightbox(url, 'video', item.name, '');
+            openLightbox(mediaUrl, 'video', title, description);
           }
         });
       }
@@ -119,36 +98,32 @@ export async function loadGalleryContent(type, containerId) {
     });
 
   } catch (error) {
-    console.error(`galeria.js: Error loading ${type}:`, error);
+    console.error(`galeria.js: Erro ao carregar ${type}:`, error);
     const errorMessage = getTranslation('error_loading_content', { type: getTranslation(type) });
-    if (loadingMessageEl) {
-      loadingMessageEl.textContent = errorMessage;
-      loadingMessageEl.style.color = 'red';
-      loadingMessageEl.style.display = 'block';
-    } else {
-      galleryContainer.innerHTML = `<p style="text-align: center; color: red;">${errorMessage}</p>`;
-    }
+    galleryContainer.innerHTML = `<p style="text-align: center; color: red;">${errorMessage}</p>`;
   }
 }
 
+// Função para carregar as apresentações
 export async function loadPresentations() {
-  console.log("galeria.js: loadPresentations called.");
+  console.log("galeria.js: A carregar apresentações.");
   const gallery = document.getElementById("presentation-gallery");
-  if (!gallery) {
-    console.error("galeria.js: Presentation gallery container not found on this page.");
-    return;
-  }
+  if (!gallery) return;
 
   const loadingMessage = getTranslation('loading_presentations');
   gallery.innerHTML = `<p style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
 
   try {
-    const response = await fetch(WEB_APP_URL);
+    // 3. ALTERAÇÃO PRINCIPAL: Buscar o data.json local
+    const response = await fetch(`../../${DATA_JSON_URL}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     const presentations = data.apresentacoes || [];
+    const lang = getCurrentLanguage();
+
+    gallery.innerHTML = '';
 
     if (presentations.length === 0) {
       const noContentMessage = getTranslation('no_presentations_found');
@@ -156,38 +131,30 @@ export async function loadPresentations() {
       return;
     }
 
-    gallery.innerHTML = '';
-
     presentations.forEach(presentation => {
       const div = document.createElement("div");
       div.className = "presentation-item";
-      const title = document.createElement("h3");
-      title.textContent = presentation.name;
+      
+      const titleElement = document.createElement("h3");
+      // 4. ALTERAÇÃO PRINCIPAL: Usar o título multilingue
+      titleElement.textContent = presentation.titles[lang] || presentation.titles['pt'];
+      
       const iframe = document.createElement("iframe");
-      let embedUrl = presentation.url;
-      if (embedUrl.includes('/presentation/d/')) {
-        if (embedUrl.includes('/edit')) {
-          embedUrl = embedUrl.split('/edit')[0] + '/embed?start=false&loop=false&delayms=3000';
-        } else if (embedUrl.includes('/pub?')) {
-          embedUrl = embedUrl.replace('/pub?', '/embed?');
-        }
-      } else if (embedUrl.includes('/file/d/')) {
-        const match = embedUrl.match(/file\/d\/([a-zA-Z0-9_-]+)/);
-        if (match && match[1]) {
-          embedUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
-        }
-      }
-      iframe.src = embedUrl;
+      // O URL do R2 pode ser usado diretamente se for um link público para um PDF, por exemplo.
+      // Se for um link do Google Slides, a lógica de conversão pode ser necessária.
+      // Assumindo que o URL no JSON já é o link de 'embed' correto.
+      iframe.src = presentation.url; 
       iframe.allowFullscreen = true;
-      iframe.title = presentation.name;
+      iframe.title = titleElement.textContent;
       iframe.loading = "lazy";
-      iframe.oncontextmenu = ( ) => false;
-      div.appendChild(title);
+      iframe.oncontextmenu = () => false;
+      
+      div.appendChild(titleElement);
       div.appendChild(iframe);
       gallery.appendChild(div);
     });
   } catch (err) {
-    console.error("galeria.js: Error loading presentations:", err);
+    console.error("galeria.js: Erro ao carregar apresentações:", err);
     const errorMessage = getTranslation('error_loading_content', { type: getTranslation('presentations') });
     gallery.innerHTML = `<p style='text-align: center; color: red;'>${errorMessage}</p>`;
   }
