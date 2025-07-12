@@ -38,42 +38,42 @@ jobs:
       # --- CORREÇÃO 2: Caminhos corrigidos na geração de thumbnails ---
       - name: Gerar e Sincronizar Thumbnails
         run: |
+          echo "A iniciar a geração de thumbnails..."
           mkdir -p temp_thumbs
           
-          # Lista vídeos no bucket 'bia-portfolio-assets'
-          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while read video_file; do
-            local_thumb_path="temp_thumbs/${video_file%.*}.jpg"
+          # Lista todos os vídeos no R2, tratando nomes de ficheiro de forma segura
+          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while IFS= read -r video_file; do
             
-            # Verifica se a thumbnail já existe no bucket 'bia-portfolio-assets'
-            if ! rclone lsf "R2:bia-portfolio-assets/thumbs/" "${video_file%.*}.jpg" | grep -q .; then
-              echo "A gerar thumbnail para ${video_file}..."
-              rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "temp_video"
-              ffmpeg -i "temp_video" -ss 00:00:01.000 -vframes 1 "$local_thumb_path"
-              rm "temp_video"
+            # Remove a extensão para criar o nome base da thumbnail
+            thumb_basename=$(basename "$video_file" | sed 's/\.[^.]*$//')
+            thumb_filename="${thumb_basename}.jpg"
+            local_thumb_path="temp_thumbs/${thumb_filename}"
+            
+            # Verifica se a thumbnail já existe no R2
+            if ! rclone lsf "R2:bia-portfolio-assets/thumbs/" | grep -q "^${thumb_filename}$"; then
+              echo "A gerar thumbnail para: ${video_file}"
+              
+              # Cria um nome de ficheiro temporário único para evitar conflitos
+              temp_video_file="temp_${RANDOM}.mp4"
+
+              # Descarrega o vídeo para o ficheiro temporário
+              rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "$temp_video_file"
+              
+              # Comando FFmpeg com mais logs e tolerância a erros
+              # -v error: só mostra erros
+              # -y: substitui o ficheiro de saída se existir
+              if ffmpeg -v error -y -i "$temp_video_file" -ss 00:00:01 -vframes 1 "$local_thumb_path"; then
+                echo "Thumbnail gerada com sucesso para ${video_file}"
+              else
+                echo "AVISO: Falha ao gerar thumbnail para ${video_file}. A ignorar este vídeo."
+              fi
+              
+              # Apaga o vídeo temporário
+              rm "$temp_video_file"
             else
               echo "Thumbnail para ${video_file} já existe. A ignorar."
             fi
           done
 
-          # Sincroniza as thumbnails para a pasta 'thumbs' no bucket 'bia-portfolio-assets'
+          echo "Sincronização de thumbnails para o R2..."
           rclone sync temp_thumbs/ "R2:bia-portfolio-assets/thumbs/"
-
-      - name: Configurar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Gerar o ficheiro data.json
-        run: python scripts/generate_data_json.py
-
-      - name: Fazer commit e push do data.json
-        run: |
-          git config --global user.name 'GitHub Actions Bot'
-          git config --global user.email 'github-actions-bot@users.noreply.github.com'
-          git add data.json
-          if ! git diff --staged --quiet; then
-            git commit -m "Atualizar data.json com novos ficheiros"
-            git push
-          else
-            echo "Nenhuma alteração no data.json. Nada para fazer commit."
-          fi
