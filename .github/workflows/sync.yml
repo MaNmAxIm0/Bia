@@ -21,7 +21,9 @@ jobs:
         env:
           RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
         run: |
+          mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
+
           
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
