@@ -37,22 +37,26 @@ jobs:
 
       # --- CORREÇÃO 2: Caminhos corrigidos na geração de thumbnails ---
       - name: Gerar e Sincronizar Thumbnails
+        id: generate_thumbs # Adiciona um ID a este passo
         run: |
           echo "A iniciar a geração de thumbnails..."
           mkdir -p temp_thumbs
           
-          # Lista todos os vídeos no R2
-          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while IFS= read -r video_filename; do
+          # Instala o jq, uma ferramenta para processar JSON
+          sudo apt-get install -y jq
+
+          # Usa rclone lsjson para obter uma lista segura de ficheiros
+          # e o jq para extrair os nomes, tratando caracteres especiais
+          rclone lsjson "R2:bia-portfolio-assets/Vídeos" | jq -r '.[] | .Path' | while IFS= read -r video_path; do
             
-            # Garante que a variável não está vazia
-            if [ -z "$video_filename" ]; then
+            if [ -z "$video_path" ]; then
               continue
             fi
 
+            video_filename=$(basename "$video_path")
             echo "A processar ficheiro: ${video_filename}"
             
-            # Cria o nome da thumbnail a partir do nome do ficheiro de vídeo
-            thumb_basename=$(basename "${video_filename}" | sed 's/\.[^.]*$//')
+            thumb_basename=$(echo "$video_filename" | sed 's/\.[^.]*$//')
             thumb_filename="${thumb_basename}.jpg"
             local_thumb_path="temp_thumbs/${thumb_filename}"
             
@@ -62,11 +66,7 @@ jobs:
               
               temp_video_file="temp_${RANDOM}.mp4"
               
-              # O rclone copyto é mais robusto e não precisa de verificação de erro aqui
-              rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_filename}" "$temp_video_file"
-              
-              # Verifica se o ficheiro temporário foi criado antes de chamar o ffmpeg
-              if [ -f "$temp_video_file" ]; then
+              if rclone copyto "R2:bia-portfolio-assets/${video_path}" "$temp_video_file"; then
                 ffmpeg -i "$temp_video_file" -ss 00:00:01 -vframes 1 "$local_thumb_path"
                 echo "Thumbnail gerada com sucesso."
                 rm "$temp_video_file"

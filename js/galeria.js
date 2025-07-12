@@ -1,10 +1,11 @@
-// js/galeria.js (Versão Final com Thumbnails para Vídeos)
+// js/galeria.js (Versão Corrigida - Sem Duplicação)
 
 import { DATA_JSON_URL } from './configuracoes.js';
 import { createWatermarkElement } from './ferramentas.js';
 import { openLightbox } from './pop-up.js';
 import { getTranslation, getCurrentLanguage } from './gestor-de-linguagem.js';
 
+// --- FUNÇÃO PRINCIPAL PARA GALERIAS (FOTOS, VÍDEOS, DESIGNS) ---
 export async function loadGalleryContent(type, containerId) {
   console.log(`galeria.js: A carregar conteúdo para tipo: ${type}`);
   const galleryContainer = document.getElementById(containerId);
@@ -17,7 +18,8 @@ export async function loadGalleryContent(type, containerId) {
   galleryContainer.innerHTML = `<p id="loadingMessage" style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
   
   try {
-    const response = await fetch(`../../data.json`);
+    // O caminho para o data.json é relativo à página HTML, por isso usamos ../../
+    const response = await fetch(`../../data.json`); 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -51,16 +53,13 @@ export async function loadGalleryContent(type, containerId) {
 
       const isVideo = type === 'videos';
 
-      // --- LÓGICA ATUALIZADA AQUI ---
       let mediaElement;
       if (!isVideo) {
-        // Comportamento para imagens
         mediaElement = document.createElement('img');
         mediaElement.src = mediaUrl;
       } else {
-        // Para vídeos, usamos a thumbnail_url como fonte da imagem
         mediaElement = document.createElement('img');
-        mediaElement.src = item.thumbnail_url; // Usa a thumbnail gerada!
+        mediaElement.src = item.thumbnail_url;
         mediaElement.classList.add('video-thumbnail');
       }
       mediaElement.alt = title;
@@ -103,12 +102,9 @@ export async function loadGalleryContent(type, containerId) {
   }
 }
 
-// A função loadPresentations permanece igual.
-export async function loadPresentations() {
-  // ... (código da função loadPresentations permanece inalterado) ...
-}
 
-// A função loadPresentations permanece igual.
+// --- FUNÇÃO APENAS PARA A PÁGINA DE APRESENTAÇÕES ---
+// (Esta era a função que estava duplicada)
 export async function loadPresentations() {
   console.log("galeria.js: A carregar apresentações.");
   const gallery = document.getElementById("presentation-gallery");
