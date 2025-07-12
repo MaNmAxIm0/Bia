@@ -189,7 +189,7 @@
     z-index: 1001; /* Garante que fica por cima de outro conteúdo */
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease, margin-top 0.2s ease;
+    transition: opacity 0.2s ease, visibility 0.2s ease 0.2s, margin-top 0.2s ease;
 }
 
 /* Itens dentro do submenu */
@@ -220,6 +220,42 @@
 
     .main-nav .dropdown:hover .dropdown-toggle i {
         transform: rotate(180deg); /* Roda a seta para cima */
+    }
+}
+
+.main-nav .dropdown {
+    position: relative;
+    padding-bottom: 15px; /* Aumenta a área de hover para baixo */
+    margin-bottom: -15px; /* Compensa o padding para não afetar o layout */
+}
+
+/* 2. A "ponte" invisível que preenche o espaço entre o link e o submenu */
+.main-nav .dropdown::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%; /* Começa logo abaixo do link */
+    height: 15px; /* A altura da nossa ponte */
+    background-color: transparent; /* É invisível */
+}
+
+/* 3. Ajusta a posição do submenu para ele aparecer sobre a ponte */
+.main-nav .dropdown .dropdown-menu {
+    margin-top: 0; /* Remove a margem antiga, a ponte já cria o espaço */
+}
+
+/* 4. Quando o utilizador faz hover no dropdown (incluindo a ponte), o menu aparece */
+@media (min-width: 769px) {
+    .main-nav .dropdown:hover .dropdown-menu {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 0s; /* Remove o atraso ao aparecer para ser instantâneo */
+    }
+
+    .main-nav .dropdown:hover .dropdown-toggle i {
+        transform: rotate(180deg);
     }
 }
 

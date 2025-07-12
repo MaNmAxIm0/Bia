@@ -15,11 +15,13 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Instalar ferramentas e a versão mais recente do rclone
+      - name: Instalar ferramentas e dependências
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg jq unzip
+          sudo apt-get install -y ffmpeg jq unzip python3-pip
+          pip3 install Pillow
           curl https://rclone.org/install.sh | sudo bash
+
 
       - name: Configurar rclone
         env:

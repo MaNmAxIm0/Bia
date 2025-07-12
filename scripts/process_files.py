@@ -1,6 +1,7 @@
 import subprocess
 import json
 import os
+from PIL import Image, ExifTags
 
 # --- Configuração ---
 RCLONE_REMOTE_NAME = "R2"
@@ -12,9 +13,11 @@ CATEGORIES = {
     "Designs": "designs",
     "Apresentações": "apresentacoes"
 }
-FALLBACK_THUMBNAIL_URL = "https://manmaxim0.github.io/Bia/imagens/work_thumb_video.png"
 
-def get_file_list( ):
+# Mapeia a orientação EXIF para a rotação necessária
+EXIF_ORIENTATION_TAG = next((tag for tag, name in ExifTags.TAGS.items( ) if name == 'Orientation'), None)
+
+def get_file_list():
     """Obtém a lista de todos os ficheiros do R2."""
     print("A obter a lista de todos os ficheiros do R2...")
     command = ["rclone", "lsf", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}", "--recursive", "--files-only"]
@@ -23,42 +26,64 @@ def get_file_list( ):
         print("Lista de ficheiros obtida com sucesso.")
         return result.stdout.strip().split('\n')
     except subprocess.CalledProcessError as e:
-        print(f"Erro ao obter a lista de ficheiros do R2: {e}")
-        print(f"Stderr: {e.stderr}")
+        print(f"Erro ao obter a lista de ficheiros do R2: {e}\nStderr: {e.stderr}")
         return []
 
-def get_dimensions(remote_path):
-    """Descarrega um ficheiro, obtém as suas dimensões com ffprobe e apaga-o."""
+def get_dimensions(remote_path, file_type):
+    """Obtém as dimensões de um ficheiro, usando Pillow para imagens e ffprobe para vídeos."""
     local_filename = os.path.basename(remote_path)
-    print(f"A obter dimensões para: {remote_path}")
+    print(f"A obter dimensões para: {remote_path} (Tipo: {file_type})")
     
-    # Descarregar
+    # Descarregar o ficheiro
     try:
-        subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{remote_path}", f"./{local_filename}"], check=True)
+        subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{remote_path}", f"./{local_filename}"], check=True, capture_output=True)
     except subprocess.CalledProcessError as e:
-        print(f"AVISO: Falha ao descarregar '{remote_path}'. A ignorar. Erro: {e.stderr}")
+        print(f"AVISO: Falha ao descarregar '{remote_path}'. A ignorar. Erro: {e.stderr.decode()}")
         return 0, 0
 
-    # Obter dimensões
     width, height = 0, 0
-    try:
-        command = [
-            "ffprobe", "-v", "error", "-select_streams", "v:0",
-            "-show_entries", "stream=width,height", "-of", "json", f"./{local_filename}"
-        ]
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
-        dims = json.loads(result.stdout)["streams"][0]
-        width, height = int(dims.get("width", 0)), int(dims.get("height", 0))
-        print(f"Dimensões encontradas: {width}x{height}")
-    except (subprocess.CalledProcessError, json.JSONDecodeError, IndexError, KeyError) as e:
-        print(f"AVISO: Não foi possível obter dimensões para '{local_filename}'. Erro: {e}")
     
+    if file_type in ['fotografias', 'designs']:
+        # --- LÓGICA PARA IMAGENS USANDO PILLOW ---
+        try:
+            with Image.open(f"./{local_filename}") as img:
+                width, height = img.size
+                print(f"Dimensões físicas encontradas: {width}x{height}")
+                
+                # Verifica os metadados EXIF para rotação
+                if EXIF_ORIENTATION_TAG and hasattr(img, '_getexif'):
+                    exif = img._getexif()
+                    if exif and EXIF_ORIENTATION_TAG in exif:
+                        orientation = exif[EXIF_ORIENTATION_TAG]
+                        # Se a orientação for 5, 6, 7 ou 8, as dimensões devem ser trocadas
+                        if orientation in [5, 6, 7, 8]:
+                            print(f"Orientação EXIF encontrada: {orientation}. A trocar dimensões.")
+                            width, height = height, width
+                print(f"Dimensões finais após EXIF: {width}x{height}")
+        except Exception as e:
+            print(f"AVISO: Pillow não conseguiu processar a imagem '{local_filename}'. Erro: {e}")
+
+    elif file_type == 'videos':
+        # --- LÓGICA PARA VÍDEOS USANDO FFPROBE ---
+        try:
+            command = [
+                "ffprobe", "-v", "error", "-select_streams", "v:0",
+                "-show_entries", "stream=width,height", "-of", "json", f"./{local_filename}"
+            ]
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
+            dims = json.loads(result.stdout)["streams"][0]
+            width, height = int(dims.get("width", 0)), int(dims.get("height", 0))
+            print(f"Dimensões do vídeo encontradas: {width}x{height}")
+        except Exception as e:
+            print(f"AVISO: ffprobe não conseguiu obter dimensões para o vídeo '{local_filename}'. Erro: {e}")
+
     # Apagar ficheiro local
     os.remove(f"./{local_filename}")
     
     return width, height
 
 def parse_filename(filename):
+    # ... (esta função permanece igual)
     name_without_ext = os.path.splitext(filename)[0]
     parts = name_without_ext.split('_')
     if len(parts) >= 3:
@@ -89,9 +114,8 @@ def process_files():
             category_key = CATEGORIES[category_name]
             
             width, height = 0, 0
-            # Só obtemos dimensões para imagens e vídeos
             if category_key in ["fotografias", "videos", "designs"]:
-                 width, height = get_dimensions(path)
+                 width, height = get_dimensions(path, category_key)
 
             orientation = "square"
             if width > 0 and height > 0:

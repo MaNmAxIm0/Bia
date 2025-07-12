@@ -1,156 +1,187 @@
-// js/galeria.js (Versão Corrigida - Sem Duplicação)
+// js/galeria.js (Versão Final com Infinite Scroll Corrigido)
 
-import { DATA_JSON_URL } from './configuracoes.js';
+import { getTranslation, getCurrentLanguage } from './gestor-de-linguagem.js';
 import { createWatermarkElement } from './ferramentas.js';
 import { openLightbox } from './pop-up.js';
-import { getTranslation, getCurrentLanguage } from './gestor-de-linguagem.js';
 
-// --- FUNÇÃO PRINCIPAL PARA GALERIAS (FOTOS, VÍDEOS, DESIGNS) ---
-export async function loadGalleryContent(type, containerId) {
-  console.log(`galeria.js: A carregar conteúdo para tipo: ${type}`);
-  const galleryContainer = document.getElementById(containerId);
-  if (!galleryContainer) {
-    console.error(`galeria.js: Contentor com ID '${containerId}' não encontrado.`);
-    return;
-  }
+// Objeto para guardar o estado de cada galeria individualmente
+const galleryStates = {};
 
-  const loadingMessage = getTranslation('loading_content');
-  galleryContainer.innerHTML = `<p id="loadingMessage" style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
-  
-  try {
-    // O caminho para o data.json é relativo à página HTML, por isso usamos ../../
-    const response = await fetch(`../../data.json`); 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+/**
+ * Renderiza o próximo lote de itens para uma galeria específica.
+ * @param {string} containerId - O ID do contentor da galeria.
+ */
+function renderNextBatch(containerId) {
+    const state = galleryStates[containerId];
+    if (!state || state.currentIndex >= state.allItems.length) {
+        if (state.observer) state.observer.disconnect(); // Para de observar se não há mais itens
+        return;
     }
-    const data = await response.json();
-    
-    const items = data[type] || [];
+
+    const galleryContainer = document.getElementById(containerId);
+    if (!galleryContainer) return;
+
     const lang = getCurrentLanguage();
+    const itemsToRender = state.allItems.slice(state.currentIndex, state.currentIndex + state.itemsPerLoad);
 
-    galleryContainer.innerHTML = '';
+    itemsToRender.forEach(item => {
+        const itemDiv = document.createElement('div');
+        const classMap = { 'fotografias': 'photo', 'designs': 'design', 'videos': 'video' };
+        itemDiv.classList.add(`${classMap[state.type]}-item`);
 
-    if (items.length === 0) {
-      const noContentMessage = getTranslation('no_content_found', { type: getTranslation(type) });
-      galleryContainer.innerHTML = `<p style="text-align: center; color: var(--light-text-color);">${noContentMessage}</p>`;
-      return;
-    }
+        const mediaUrl = item.url;
+        const title = item.titles[lang] || item.titles['pt'];
+        const isVideo = state.type === 'videos';
 
-    items.forEach(item => {
-      const itemDiv = document.createElement('div');
-      
-      const classMap = {
-        'fotografias': 'photo',
-        'designs': 'design',
-        'videos': 'video'
-      };
-      const baseClass = classMap[type];
-      itemDiv.classList.add(`${baseClass}-item`);
+        const imageContainer = document.createElement('div');
+        imageContainer.classList.add('image-container');
 
-      const mediaUrl = item.url;
-      const title = item.titles[lang] || item.titles['pt'];
-      const description = '';
+        const mediaElement = document.createElement('img');
+        mediaElement.src = isVideo ? item.thumbnail_url : mediaUrl;
+        mediaElement.alt = title;
+        mediaElement.loading = "lazy";
+        mediaElement.oncontextmenu = () => false;
+        
+        imageContainer.appendChild(mediaElement);
+        imageContainer.appendChild(createWatermarkElement());
 
-      const isVideo = type === 'videos';
+        if (isVideo) {
+            const playIcon = document.createElement('i');
+            playIcon.className = 'fas fa-play video-play-icon';
+            imageContainer.appendChild(playIcon);
+        }
 
-      let mediaElement;
-      if (!isVideo) {
-        mediaElement = document.createElement('img');
-        mediaElement.src = mediaUrl;
-      } else {
-        mediaElement = document.createElement('img');
-        mediaElement.src = item.thumbnail_url;
-        mediaElement.classList.add('video-thumbnail');
-      }
-      mediaElement.alt = title;
-      mediaElement.loading = "lazy";
-      mediaElement.oncontextmenu = () => false;
-      
-      const imageContainer = document.createElement('div');
-      imageContainer.classList.add('image-container');
-      imageContainer.appendChild(mediaElement);
-      imageContainer.appendChild(createWatermarkElement());
+        const overlayDiv = document.createElement('div');
+        overlayDiv.classList.add(`${classMap[state.type]}-overlay`);
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = title;
+        overlayDiv.appendChild(titleElement);
 
-      if (isVideo) {
-        const playIcon = document.createElement('i');
-        playIcon.className = 'fas fa-play video-play-icon';
-        imageContainer.appendChild(playIcon);
-      }
+        itemDiv.appendChild(imageContainer);
+        itemDiv.appendChild(overlayDiv);
 
-      const overlayDiv = document.createElement('div');
-      overlayDiv.classList.add(`${baseClass}-overlay`);
-      
-      const titleElement = document.createElement('h3');
-      titleElement.textContent = title;
-      overlayDiv.appendChild(titleElement);
+        itemDiv.addEventListener('click', () => {
+            openLightbox(mediaUrl, isVideo ? 'video' : 'image', title);
+        });
 
-      itemDiv.appendChild(imageContainer);
-      itemDiv.appendChild(overlayDiv);
-
-      itemDiv.addEventListener('click', () => {
-        const mediaType = isVideo ? 'video' : 'image';
-        openLightbox(mediaUrl, mediaType, title, description);
-      });
-
-      galleryContainer.appendChild(itemDiv);
+        galleryContainer.appendChild(itemDiv);
     });
 
-  } catch (error) {
-    console.error(`galeria.js: Erro ao carregar ${type}:`, error);
-    const errorMessage = getTranslation('error_loading_content', { type: getTranslation(type) });
-    galleryContainer.innerHTML = `<p style="text-align: center; color: red;">${errorMessage}</p>`;
-  }
+    state.currentIndex += itemsToRender.length;
+
+    // Se ainda houver itens, observa o novo último elemento
+    if (state.currentIndex < state.allItems.length) {
+        const lastElement = galleryContainer.lastElementChild;
+        if (lastElement) {
+            state.observer.observe(lastElement);
+        }
+    } else {
+        state.observer.disconnect(); // Fim da lista
+    }
 }
 
+/**
+ * Função principal que inicia o carregamento da galeria.
+ */
+export async function loadGalleryContent(type, containerId, orientationFilter = null) {
+    const galleryContainer = document.getElementById(containerId);
+    if (!galleryContainer) return;
 
-// --- FUNÇÃO APENAS PARA A PÁGINA DE APRESENTAÇÕES ---
-// (Esta era a função que estava duplicada)
+    // Limpa o estado anterior para esta galeria, se existir
+    if (galleryStates[containerId] && galleryStates[containerId].observer) {
+        galleryStates[containerId].observer.disconnect();
+    }
+
+    // Adiciona a classe para o estilo 16:9 se a orientação for horizontal
+    if (orientationFilter === 'horizontal') {
+        galleryContainer.classList.add('horizontal-gallery');
+    } else {
+        galleryContainer.classList.remove('horizontal-gallery'); // Garante que não fica em outras páginas
+    }
+
+    galleryContainer.innerHTML = `<p style="text-align: center;">${getTranslation('loading_content')}</p>`;
+    
+    try {
+        const response = await fetch(`../../data.json`);
+        const data = await response.json();
+        
+        let allFilteredItems = data[type] || [];
+        if (orientationFilter) {
+            allFilteredItems = allFilteredItems.filter(item => item.orientation === orientationFilter);
+        }
+
+        galleryContainer.innerHTML = '';
+
+        if (allFilteredItems.length === 0) {
+            galleryContainer.innerHTML = `<p>${getTranslation('no_content_found', { type: getTranslation(type) })}</p>`;
+            return;
+        }
+
+        // Cria um novo observador para esta galeria
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const state = galleryStates[containerId];
+                    if (state) {
+                        state.observer.unobserve(entry.target);
+                        renderNextBatch(containerId);
+                    }
+                }
+            });
+        }, { rootMargin: "500px" }); // Carrega 500px antes de o elemento ser visível
+
+        // Inicializa o estado para esta galeria específica
+        galleryStates[containerId] = {
+            allItems: allFilteredItems,
+            currentIndex: 0,
+            itemsPerLoad: 12, // Pode ajustar este número
+            type: type,
+            observer: observer
+        };
+
+        // Inicia o processo renderizando o primeiro lote
+        renderNextBatch(containerId);
+
+    } catch (error) {
+        console.error(`Erro ao carregar ${type}:`, error);
+        galleryContainer.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content', { type: getTranslation(type) })}</p>`;
+    }
+}
+
+/**
+ * Carrega e exibe as apresentações (sem carregamento progressivo).
+ */
 export async function loadPresentations() {
-  console.log("galeria.js: A carregar apresentações.");
   const gallery = document.getElementById("presentation-gallery");
   if (!gallery) return;
-
-  const loadingMessage = getTranslation('loading_presentations');
-  gallery.innerHTML = `<p style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
-
+  gallery.innerHTML = `<p style="text-align: center;">${getTranslation('loading_presentations')}</p>`;
   try {
     const response = await fetch(`../../data.json`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
     const data = await response.json();
     const presentations = data['apresentacoes'] || [];
     const lang = getCurrentLanguage();
-
     gallery.innerHTML = '';
-
     if (presentations.length === 0) {
-      const noContentMessage = getTranslation('no_presentations_found');
-      gallery.innerHTML = `<p style='text-align: center; color: var(--light-text-color);'>${noContentMessage}</p>`;
+      gallery.innerHTML = `<p>${getTranslation('no_presentations_found')}</p>`;
       return;
     }
-
     presentations.forEach(presentation => {
       const div = document.createElement("div");
       div.className = "presentation-item";
-      
       const titleElement = document.createElement("h3");
       titleElement.textContent = presentation.titles[lang] || presentation.titles['pt'];
-      
       const iframe = document.createElement("iframe");
       iframe.src = presentation.url; 
       iframe.allowFullscreen = true;
       iframe.title = titleElement.textContent;
       iframe.loading = "lazy";
       iframe.oncontextmenu = () => false;
-      
       div.appendChild(titleElement);
       div.appendChild(iframe);
       gallery.appendChild(div);
     });
   } catch (err) {
-    console.error("galeria.js: Erro ao carregar apresentações:", err);
-    const errorMessage = getTranslation('error_loading_content', { type: getTranslation('presentations') });
-    gallery.innerHTML = `<p style='text-align: center; color: red;'>${errorMessage}</p>`;
+    console.error("Erro ao carregar apresentações:", err);
+    gallery.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content', { type: getTranslation('presentations') })}</p>`;
   }
 }
