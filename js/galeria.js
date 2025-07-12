@@ -1,11 +1,10 @@
-// js/galeria.js
+// js/galeria.js (Versão Final com Thumbnails para Vídeos)
 
 import { DATA_JSON_URL } from './configuracoes.js';
 import { createWatermarkElement } from './ferramentas.js';
 import { openLightbox } from './pop-up.js';
 import { getTranslation, getCurrentLanguage } from './gestor-de-linguagem.js';
 
-// Função para carregar o conteúdo das galerias (fotos, designs, vídeos)
 export async function loadGalleryContent(type, containerId) {
   console.log(`galeria.js: A carregar conteúdo para tipo: ${type}`);
   const galleryContainer = document.getElementById(containerId);
@@ -18,14 +17,12 @@ export async function loadGalleryContent(type, containerId) {
   galleryContainer.innerHTML = `<p id="loadingMessage" style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
   
   try {
-    // Busca o data.json local a partir da raiz do site
     const response = await fetch(`../../data.json`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     
-    // O 'type' corresponde às chaves no nosso data.json (fotografias, videos, etc.)
     const items = data[type] || [];
     const lang = getCurrentLanguage();
 
@@ -39,59 +36,63 @@ export async function loadGalleryContent(type, containerId) {
 
     items.forEach(item => {
       const itemDiv = document.createElement('div');
-      itemDiv.classList.add(`${type.slice(0, -1)}-item`);
+      
+      const classMap = {
+        'fotografias': 'photo',
+        'designs': 'design',
+        'videos': 'video'
+      };
+      const baseClass = classMap[type];
+      itemDiv.classList.add(`${baseClass}-item`);
 
       const mediaUrl = item.url;
       const title = item.titles[lang] || item.titles['pt'];
-      const description = item.description || '';
+      const description = '';
 
-      const isVideo = mediaUrl.toLowerCase().endsWith('.mp4') || mediaUrl.toLowerCase().endsWith('.mov') || mediaUrl.toLowerCase().endsWith('.webm');
+      const isVideo = type === 'videos';
 
-      if (!isVideo) { // Lógica para Imagens (fotos, designs)
-        const imageContainer = document.createElement('div');
-        imageContainer.classList.add('image-container');
-
-        const img = document.createElement('img');
-        img.src = mediaUrl;
-        img.alt = title;
-        img.loading = "lazy";
-        img.oncontextmenu = () => false;
-
-        imageContainer.appendChild(img);
-        imageContainer.appendChild(createWatermarkElement());
-        itemDiv.appendChild(imageContainer);
-
-        const overlay = document.createElement('div');
-        overlay.classList.add(`${type.slice(0, -1)}-overlay`);
-        const h3 = document.createElement('h3');
-        h3.textContent = title;
-        overlay.appendChild(h3);
-        itemDiv.appendChild(overlay);
-
-        itemDiv.addEventListener('click', () => openLightbox(mediaUrl, 'image', title, description));
-
-      } else { // Lógica para Vídeos
-        const iframe = document.createElement('iframe');
-        iframe.src = mediaUrl;
-        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-        iframe.allowFullscreen = true;
-        iframe.frameBorder = "0";
-        iframe.title = title;
-        iframe.loading = "lazy";
-        iframe.oncontextmenu = () => false;
-
-        itemDiv.appendChild(iframe);
-
-        const titleElement = document.createElement('h3');
-        titleElement.textContent = title;
-        itemDiv.appendChild(titleElement);
-
-        itemDiv.addEventListener('click', (e) => {
-          if (e.target !== iframe) {
-            openLightbox(mediaUrl, 'video', title, description);
-          }
-        });
+      // --- LÓGICA ATUALIZADA AQUI ---
+      let mediaElement;
+      if (!isVideo) {
+        // Comportamento para imagens
+        mediaElement = document.createElement('img');
+        mediaElement.src = mediaUrl;
+      } else {
+        // Para vídeos, usamos a thumbnail_url como fonte da imagem
+        mediaElement = document.createElement('img');
+        mediaElement.src = item.thumbnail_url; // Usa a thumbnail gerada!
+        mediaElement.classList.add('video-thumbnail');
       }
+      mediaElement.alt = title;
+      mediaElement.loading = "lazy";
+      mediaElement.oncontextmenu = () => false;
+      
+      const imageContainer = document.createElement('div');
+      imageContainer.classList.add('image-container');
+      imageContainer.appendChild(mediaElement);
+      imageContainer.appendChild(createWatermarkElement());
+
+      if (isVideo) {
+        const playIcon = document.createElement('i');
+        playIcon.className = 'fas fa-play video-play-icon';
+        imageContainer.appendChild(playIcon);
+      }
+
+      const overlayDiv = document.createElement('div');
+      overlayDiv.classList.add(`${baseClass}-overlay`);
+      
+      const titleElement = document.createElement('h3');
+      titleElement.textContent = title;
+      overlayDiv.appendChild(titleElement);
+
+      itemDiv.appendChild(imageContainer);
+      itemDiv.appendChild(overlayDiv);
+
+      itemDiv.addEventListener('click', () => {
+        const mediaType = isVideo ? 'video' : 'image';
+        openLightbox(mediaUrl, mediaType, title, description);
+      });
+
       galleryContainer.appendChild(itemDiv);
     });
 
@@ -102,7 +103,12 @@ export async function loadGalleryContent(type, containerId) {
   }
 }
 
-// Função para carregar as apresentações
+// A função loadPresentations permanece igual.
+export async function loadPresentations() {
+  // ... (código da função loadPresentations permanece inalterado) ...
+}
+
+// A função loadPresentations permanece igual.
 export async function loadPresentations() {
   console.log("galeria.js: A carregar apresentações.");
   const gallery = document.getElementById("presentation-gallery");

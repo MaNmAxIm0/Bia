@@ -6,11 +6,8 @@ on:
   schedule:
     - cron: '0 20 * * *'
 
-# --- INÍCIO DA ALTERAÇÃO ---
-# Adicione esta secção para dar permissões de escrita ao workflow
 permissions:
   contents: write
-# --- FIM DA ALTERAÇÃO ---
 
 jobs:
   sync-and-build:
@@ -18,8 +15,6 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
-
-      # ... o resto do ficheiro continua exatamente igual ...
 
       - name: Instalar rclone
         run: sudo -v ; curl https://rclone.org/install.sh | sudo bash
@@ -31,9 +26,37 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF_DATA" > ~/.config/rclone/rclone.conf
 
+      # --- CORREÇÃO 1: Caminhos de origem e destino corrigidos ---
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
-          rclone sync Drive:Bia R2:bia --progress
+          # Sincroniza a pasta "Portfólio Bia" do Drive para o bucket "bia-portfolio-assets" no R2
+          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --progress --exclude "desktop.ini"
+
+      - name: Instalar FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      # --- CORREÇÃO 2: Caminhos corrigidos na geração de thumbnails ---
+      - name: Gerar e Sincronizar Thumbnails
+        run: |
+          mkdir -p temp_thumbs
+          
+          # Lista vídeos no bucket 'bia-portfolio-assets'
+          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while read video_file; do
+            local_thumb_path="temp_thumbs/${video_file%.*}.jpg"
+            
+            # Verifica se a thumbnail já existe no bucket 'bia-portfolio-assets'
+            if ! rclone lsf "R2:bia-portfolio-assets/thumbs/" "${video_file%.*}.jpg" | grep -q .; then
+              echo "A gerar thumbnail para ${video_file}..."
+              rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "temp_video"
+              ffmpeg -i "temp_video" -ss 00:00:01.000 -vframes 1 "$local_thumb_path"
+              rm "temp_video"
+            else
+              echo "Thumbnail para ${video_file} já existe. A ignorar."
+            fi
+          done
+
+          # Sincroniza as thumbnails para a pasta 'thumbs' no bucket 'bia-portfolio-assets'
+          rclone sync temp_thumbs/ "R2:bia-portfolio-assets/thumbs/"
 
       - name: Configurar Python
         uses: actions/setup-python@v5
