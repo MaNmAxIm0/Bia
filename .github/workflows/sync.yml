@@ -37,16 +37,13 @@ jobs:
 
       # --- CORREÇÃO 2: Caminhos corrigidos na geração de thumbnails ---
       - name: Gerar e Sincronizar Thumbnails
-        id: generate_thumbs # Adiciona um ID a este passo
         run: |
           echo "A iniciar a geração de thumbnails..."
           mkdir -p temp_thumbs
           
-          # Instala o jq, uma ferramenta para processar JSON
           sudo apt-get install -y jq
 
           # Usa rclone lsjson para obter uma lista segura de ficheiros
-          # e o jq para extrair os nomes, tratando caracteres especiais
           rclone lsjson "R2:bia-portfolio-assets/Vídeos" | jq -r '.[] | .Path' | while IFS= read -r video_path; do
             
             if [ -z "$video_path" ]; then
@@ -64,12 +61,16 @@ jobs:
             if ! rclone lsf "R2:bia-portfolio-assets/thumbs/" | grep -q "^${thumb_filename}$"; then
               echo "A gerar thumbnail para: ${video_filename}"
               
-              temp_video_file="temp_${RANDOM}.mp4"
-              
-              if rclone copyto "R2:bia-portfolio-assets/${video_path}" "$temp_video_file"; then
-                ffmpeg -i "$temp_video_file" -ss 00:00:01 -vframes 1 "$local_thumb_path"
+              # --- CORREÇÃO PRINCIPAL AQUI ---
+              # Usa 'rclone copy' para descarregar o ficheiro para a pasta atual com o seu nome original
+              # Isto é mais robusto que 'copyto' com nomes temporários
+              if rclone copy "R2:bia-portfolio-assets/${video_path}" .; then
+                # O ficheiro foi descarregado com sucesso para a pasta local com o nome video_filename
+                ffmpeg -i "$video_filename" -ss 00:00:01 -vframes 1 "$local_thumb_path"
                 echo "Thumbnail gerada com sucesso."
-                rm "$temp_video_file"
+                
+                # Apaga o vídeo local após o uso
+                rm "$video_filename"
               else
                 echo "AVISO: Falha ao descarregar ${video_filename} do R2. A ignorar."
               fi
