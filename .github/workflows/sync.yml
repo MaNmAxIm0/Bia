@@ -1,4 +1,4 @@
-# .github/workflows/sync.yml
+# .github/workflows/sync.yml (Versão Final e Robusta)
 name: Sincronizar Ficheiros, Gerar JSON e Atualizar Site
 
 on:
@@ -26,61 +26,28 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF_DATA" > ~/.config/rclone/rclone.conf
 
-      # --- CORREÇÃO 1: Caminhos de origem e destino corrigidos ---
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
-          # Sincroniza a pasta "Portfólio Bia" do Drive para o bucket "bia-portfolio-assets" no R2
           rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --progress --exclude "desktop.ini"
 
-      - name: Instalar FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      # --- CORREÇÃO 2: Caminhos corrigidos na geração de thumbnails ---
-      - name: Gerar e Sincronizar Thumbnails
+      # --- NOVO PASSO ÚNICO PARA PROCESSAMENTO ---
+      - name: Instalar dependências (Python e FFmpeg )
         run: |
-          echo "A iniciar a geração de thumbnails..."
-          mkdir -p temp_thumbs
-          
-          sudo apt-get install -y jq
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg python3-pip
+          pip3 install rclone-python
 
-          # Usa rclone lsjson para obter uma lista segura de ficheiros
-          rclone lsjson "R2:bia-portfolio-assets/Vídeos" | jq -r '.[] | .Path' | while IFS= read -r video_path; do
-            
-            if [ -z "$video_path" ]; then
-              continue
-            fi
+      - name: Gerar Thumbnails e Ficheiro data.json
+        run: python3 scripts/process_files.py # Vamos criar este novo ficheiro
 
-            video_filename=$(basename "$video_path")
-            echo "A processar ficheiro: ${video_filename}"
-            
-            thumb_basename=$(echo "$video_filename" | sed 's/\.[^.]*$//')
-            thumb_filename="${thumb_basename}.jpg"
-            local_thumb_path="temp_thumbs/${thumb_filename}"
-            
-            # Verifica se a thumbnail já existe no R2
-            if ! rclone lsf "R2:bia-portfolio-assets/thumbs/" | grep -q "^${thumb_filename}$"; then
-              echo "A gerar thumbnail para: ${video_filename}"
-              
-              # --- CORREÇÃO CRUCIAL AQUI ---
-              # Descarrega o ficheiro específico usando a flag --include
-              # Isto diz ao rclone para copiar da pasta 'Vídeos' APENAS o ficheiro com este nome.
-              if rclone copy "R2:bia-portfolio-assets/Vídeos" . --include "$video_filename"; then
-                
-                # Verifica se o ficheiro foi realmente descarregado
-                if [ -f "$video_filename" ]; then
-                  ffmpeg -i "$video_filename" -ss 00:00:01 -vframes 1 "$local_thumb_path"
-                  echo "Thumbnail gerada com sucesso."
-                  rm "$video_filename"
-                else
-                  echo "AVISO: O download parece ter falhado, o ficheiro local não foi encontrado. A ignorar."
-                fi
-              else
-                echo "AVISO: O comando rclone copy falhou para ${video_filename}. A ignorar."
-              fi
-            else
-              echo "Thumbnail para ${video_filename} já existe. A ignorar."
-            fi
-          done
-
-          echo "Sincronização de thumbnails para o R2..."
-          rclone sync temp_thumbs/ "R2:bia-portfolio-assets/thumbs/"
+      - name: Fazer commit e push do data.json
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'github-actions-bot@users.noreply.github.com'
+          git add data.json
+          if ! git diff --staged --quiet; then
+            git commit -m "Atualizar data.json com novos ficheiros e thumbnails"
+            git push
+          else
+            echo "Nenhuma alteração no data.json. Nada para fazer commit."
+          fi
