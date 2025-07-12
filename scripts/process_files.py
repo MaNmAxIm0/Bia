@@ -1,134 +1,120 @@
-# scripts/process_files.py (Versão com Deteção de Orientação)
 import subprocess
 import json
 import os
-import urllib.parse
+import re
 
-# --- CONFIGURAÇÃO PRINCIPAL ---
+# --- Configuração ---
 RCLONE_REMOTE_NAME = "R2"
 BUCKET_NAME = "bia-portfolio-assets"
 PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
-FOLDER_TO_CATEGORY_MAP = {
+CATEGORIES = {
     "Fotografias": "fotografias",
     "Vídeos": "videos",
     "Designs": "designs",
     "Apresentações": "apresentacoes"
 }
-# --- FIM DA CONFIGURAÇÃO ---
+# URL de uma imagem de fallback caso a geração da thumbnail falhe
+FALLBACK_THUMBNAIL_URL = "https://manmaxim0.github.io/Bia/imagens/work_thumb_video.png"
 
-def run_command(command, check=True ):
-    """Executa um comando e retorna a saída."""
-    try:
-        result = subprocess.run(command, capture_output=True, text=True, check=check, encoding="utf-8")
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"Erro ao executar comando {' '.join(command)}: {e.stderr}")
-        return None
-
-def get_orientation(local_file_path):
-    """Usa ffprobe para obter a orientação de um ficheiro de media."""
+def get_all_files_with_metadata( ):
+    """
+    *** A NOVA ABORDAGEM ***
+    Executa 'rclone lsjson' com a flag '--metadata' uma única vez para obter
+    todos os ficheiros e os seus metadados (incluindo dimensões) numa só chamada de rede.
+    Isto é muito mais rápido do que fazer um pedido para cada ficheiro.
+    """
+    print("A obter a lista de todos os ficheiros e metadados do R2...")
     command = [
-        "ffprobe", "-v", "error", "-select_streams", "v:0",
-        "-show_entries", "stream=width,height", "-of", "json", local_file_path
+        "rclone", "lsjson",
+        f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}",
+        "--metadata",         # Pede os metadados (inclui altura e largura)
+        "--recursive",        # Garante que lemos dentro de todas as subpastas
+        "--no-mimetype"       # Não precisamos do mimetype, poupa processamento
     ]
-    output = run_command(command)
-    if not output:
-        return "unknown"
-    
     try:
-        data = json.loads(output)
-        width = data["streams"][0]["width"]
-        height = data["streams"][0]["height"]
-        
-        if width > height:
-            return "horizontal"
-        elif height > width:
-            return "vertical"
-        else:
-            return "square"
-    except (KeyError, IndexError, json.JSONDecodeError):
-        return "unknown"
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        print("Lista de ficheiros e metadados obtida com sucesso.")
+        return json.loads(result.stdout)
+    except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+        print(f"Erro ao obter a lista de ficheiros do R2: {e}")
+        if hasattr(e, 'stderr'):
+            print(f"Stderr: {e.stderr}")
+        return []
 
 def parse_filename(filename):
-    name_part = filename.rsplit('.', 1)[0]
-    titles_parts = name_part.split('_')
-    if len(titles_parts) == 3:
-        return {"pt": titles_parts[0].strip(), "en": titles_parts[1].strip(), "es": titles_parts[2].strip()}
+    """
+    Extrai os títulos multilingues do nome do ficheiro.
+    Exemplo: "Título PT_Título EN_Título ES.jpg"
+    """
+    name_without_ext = os.path.splitext(filename)[0]
+    parts = name_without_ext.split('_')
+    
+    # Garante que temos sempre 3 partes, repetindo a primeira se necessário
+    if len(parts) == 1:
+        titles = {'pt': parts[0], 'en': parts[0], 'es': parts[0]}
+    elif len(parts) == 2:
+        titles = {'pt': parts[0], 'en': parts[1], 'es': parts[1]}
     else:
-        clean_title = name_part.replace('_', ' ').strip()
-        return {"pt": clean_title, "en": clean_title, "es": clean_title}
+        titles = {'pt': parts[0], 'en': parts[1], 'es': parts[2]}
+        
+    return titles
 
-def main():
-    print("A iniciar o processamento de ficheiros...")
-    
-    all_files_json = run_command(["rclone", "lsjson", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}", "--recursive"])
-    if not all_files_json: return
-    all_files = json.loads(all_files_json)
-    
-    existing_thumbs_str = run_command(["rclone", "lsf", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/thumbs/"])
-    existing_thumbs = set(existing_thumbs_str.splitlines()) if existing_thumbs_str else set()
+def process_files():
+    all_files = get_all_files_with_metadata()
+    if not all_files:
+        print("Nenhum ficheiro encontrado no R2. A sair.")
+        return
 
-    output_data = {category: [] for category in FOLDER_TO_CATEGORY_MAP.values()}
-    
-    for file_info in all_files:
-        path = file_info.get("Path", "")
-        if not path or "/" not in path or path.lower().endswith('desktop.ini'):
+    output_data = {
+        "fotografias": [],
+        "videos": [],
+        "designs": [],
+        "apresentacoes": []
+    }
+
+    for item in all_files:
+        path = item.get("Path", "")
+        
+        # Ignora ficheiros indesejados
+        if "desktop.ini" in path or not path:
             continue
 
-        folder_name = path.split('/')[0]
-        category = FOLDER_TO_CATEGORY_MAP.get(folder_name)
-        if not category: continue
+        # Determina a categoria e o nome do ficheiro
+        try:
+            category_name, filename = path.split('/', 1)
+        except ValueError:
+            continue # Ignora ficheiros na raiz do bucket
 
-        filename = os.path.basename(path)
-        titles = parse_filename(filename)
-        encoded_path = urllib.parse.quote(path)
-        
-        item_data = {
-            "name": filename,
-            "titles": titles,
-            "url": f"{PUBLIC_URL}/{encoded_path}",
-            "orientation": "unknown" # Valor padrão
-        }
-
-        # Só precisamos de detetar a orientação para fotos e vídeos
-        if category in ["fotografias", "videos"]:
-            print(f"A processar: {filename}")
-            local_file = "temp_media_file"
-            run_command(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_file])
+        if category_name in CATEGORIES:
+            category_key = CATEGORIES[category_name]
             
-            if os.path.exists(local_file):
-                item_data["orientation"] = get_orientation(local_file)
-                print(f"--> Orientação detetada: {item_data['orientation']}")
-                
-                if category == "videos":
-                    thumb_basename = filename.rsplit('.', 1)[0]
-                    thumb_filename = f"{thumb_basename}.jpg"
-                    if thumb_filename not in existing_thumbs:
-                        print(f"--> A gerar thumbnail...")
-                        local_thumb_path = "temp_thumb.jpg"
-                        subprocess.run(["ffmpeg", "-i", local_file, "-ss", "00:00:01", "-vframes", "1", local_thumb_path, "-y"], capture_output=True)
-                        if os.path.exists(local_thumb_path):
-                            run_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/thumbs/{thumb_filename}"])
-                            existing_thumbs.add(thumb_filename)
-                            os.remove(local_thumb_path)
-                
-                os.remove(local_file)
+            # Obtém as dimensões dos metadados (muito mais rápido)
+            width = int(item.get("Mdi", {}).get("width", 0))
+            height = int(item.get("Mdi", {}).get("height", 0))
 
-        # Adiciona a thumbnail URL se for um vídeo
-        if category == "videos":
-            thumb_basename = filename.rsplit('.', 1)[0]
-            thumb_filename = f"{thumb_basename}.jpg"
-            if thumb_filename in existing_thumbs:
-                item_data["thumbnail_url"] = f"{PUBLIC_URL}/thumbs/{urllib.parse.quote(thumb_filename)}"
-            else:
-                item_data["thumbnail_url"] = "https://manmaxim0.github.io/Bia/imagens/work_thumb_video.png"
-        
-        output_data[category].append(item_data )
+            orientation = "horizontal" if width >= height else "vertical"
+            if width == 0 or height == 0:
+                orientation = "square" # Fallback para ficheiros sem dimensões (PDFs, etc.)
 
+            file_data = {
+                "name": filename,
+                "titles": parse_filename(filename),
+                "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}",
+                "orientation": orientation
+            }
+
+            # Adiciona URL da thumbnail apenas para vídeos
+            if category_key == "videos":
+                thumb_filename = os.path.splitext(filename)[0] + ".jpg"
+                file_data["thumbnail_url"] = f"{PUBLIC_URL}/_thumbnails/{thumb_filename.replace(' ', '%20')}"
+
+            output_data[category_key].append(file_data)
+
+    # Escreve o ficheiro data.json final
     with open("data.json", "w", encoding="utf-8") as f:
-        json.dump(output_data, f, ensure_ascii=False, indent=2)
-    
-    print("Processo concluído. Ficheiro data.json gerado com sucesso.")
+        json.dump(output_data, f, indent=2, ensure_ascii=False)
+
+    print("Ficheiro data.json gerado com sucesso.")
 
 if __name__ == "__main__":
-    main()
+    process_files()
