@@ -7,11 +7,12 @@ import os
 RCLONE_REMOTE_NAME = "R2"
 BUCKET_NAME = "bia-portfolio-assets" # O nome do seu bucket no R2
 R2_PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev" # SUBSTITUA PELO SEU URL PÚBLICO
+# DEPOIS DA CORREÇÃO
 FOLDER_TO_CATEGORY_MAP = {
-    "fotografias": "fotografias",
-    "videos": "videos",
-    "designs": "designs",
-    "apresentacoes": "apresentacoes"
+    "Fotografias": "fotografias",
+    "Vídeos": "videos",
+    "Designs": "designs",
+    "Apresentações": "apresentacoes"
 }
 # --------------------
 
