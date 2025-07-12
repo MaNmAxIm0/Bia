@@ -1,8 +1,7 @@
 // js/galeria.js
 
-// Importa a nova fonte de dados e as ferramentas necessárias
 import { DATA_JSON_URL } from './configuracoes.js';
-import { createWatermarkElement } from './ferramentas.js'; // Assumindo que a função está em ferramentas.js
+import { createWatermarkElement } from './ferramentas.js';
 import { openLightbox } from './pop-up.js';
 import { getTranslation, getCurrentLanguage } from './gestor-de-linguagem.js';
 
@@ -19,8 +18,8 @@ export async function loadGalleryContent(type, containerId) {
   galleryContainer.innerHTML = `<p id="loadingMessage" style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
   
   try {
-    // 1. ALTERAÇÃO PRINCIPAL: Buscar o data.json local
-    const response = await fetch(`../../${DATA_JSON_URL}`); // O ../../ sobe de /js/pt/ para a raiz
+    // Busca o data.json local a partir da raiz do site
+    const response = await fetch(`../../data.json`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -28,9 +27,9 @@ export async function loadGalleryContent(type, containerId) {
     
     // O 'type' corresponde às chaves no nosso data.json (fotografias, videos, etc.)
     const items = data[type] || [];
-    const lang = getCurrentLanguage(); // Obtém o idioma atual (ex: 'pt')
+    const lang = getCurrentLanguage();
 
-    galleryContainer.innerHTML = ''; // Limpa a mensagem de "a carregar"
+    galleryContainer.innerHTML = '';
 
     if (items.length === 0) {
       const noContentMessage = getTranslation('no_content_found', { type: getTranslation(type) });
@@ -42,10 +41,9 @@ export async function loadGalleryContent(type, containerId) {
       const itemDiv = document.createElement('div');
       itemDiv.classList.add(`${type.slice(0, -1)}-item`);
 
-      // 2. ALTERAÇÃO PRINCIPAL: Usar os dados do novo JSON
-      const mediaUrl = item.url; // URL direto do R2
-      const title = item.titles[lang] || item.titles['pt']; // Título no idioma correto, com fallback para PT
-      const description = item.description || ''; // Descrição (se existir no futuro)
+      const mediaUrl = item.url;
+      const title = item.titles[lang] || item.titles['pt'];
+      const description = item.description || '';
 
       const isVideo = mediaUrl.toLowerCase().endsWith('.mp4') || mediaUrl.toLowerCase().endsWith('.mov') || mediaUrl.toLowerCase().endsWith('.webm');
 
@@ -54,7 +52,7 @@ export async function loadGalleryContent(type, containerId) {
         imageContainer.classList.add('image-container');
 
         const img = document.createElement('img');
-        img.src = mediaUrl; // URL direto do R2
+        img.src = mediaUrl;
         img.alt = title;
         img.loading = "lazy";
         img.oncontextmenu = () => false;
@@ -74,7 +72,7 @@ export async function loadGalleryContent(type, containerId) {
 
       } else { // Lógica para Vídeos
         const iframe = document.createElement('iframe');
-        iframe.src = mediaUrl; // O URL do R2 pode ser usado diretamente se o bucket for público
+        iframe.src = mediaUrl;
         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         iframe.allowFullscreen = true;
         iframe.frameBorder = "0";
@@ -114,13 +112,12 @@ export async function loadPresentations() {
   gallery.innerHTML = `<p style="text-align: center; color: var(--light-text-color);">${loadingMessage}</p>`;
 
   try {
-    // 3. ALTERAÇÃO PRINCIPAL: Buscar o data.json local
-    const response = await fetch(`../../${DATA_JSON_URL}`);
+    const response = await fetch(`../../data.json`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    const presentations = data.apresentacoes || [];
+    const presentations = data['apresentacoes'] || [];
     const lang = getCurrentLanguage();
 
     gallery.innerHTML = '';
@@ -136,13 +133,9 @@ export async function loadPresentations() {
       div.className = "presentation-item";
       
       const titleElement = document.createElement("h3");
-      // 4. ALTERAÇÃO PRINCIPAL: Usar o título multilingue
       titleElement.textContent = presentation.titles[lang] || presentation.titles['pt'];
       
       const iframe = document.createElement("iframe");
-      // O URL do R2 pode ser usado diretamente se for um link público para um PDF, por exemplo.
-      // Se for um link do Google Slides, a lógica de conversão pode ser necessária.
-      // Assumindo que o URL no JSON já é o link de 'embed' correto.
       iframe.src = presentation.url; 
       iframe.allowFullscreen = true;
       iframe.title = titleElement.textContent;

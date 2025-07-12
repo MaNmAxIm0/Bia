@@ -72,57 +72,47 @@ function initializePageContent() {
     });
   });
 
-  // --- INÍCIO DA ALTERAÇÃO DA MARCA D'ÁGUA ---
   // Adiciona marca d'água às imagens estáticas da página inicial
   const staticImageContainers = document.querySelectorAll('.work-item, .preview-item');
   staticImageContainers.forEach(container => {
     const img = container.querySelector('img');
     if (img) {
-      // Cria o wrapper para a imagem
       const imageWrapper = document.createElement('div');
       imageWrapper.classList.add('image-container');
-
-      // Move a imagem para dentro do wrapper
-      // O insertBefore coloca o wrapper no lugar da imagem, e depois a imagem é movida para dentro dele
       container.insertBefore(imageWrapper, img);
       imageWrapper.appendChild(img);
-
-      // Adiciona a marca d'água ao wrapper
       imageWrapper.appendChild(createWatermarkElement());
-      
-      // Desativa o menu de contexto na imagem
       img.oncontextmenu = () => false;
     }
   });
-  // --- FIM DA ALTERAÇÃO DA MARCA D'ÁGUA ---
 
-  // Load content for gallery pages
+  // --- CORREÇÃO PRINCIPAL AQUI ---
+  // Carrega o conteúdo para as páginas de galeria usando as chaves corretas do data.json
   const pathSegments = currentPathname.split('/');
   const currentFilename = pathSegments[pathSegments.length - 1];
 
   if (currentFilename === 'fotos.html' || currentFilename === 'photos.html') {
-    console.log("principal.js: Calling loadGalleryContent for photos.");
-    loadGalleryContent('photos', 'photoGalleryContainer');
+    console.log("principal.js: A chamar loadGalleryContent para 'fotografias'.");
+    loadGalleryContent('fotografias', 'photoGalleryContainer');
   } else if (currentFilename === 'designs.html') {
-    console.log("principal.js: Calling loadGalleryContent for designs.");
+    console.log("principal.js: A chamar loadGalleryContent para 'designs'.");
     loadGalleryContent('designs', 'design-gallery');
   } else if (currentFilename === 'videos.html') {
-    console.log("principal.js: Calling loadGalleryContent for videos.");
+    console.log("principal.js: A chamar loadGalleryContent para 'videos'.");
     loadGalleryContent('videos', 'video-gallery');
   } else if (currentFilename === 'apresentacoes.html' || currentFilename === 'presentations.html') {
-    console.log("principal.js: Calling loadPresentations.");
+    console.log("principal.js: A chamar loadPresentations.");
     loadPresentations();
   } else {
-    console.log("principal.js: No specific gallery content loading for this page.");
+    console.log("principal.js: Nenhum conteúdo de galeria específico para carregar nesta página.");
   }
 
-  // Apply translations after all content is loaded/initialized
+  // Aplica as traduções depois de todo o conteúdo ser carregado/inicializado
   applyTranslations();
-  console.log("principal.js: Translations applied.");
+  console.log("principal.js: Traduções aplicadas.");
 }
 
 // Garante que o código só é executado depois de o HTML ser carregado
-// (Embora o script seja type="module", que já tem defer, isto é uma segurança extra)
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializePageContent);
 } else {
