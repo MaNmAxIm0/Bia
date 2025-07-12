@@ -12,7 +12,7 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Instalar a versão mais recente do rclone e outras ferramentas
+      - name: Instalar ferramentas e a versão mais recente do rclone
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg jq unzip
@@ -46,7 +46,6 @@ jobs:
               width=$(echo $dims | cut -d'x' -f1)
               height=$(echo $dims | cut -d'x' -f2)
               echo "Dimensões do vídeo: ${width}x${height}"
-
               rclone metadata set "R2:bia-portfolio-assets/Vídeos/${video_file}" --metadata "width=${width},height=${height}"
               
               thumb_name="${video_file%.*}.jpg"
