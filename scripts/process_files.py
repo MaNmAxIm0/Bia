@@ -1,7 +1,6 @@
 import subprocess
 import json
 import os
-import re
 
 # --- Configuração ---
 RCLONE_REMOTE_NAME = "R2"
@@ -15,57 +14,25 @@ CATEGORIES = {
 }
 FALLBACK_THUMBNAIL_URL = "https://manmaxim0.github.io/Bia/imagens/work_thumb_video.png"
 
-def get_all_files( ):
-    """Obtém a lista de todos os ficheiros do R2 de forma eficiente."""
-    print("A obter a lista de todos os ficheiros do R2...")
+def get_all_files_with_metadata( ):
+    """Obtém todos os ficheiros e os seus metadados numa só chamada."""
+    print("A obter a lista de todos os ficheiros e metadados do R2...")
     command = [
         "rclone", "lsjson",
         f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}",
+        "--metadata",
         "--recursive",
         "--no-mimetype"
     ]
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True)
-        print("Lista de ficheiros obtida com sucesso.")
+        print("Lista de ficheiros e metadados obtida com sucesso.")
         return json.loads(result.stdout)
     except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
         print(f"Erro ao obter a lista de ficheiros do R2: {e}")
         if hasattr(e, 'stderr'):
             print(f"Stderr: {e.stderr}")
         return []
-
-def get_dimensions(file_path_on_remote):
-    """
-    Obtém as dimensões de um único ficheiro (imagem ou vídeo) usando ffprobe.
-    O rclone cat transmite o ficheiro para o ffprobe sem o guardar em disco.
-    """
-    print(f"A obter dimensões para: {file_path_on_remote}")
-    ffprobe_command = [
-        "ffprobe",
-        "-v", "error",
-        "-select_streams", "v:0",
-        "-show_entries", "stream=width,height",
-        "-of", "json",
-        "-" # O hífen indica que a entrada vem do stdin
-    ]
-    rclone_command = ["rclone", "cat", f"{RCLONE_REMOTE_NAME}:{file_path_on_remote}"]
-    
-    try:
-        # Executa o rclone e envia a sua saída (o ficheiro) para o stdin do ffprobe
-        rclone_process = subprocess.Popen(rclone_command, stdout=subprocess.PIPE)
-        ffprobe_process = subprocess.run(ffprobe_command, stdin=rclone_process.stdout, capture_output=True, text=True, check=True)
-        
-        # Garante que o processo rclone terminou
-        rclone_process.wait()
-
-        dimensions_data = json.loads(ffprobe_process.stdout)
-        width = dimensions_data["streams"][0].get("width", 0)
-        height = dimensions_data["streams"][0].get("height", 0)
-        print(f"Dimensões encontradas: {width}x{height}")
-        return width, height
-    except Exception as e:
-        print(f"AVISO: Não foi possível obter dimensões para '{file_path_on_remote}'. Erro: {e}")
-        return 0, 0
 
 def parse_filename(filename):
     name_without_ext = os.path.splitext(filename)[0]
@@ -79,7 +46,7 @@ def parse_filename(filename):
     return titles
 
 def process_files():
-    all_files = get_all_files()
+    all_files = get_all_files_with_metadata()
     if not all_files:
         print("Nenhum ficheiro encontrado no R2. A sair.")
         return
@@ -99,7 +66,10 @@ def process_files():
         if category_name in CATEGORIES:
             category_key = CATEGORIES[category_name]
             
-            width, height = get_dimensions(f"{BUCKET_NAME}/{path}")
+            # Lê as dimensões dos metadados guardados pelo workflow
+            metadata = item.get("Metadata", {})
+            width = int(metadata.get("width", 0))
+            height = int(metadata.get("height", 0))
 
             orientation = "square"
             if width > 0 and height > 0:

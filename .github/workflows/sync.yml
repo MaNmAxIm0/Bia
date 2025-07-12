@@ -1,53 +1,96 @@
-# .github/workflows/sync.yml (Versão Final e Robusta)
-name: Sincronizar Ficheiros, Gerar JSON e Atualizar Site
+name: Sincronizar Drive, Gerar Thumbs e Dados
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 20 * * *'
-
-permissions:
-  contents: write
+    - cron: '0 20 * * *' # Executa todos os dias às 20:00 UTC
 
 jobs:
   sync-and-build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do código
+      - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Instalar rclone
-        run: sudo -v ; curl https://rclone.org/install.sh | sudo bash
-
-      - name: Configurar rclone
-        env:
-          RCLONE_CONF_DATA: ${{ secrets.RCLONE_CONF }}
-        run: |
-          mkdir -p ~/.config/rclone
-          echo "$RCLONE_CONF_DATA" > ~/.config/rclone/rclone.conf
-
-      - name: Sincronizar Google Drive para Cloudflare R2
-        run: |
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --progress --exclude "desktop.ini"
-
-      # --- NOVO PASSO ÚNICO PARA PROCESSAMENTO ---
-      - name: Instalar dependências (Python e FFmpeg )
+      - name: Instalar rclone e outras ferramentas
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg python3-pip
-          pip3 install rclone-python
+          sudo apt-get install -y rclone ffmpeg jq
+          
+      - name: Configurar rclone
+        env:
+          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+        run: |
+          echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
+          
+      - name: Sincronizar Google Drive para Cloudflare R2
+        run: |
+          echo "A sincronizar Google Drive para R2..."
+          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -P
+          echo "Sincronização concluída."
 
-      - name: Gerar Thumbnails e Ficheiro data.json
-        run: python3 scripts/process_files.py # Vamos criar este novo ficheiro
+      - name: Gerar e Sincronizar Thumbnails com Metadados
+        run: |
+          echo "A iniciar a geração de thumbnails e metadados..."
+          mkdir -p temp_thumbs
+
+          # Lista todos os vídeos do R2
+          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while read -r video_file; do
+            echo "A processar vídeo: ${video_file}"
+            
+            # Descarrega o vídeo para um ficheiro temporário
+            rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
+            
+            if [ -f "./${video_file}" ]; then
+              # Obtém dimensões do vídeo
+              dims=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "./${video_file}")
+              width=$(echo $dims | cut -d'x' -f1)
+              height=$(echo $dims | cut -d'x' -f2)
+              echo "Dimensões do vídeo: ${width}x${height}"
+
+              # Adiciona metadados de dimensão ao próprio ficheiro de vídeo no R2
+              rclone set-modtime "R2:bia-portfolio-assets/Vídeos/${video_file}" --header-meta "width=${width}" --header-meta "height=${height}"
+              
+              # Gera a thumbnail
+              thumb_name="${video_file%.*}.jpg"
+              ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 "temp_thumbs/${thumb_name}"
+              
+              # Limpa o ficheiro de vídeo local
+              rm "./${video_file}"
+            else
+              echo "AVISO: Falha ao descarregar ${video_file}. A ignorar."
+            fi
+          done
+          
+          # Sincroniza a pasta de thumbnails para o R2
+          rclone sync temp_thumbs "R2:bia-portfolio-assets/_thumbnails" -P
+          
+          # Adiciona metadados às imagens nas outras pastas
+          for dir in Fotografias Designs; do
+            rclone lsf "R2:bia-portfolio-assets/${dir}" --files-only | while read -r img_file; do
+                echo "A processar imagem: ${img_file}"
+                rclone copyto "R2:bia-portfolio-assets/${dir}/${img_file}" "./${img_file}"
+                if [ -f "./${img_file}" ]; then
+                    dims=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "./${img_file}")
+                    width=$(echo $dims | cut -d'x' -f1)
+                    height=$(echo $dims | cut -d'x' -f2)
+                    echo "Dimensões da imagem: ${width}x${height}"
+                    rclone set-modtime "R2:bia-portfolio-assets/${dir}/${img_file}" --header-meta "width=${width}" --header-meta "height=${height}"
+                    rm "./${img_file}"
+                fi
+            done
+          done
+
+      - name: Gerar o ficheiro data.json
+        run: |
+          echo "A gerar data.json..."
+          python3 scripts/process_files.py
+          echo "data.json gerado."
 
       - name: Fazer commit e push do data.json
         run: |
-          git config --global user.name 'GitHub Actions Bot'
-          git config --global user.email 'github-actions-bot@users.noreply.github.com'
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add data.json
-          if ! git diff --staged --quiet; then
-            git commit -m "Atualizar data.json com novos ficheiros e thumbnails"
-            git push
-          else
-            echo "Nenhuma alteração no data.json. Nada para fazer commit."
-          fi
+          git diff --quiet --exit-code --cached || git commit -m "Atualiza data.json [skip ci]"
+          git push
