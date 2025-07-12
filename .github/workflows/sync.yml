@@ -41,37 +41,40 @@ jobs:
           echo "A iniciar a geração de thumbnails..."
           mkdir -p temp_thumbs
           
-          # Lista todos os vídeos no R2, tratando nomes de ficheiro de forma segura
-          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while IFS= read -r video_file; do
+          # Lista todos os vídeos no R2
+          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while IFS= read -r video_filename; do
             
-            # Remove a extensão para criar o nome base da thumbnail
-            thumb_basename=$(basename "$video_file" | sed 's/\.[^.]*$//')
+            # Garante que a variável não está vazia
+            if [ -z "$video_filename" ]; then
+              continue
+            fi
+
+            echo "A processar ficheiro: ${video_filename}"
+            
+            # Cria o nome da thumbnail a partir do nome do ficheiro de vídeo
+            thumb_basename=$(basename "${video_filename}" | sed 's/\.[^.]*$//')
             thumb_filename="${thumb_basename}.jpg"
             local_thumb_path="temp_thumbs/${thumb_filename}"
             
             # Verifica se a thumbnail já existe no R2
             if ! rclone lsf "R2:bia-portfolio-assets/thumbs/" | grep -q "^${thumb_filename}$"; then
-              echo "A gerar thumbnail para: ${video_file}"
+              echo "A gerar thumbnail para: ${video_filename}"
               
-              # Cria um nome de ficheiro temporário único para evitar conflitos
               temp_video_file="temp_${RANDOM}.mp4"
-
-              # Descarrega o vídeo para o ficheiro temporário
-              rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "$temp_video_file"
               
-              # Comando FFmpeg com mais logs e tolerância a erros
-              # -v error: só mostra erros
-              # -y: substitui o ficheiro de saída se existir
-              if ffmpeg -v error -y -i "$temp_video_file" -ss 00:00:01 -vframes 1 "$local_thumb_path"; then
-                echo "Thumbnail gerada com sucesso para ${video_file}"
+              # O rclone copyto é mais robusto e não precisa de verificação de erro aqui
+              rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_filename}" "$temp_video_file"
+              
+              # Verifica se o ficheiro temporário foi criado antes de chamar o ffmpeg
+              if [ -f "$temp_video_file" ]; then
+                ffmpeg -i "$temp_video_file" -ss 00:00:01 -vframes 1 "$local_thumb_path"
+                echo "Thumbnail gerada com sucesso."
+                rm "$temp_video_file"
               else
-                echo "AVISO: Falha ao gerar thumbnail para ${video_file}. A ignorar este vídeo."
+                echo "AVISO: Falha ao descarregar ${video_filename} do R2. A ignorar."
               fi
-              
-              # Apaga o vídeo temporário
-              rm "$temp_video_file"
             else
-              echo "Thumbnail para ${video_file} já existe. A ignorar."
+              echo "Thumbnail para ${video_filename} já existe. A ignorar."
             fi
           done
 
