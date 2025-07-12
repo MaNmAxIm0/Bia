@@ -7,16 +7,29 @@ let currentLightbox = null;
 
 function closeLightbox() {
     if (currentLightbox) {
-        currentLightbox.classList.remove('active');
-        currentLightbox.addEventListener('transitionend', function handler() {
-            if (currentLightbox && currentLightbox.parentNode) {
-                currentLightbox.parentNode.removeChild(currentLightbox);
+        const lightboxToRemove = currentLightbox; // Guarda a referência ao elemento atual
+
+        lightboxToRemove.classList.remove('active');
+
+        const handler = () => {
+            // Remove o próprio listener para garantir que só corre uma vez
+            lightboxToRemove.removeEventListener('transitionend', handler);
+
+            if (lightboxToRemove.parentNode) {
+                lightboxToRemove.parentNode.removeChild(lightboxToRemove);
+            }
+            
+            // Anula a variável global apenas no final
+            if (currentLightbox === lightboxToRemove) {
                 currentLightbox = null;
             }
-            document.removeEventListener('keydown', handleEscapeKey);
-            document.body.style.overflow = '';
-            currentLightbox.removeEventListener('transitionend', handler);
-        });
+        };
+
+        lightboxToRemove.addEventListener('transitionend', handler);
+        
+        // Remove o listener da tecla Escape imediatamente
+        document.removeEventListener('keydown', handleEscapeKey);
+        document.body.style.overflow = '';
     }
 }
 
