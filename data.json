@@ -7,7 +7,7 @@
         "en": "1752175347552 (1)",
         "es": "1752175347552 (1)"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175347552%20(1).jpeg"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175347552%20%281%29.jpeg"
     },
     {
       "name": "1752175504469 (1).jpeg",
@@ -16,7 +16,7 @@
         "en": "1752175504469 (1)",
         "es": "1752175504469 (1)"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175504469%20(1).jpeg"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175504469%20%281%29.jpeg"
     },
     {
       "name": "1752175504469.jpeg",
@@ -1413,7 +1413,8 @@
         "en": "A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p",
         "es": "A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/A%20vossa%20lista,%20tem%20o%20prazer%20de%20apresentar%20a%20mais%20recente%20parceria%20com%20o%20@fitnesshut,%20em%20que%20os%20p.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/A%20vossa%20lista%2C%20tem%20o%20prazer%20de%20apresentar%20a%20mais%20recente%20parceria%20com%20o%20%40fitnesshut%2C%20em%20que%20os%20p.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/A%20vossa%20lista%2C%20tem%20o%20prazer%20de%20apresentar%20a%20mais%20recente%20parceria%20com%20o%20%40fitnesshut%2C%20em%20que%20os%20p.jpg"
     },
     {
       "name": "Design sem nome.mp4",
@@ -1422,16 +1423,18 @@
         "en": "Design sem nome",
         "es": "Design sem nome"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/Design%20sem%20nome.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/Design%20sem%20nome.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/Design%20sem%20nome.jpg"
     },
     {
       "name": "Design_sem_nome_1.mp4",
       "titles": {
-        "pt": "Design",
-        "en": "sem",
-        "es": "nome"
+        "pt": "Design sem nome 1",
+        "en": "Design sem nome 1",
+        "es": "Design sem nome 1"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/Design_sem_nome_1.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/Design_sem_nome_1.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/Design_sem_nome_1.jpg"
     },
     {
       "name": "E foi assim que terminámos o nosso último dia de campanha.mp4",
@@ -1440,7 +1443,8 @@
         "en": "E foi assim que terminámos o nosso último dia de campanha",
         "es": "E foi assim que terminámos o nosso último dia de campanha"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/E%20foi%20assim%20que%20terminámos%20o%20nosso%20último%20dia%20de%20campanha.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/E%20foi%20assim%20que%20termin%C3%A1mos%20o%20nosso%20%C3%BAltimo%20dia%20de%20campanha.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/E%20foi%20assim%20que%20termin%C3%A1mos%20o%20nosso%20%C3%BAltimo%20dia%20de%20campanha.jpg"
     },
     {
       "name": "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖.mp4",
@@ -1449,7 +1453,18 @@
         "en": "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖",
         "es": "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/Este%20foi%20o%20nosso%20dia%20da%20campanha%20de%20hoje.%20Preparem-se%20para%20amanhã%20🔥LISTA%20V-%20SOMOS%20A%20TUA%20VOZ🧡🖖.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/Este%20foi%20o%20nosso%20dia%20da%20campanha%20de%20hoje.%20Preparem-se%20para%20amanh%C3%A3%20%F0%9F%94%A5LISTA%20V-%20SOMOS%20A%20TUA%20VOZ%F0%9F%A7%A1%F0%9F%96%96.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/Este%20foi%20o%20nosso%20dia%20da%20campanha%20de%20hoje.%20Preparem-se%20para%20amanh%C3%A3%20%F0%9F%94%A5LISTA%20V-%20SOMOS%20A%20TUA%20VOZ%F0%9F%A7%A1%F0%9F%96%96.jpg"
+    },
+    {
+      "name": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO.mp4",
+      "titles": {
+        "pt": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO",
+        "en": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO",
+        "es": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO"
+      },
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/Estudantes%2C%20aten%C3%A7%C3%A3o%21%20Se%20est%C3%A3o%20na%20zona%20da%20Expo%20e%20a%20precisar%20de%20uma%20pausa%2C%20o%20PEPE%20TACO.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/Estudantes%2C%20aten%C3%A7%C3%A3o%21%20Se%20est%C3%A3o%20na%20zona%20da%20Expo%20e%20a%20precisar%20de%20uma%20pausa%2C%20o%20PEPE%20TACO.jpg"
     },
     {
       "name": "SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.mp4",
@@ -1458,7 +1473,8 @@
         "en": "AQNAQdz8jImZ2eL",
         "es": "4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.jpg"
     },
     {
       "name": "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! .mp4",
@@ -1467,7 +1483,8 @@
         "en": "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti!",
         "es": "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti!"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/Tens%20mais%20de%2016%20anos%20e%20não%20sabes%20onde%20ir%20quinta%20à%20noite%20A%20Lista%20V%20tem%20a%20melhor%20solução%20para%20ti!%20.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/Tens%20mais%20de%2016%20anos%20e%20n%C3%A3o%20sabes%20onde%20ir%20quinta%20%C3%A0%20noite%20A%20Lista%20V%20tem%20a%20melhor%20solu%C3%A7%C3%A3o%20para%20ti%21%20.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/Tens%20mais%20de%2016%20anos%20e%20n%C3%A3o%20sabes%20onde%20ir%20quinta%20%C3%A0%20noite%20A%20Lista%20V%20tem%20a%20melhor%20solu%C3%A7%C3%A3o%20para%20ti%21%20.jpg"
     },
     {
       "name": "highlights - 17869451268147253.mp4",
@@ -1476,7 +1493,8 @@
         "en": "highlights - 17869451268147253",
         "es": "highlights - 17869451268147253"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights%20-%2017869451268147253.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/highlights%20-%2017869451268147253.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/highlights%20-%2017869451268147253.jpg"
     },
     {
       "name": "highlights - 17875946589196602.mp4",
@@ -1485,7 +1503,8 @@
         "en": "highlights - 17875946589196602",
         "es": "highlights - 17875946589196602"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights%20-%2017875946589196602.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/highlights%20-%2017875946589196602.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/highlights%20-%2017875946589196602.jpg"
     },
     {
       "name": "highlights - 17941463183908702.mp4",
@@ -1494,7 +1513,8 @@
         "en": "highlights - 17941463183908702",
         "es": "highlights - 17941463183908702"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights%20-%2017941463183908702.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/highlights%20-%2017941463183908702.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/highlights%20-%2017941463183908702.jpg"
     },
     {
       "name": "highlights - 18026883509390937.mp4",
@@ -1503,7 +1523,8 @@
         "en": "highlights - 18026883509390937",
         "es": "highlights - 18026883509390937"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights%20-%2018026883509390937.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/highlights%20-%2018026883509390937.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/highlights%20-%2018026883509390937.jpg"
     },
     {
       "name": "highlights - 18057588424859151.mp4",
@@ -1512,7 +1533,8 @@
         "en": "highlights - 18057588424859151",
         "es": "highlights - 18057588424859151"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights%20-%2018057588424859151.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/highlights%20-%2018057588424859151.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/highlights%20-%2018057588424859151.jpg"
     },
     {
       "name": "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor.mp4",
@@ -1521,16 +1543,8 @@
         "en": "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor",
         "es": "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/É%20com%20muito%20orgulho%20que%20apresentamos%20a%20nossa%20parceria%20com%20a%20melhor%20barbearia%20de%20loures%20e%20arredor.mp4"
-    },
-    {
-      "name": "📢 Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO tem a so.mp4",
-      "titles": {
-        "pt": "📢 Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO tem a so",
-        "en": "📢 Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO tem a so",
-        "es": "📢 Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO tem a so"
-      },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/📢%20Estudantes,%20atenção!%20Se%20estão%20na%20zona%20da%20Expo%20e%20a%20precisar%20de%20uma%20pausa,%20o%20PEPE%20TACO%20tem%20a%20so.mp4"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/V%C3%ADdeos/%C3%89%20com%20muito%20orgulho%20que%20apresentamos%20a%20nossa%20parceria%20com%20a%20melhor%20barbearia%20de%20loures%20e%20arredor.mp4",
+      "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/thumbs/%C3%89%20com%20muito%20orgulho%20que%20apresentamos%20a%20nossa%20parceria%20com%20a%20melhor%20barbearia%20de%20loures%20e%20arredor.jpg"
     }
   ],
   "designs": [
@@ -1676,7 +1690,7 @@
         "en": "1752175543768 (1)",
         "es": "1752175543768 (1)"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175543768%20(1).jpeg"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175543768%20%281%29.jpeg"
     },
     {
       "name": "1752175543768.jpeg",
@@ -1739,7 +1753,7 @@
         "en": "1752175771401 (1)",
         "es": "1752175771401 (1)"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175771401%20(1).jpeg"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175771401%20%281%29.jpeg"
     },
     {
       "name": "1752175771401.jpeg",
@@ -1793,7 +1807,7 @@
         "en": "1752175784981 (1)",
         "es": "1752175784981 (1)"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175784981%20(1).jpeg"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175784981%20%281%29.jpeg"
     },
     {
       "name": "1752175784981.jpeg",
@@ -1829,7 +1843,7 @@
         "en": "1752175793687 (1)",
         "es": "1752175793687 (1)"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175793687%20(1).jpeg"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175793687%20%281%29.jpeg"
     },
     {
       "name": "1752175793687.jpeg",
@@ -1874,7 +1888,7 @@
         "en": "1752175849497 (1)",
         "es": "1752175849497 (1)"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175849497%20(1).jpeg"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175849497%20%281%29.jpeg"
     },
     {
       "name": "1752175849497.jpeg",
@@ -1960,9 +1974,9 @@
     {
       "name": "A_MELHOR_PARCERIA_ESTA_A_CHEGAR_Video_para_dispositivos_moveis.png",
       "titles": {
-        "pt": "A",
-        "en": "MELHOR",
-        "es": "PARCERIA"
+        "pt": "A MELHOR PARCERIA ESTA A CHEGAR Video para dispositivos moveis",
+        "en": "A MELHOR PARCERIA ESTA A CHEGAR Video para dispositivos moveis",
+        "es": "A MELHOR PARCERIA ESTA A CHEGAR Video para dispositivos moveis"
       },
       "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/A_MELHOR_PARCERIA_ESTA_A_CHEGAR_Video_para_dispositivos_moveis.png"
     },
@@ -1973,7 +1987,7 @@
         "en": "Captura de ecrã 2025-02-19 203547",
         "es": "Captura de ecrã 2025-02-19 203547"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/Captura%20de%20ecrã%202025-02-19%20203547.png"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/Captura%20de%20ecr%C3%A3%202025-02-19%20203547.png"
     },
     {
       "name": "sara (1).png",
@@ -1982,7 +1996,7 @@
         "en": "sara (1)",
         "es": "sara (1)"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/sara%20(1).png"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/sara%20%281%29.png"
     },
     {
       "name": "sara (2).png",
@@ -1991,10 +2005,19 @@
         "en": "sara (2)",
         "es": "sara (2)"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/sara%20(2).png"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/sara%20%282%29.png"
     }
   ],
   "apresentacoes": [
+    {
+      "name": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos.pdf",
+      "titles": {
+        "pt": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos",
+        "en": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos",
+        "es": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos"
+      },
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Apresenta%C3%A7%C3%B5es/A%20crise%20da%20habita%C3%A7%C3%A3o%20em%20Portugal%20e%20a%20sua%20rela%C3%A7%C3%A3o%20com%20os%20Direitos%20Humanos.pdf"
+    },
     {
       "name": "Senegal.pdf",
       "titles": {
@@ -2002,7 +2025,7 @@
         "en": "Senegal",
         "es": "Senegal"
       },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Apresentações/Senegal.pdf"
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Apresenta%C3%A7%C3%B5es/Senegal.pdf"
     }
   ]
 }
