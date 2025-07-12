@@ -1,24 +1,13 @@
 // js/principal.js
 
-import { initCarousel } from './carrossel.js';
 import { loadGalleryContent, loadPresentations } from './galeria.js';
 import { createWatermarkElement } from './ferramentas.js';
 import { applyTranslations } from './linguagem.js';
 
-console.log("principal.js: Módulo carregado.");
-
-// Função para lidar com todas as inicializações de página
 function initializePageContent() {
-  console.log("principal.js: initializePageContent chamada.");
-  
-  // Inicializa o carrossel na página inicial
-  const carouselElement = document.querySelector('.carousel-container');
-  if (carouselElement) {
-    initCarousel(carouselElement);
-    console.log("principal.js: Carrossel inicializado.");
-  }
+  console.log("principal.js: A inicializar conteúdo da página.");
 
-  // Mobile Navigation Toggle
+  // Código do menu (incluindo a nova lógica para dropdowns móveis)
   const menuToggle = document.querySelector('.menu-toggle');
   const navLinks = document.querySelector('.nav-links');
 
@@ -26,93 +15,69 @@ function initializePageContent() {
     menuToggle.addEventListener('click', () => {
       navLinks.classList.toggle('active');
       const icon = menuToggle.querySelector('i');
-      if (navLinks.classList.contains('active')) {
-        icon.classList.remove('fa-bars');
-        icon.classList.add('fa-times');
-      } else {
-        icon.classList.remove('fa-times');
-        icon.classList.add('fa-bars');
-      }
-    });
-
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        if (navLinks.classList.contains('active')) {
-          navLinks.classList.remove('active');
-          menuToggle.querySelector('i').classList.remove('fa-times');
-          menuToggle.querySelector('i').classList.add('fa-bars');
-        }
-      });
+      icon.classList.toggle('fa-bars');
+      icon.classList.toggle('fa-times');
     });
   }
+  
+  document.querySelectorAll('.main-nav .dropdown-toggle').forEach(toggle => {
+    toggle.addEventListener('click', function(e) {
+      e.preventDefault(); 
+      if (window.innerWidth <= 768) {
+        const dropdown = this.parentElement;
+        dropdown.classList.toggle('active');
+      }
+    });
+  });
 
-  // Set active class for navigation link based on current page
+  // Lógica para destacar o link ativo na navegação
   const navItems = document.querySelectorAll('.main-nav .nav-links li a');
   const currentPathname = window.location.pathname;
-  console.log("principal.js: Current pathname:", currentPathname);
-
   navItems.forEach(item => {
-    const linkPath = item.getAttribute('href');
-    if (currentPathname.endsWith('/' + linkPath)) {
+    const itemHref = item.getAttribute('href');
+    if (currentPathname.endsWith(itemHref)) {
+      // Adiciona a classe 'active' ao link direto
       item.classList.add('active');
-    } else if (linkPath === 'index.html' && (currentPathname.endsWith('/') || currentPathname.endsWith('/index.html'))) {
-      item.classList.add('active');
-    } else {
-      item.classList.remove('active');
+      
+      // Se o link ativo estiver dentro de um dropdown, ativa também o link principal do dropdown
+      const parentDropdown = item.closest('.dropdown');
+      if (parentDropdown) {
+        parentDropdown.querySelector('.dropdown-toggle').classList.add('active');
+      }
     }
   });
 
-  // Smooth scroll for internal links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      document.querySelector(this.getAttribute('href')).scrollIntoView({
-        behavior: 'smooth'
-      });
-    });
-  });
-
-  // Adiciona marca d'água às imagens estáticas da página inicial
-  const staticImageContainers = document.querySelectorAll('.work-item, .preview-item');
-  staticImageContainers.forEach(container => {
-    const img = container.querySelector('img');
-    if (img) {
+  // Adiciona marca d'água a imagens estáticas
+  document.querySelectorAll('.work-item img, .preview-item img').forEach(img => {
       const imageWrapper = document.createElement('div');
       imageWrapper.classList.add('image-container');
-      container.insertBefore(imageWrapper, img);
+      img.parentNode.insertBefore(imageWrapper, img);
       imageWrapper.appendChild(img);
       imageWrapper.appendChild(createWatermarkElement());
       img.oncontextmenu = () => false;
-    }
   });
 
-  // --- CORREÇÃO PRINCIPAL AQUI ---
-  // Carrega o conteúdo para as páginas de galeria usando as chaves corretas do data.json
-  const pathSegments = currentPathname.split('/');
-  const currentFilename = pathSegments[pathSegments.length - 1];
+  // --- LÓGICA DE CARREGAMENTO DE GALERIA ATUALIZADA ---
+  const pageName = currentPathname.split('/').pop();
 
-  if (currentFilename === 'fotos.html' || currentFilename === 'photos.html') {
-    console.log("principal.js: A chamar loadGalleryContent para 'fotografias'.");
-    loadGalleryContent('fotografias', 'photoGalleryContainer');
-  } else if (currentFilename === 'designs.html') {
-    console.log("principal.js: A chamar loadGalleryContent para 'designs'.");
+  if (pageName.includes('fotos-horizontais') || pageName.includes('photos-horizontal')) {
+    loadGalleryContent('fotografias', 'photo-h-gallery', 'horizontal');
+  } else if (pageName.includes('fotos-verticais') || pageName.includes('photos-vertical')) {
+    loadGalleryContent('fotografias', 'photo-v-gallery', 'vertical');
+  } else if (pageName.includes('videos-horizontais') || pageName.includes('videos-horizontal')) {
+    loadGalleryContent('videos', 'video-h-gallery', 'horizontal');
+  } else if (pageName.includes('videos-verticais') || pageName.includes('videos-vertical')) {
+    loadGalleryContent('videos', 'video-v-gallery', 'vertical');
+  } else if (pageName.includes('designs')) {
     loadGalleryContent('designs', 'design-gallery');
-  } else if (currentFilename === 'videos.html') {
-    console.log("principal.js: A chamar loadGalleryContent para 'videos'.");
-    loadGalleryContent('videos', 'video-gallery');
-  } else if (currentFilename === 'apresentacoes.html' || currentFilename === 'presentations.html') {
-    console.log("principal.js: A chamar loadPresentations.");
+  } else if (pageName.includes('apresentacoes') || pageName.includes('presentations')) {
     loadPresentations();
-  } else {
-    console.log("principal.js: Nenhum conteúdo de galeria específico para carregar nesta página.");
   }
 
-  // Aplica as traduções depois de todo o conteúdo ser carregado/inicializado
+  // Aplica as traduções
   applyTranslations();
-  console.log("principal.js: Traduções aplicadas.");
 }
 
-// Garante que o código só é executado depois de o HTML ser carregado
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializePageContent);
 } else {

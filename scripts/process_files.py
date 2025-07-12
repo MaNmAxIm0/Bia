@@ -1,4 +1,4 @@
-# scripts/process_files.py
+# scripts/process_files.py (Versão com Deteção de Orientação)
 import subprocess
 import json
 import os
@@ -16,14 +16,38 @@ FOLDER_TO_CATEGORY_MAP = {
 }
 # --- FIM DA CONFIGURAÇÃO ---
 
-def run_rclone_command(command ):
-    """Executa um comando rclone e retorna a saída."""
+def run_command(command, check=True ):
+    """Executa um comando e retorna a saída."""
     try:
-        result = subprocess.run(command, capture_output=True, text=True, check=True, encoding="utf-8")
+        result = subprocess.run(command, capture_output=True, text=True, check=check, encoding="utf-8")
         return result.stdout
     except subprocess.CalledProcessError as e:
-        print(f"Erro ao executar rclone: {e.stderr}")
+        print(f"Erro ao executar comando {' '.join(command)}: {e.stderr}")
         return None
+
+def get_orientation(local_file_path):
+    """Usa ffprobe para obter a orientação de um ficheiro de media."""
+    command = [
+        "ffprobe", "-v", "error", "-select_streams", "v:0",
+        "-show_entries", "stream=width,height", "-of", "json", local_file_path
+    ]
+    output = run_command(command)
+    if not output:
+        return "unknown"
+    
+    try:
+        data = json.loads(output)
+        width = data["streams"][0]["width"]
+        height = data["streams"][0]["height"]
+        
+        if width > height:
+            return "horizontal"
+        elif height > width:
+            return "vertical"
+        else:
+            return "square"
+    except (KeyError, IndexError, json.JSONDecodeError):
+        return "unknown"
 
 def parse_filename(filename):
     name_part = filename.rsplit('.', 1)[0]
@@ -37,22 +61,15 @@ def parse_filename(filename):
 def main():
     print("A iniciar o processamento de ficheiros...")
     
-    # 1. Listar todos os ficheiros no bucket
-    all_files_json = run_rclone_command(["rclone", "lsjson", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}", "--recursive"])
-    if not all_files_json:
-        print("Não foi possível listar ficheiros do R2. A sair.")
-        return
-        
+    all_files_json = run_command(["rclone", "lsjson", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}", "--recursive"])
+    if not all_files_json: return
     all_files = json.loads(all_files_json)
     
-    # 2. Listar thumbnails existentes
-    existing_thumbs_str = run_rclone_command(["rclone", "lsf", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/thumbs/"])
+    existing_thumbs_str = run_command(["rclone", "lsf", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/thumbs/"])
     existing_thumbs = set(existing_thumbs_str.splitlines()) if existing_thumbs_str else set()
-    print(f"Encontradas {len(existing_thumbs)} thumbnails existentes.")
 
     output_data = {category: [] for category in FOLDER_TO_CATEGORY_MAP.values()}
     
-    # 3. Processar cada ficheiro
     for file_info in all_files:
         path = file_info.get("Path", "")
         if not path or "/" not in path or path.lower().endswith('desktop.ini'):
@@ -60,53 +77,7 @@ def main():
 
         folder_name = path.split('/')[0]
         category = FOLDER_TO_CATEGORY_MAP.get(folder_name)
-        if not category:
-            continue
-
-        filename = os.path.basename(path)
-        
-        # Se for um vídeo, tenta gerar a thumbnail
-        if category == "videos":
-            thumb_basename = filename.rsplit('.', 1)[0]
-            thumb_filename = f"{thumb_basename}.jpg"
-
-            if thumb_filename not in existing_thumbs:
-                print(f"A gerar thumbnail para: {filename}")
-                local_video_path = "temp_video_file"
-                
-                # Descarrega o vídeo
-                run_rclone_command(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_video_path])
-                
-                if os.path.exists(local_video_path):
-                    local_thumb_path = "temp_thumb.jpg"
-                    # Gera a thumbnail
-                    subprocess.run([
-                        "ffmpeg", "-i", local_video_path, "-ss", "00:00:01", 
-                        "-vframes", "1", local_thumb_path, "-y"
-                    ], capture_output=True)
-                    
-                    if os.path.exists(local_thumb_path):
-                        # Faz o upload da thumbnail
-                        run_rclone_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/thumbs/{thumb_filename}"])
-                        print(f"Thumbnail '{thumb_filename}' gerada e enviada com sucesso.")
-                        existing_thumbs.add(thumb_filename) # Adiciona à lista para não reprocessar
-                        os.remove(local_thumb_path)
-                    
-                    os.remove(local_video_path)
-                else:
-                    print(f"AVISO: Falha ao descarregar {filename}. A ignorar thumbnail.")
-
-    # 4. Gerar o data.json final (agora com conhecimento de todas as thumbnails)
-    print("\nA gerar o ficheiro data.json final...")
-    for file_info in all_files:
-        path = file_info.get("Path", "")
-        if not path or "/" not in path or path.lower().endswith('desktop.ini'):
-            continue
-
-        folder_name = path.split('/')[0]
-        category = FOLDER_TO_CATEGORY_MAP.get(folder_name)
-        if not category:
-            continue
+        if not category: continue
 
         filename = os.path.basename(path)
         titles = parse_filename(filename)
@@ -115,15 +86,40 @@ def main():
         item_data = {
             "name": filename,
             "titles": titles,
-            "url": f"{PUBLIC_URL}/{encoded_path}"
+            "url": f"{PUBLIC_URL}/{encoded_path}",
+            "orientation": "unknown" # Valor padrão
         }
 
+        # Só precisamos de detetar a orientação para fotos e vídeos
+        if category in ["fotografias", "videos"]:
+            print(f"A processar: {filename}")
+            local_file = "temp_media_file"
+            run_command(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_file])
+            
+            if os.path.exists(local_file):
+                item_data["orientation"] = get_orientation(local_file)
+                print(f"--> Orientação detetada: {item_data['orientation']}")
+                
+                if category == "videos":
+                    thumb_basename = filename.rsplit('.', 1)[0]
+                    thumb_filename = f"{thumb_basename}.jpg"
+                    if thumb_filename not in existing_thumbs:
+                        print(f"--> A gerar thumbnail...")
+                        local_thumb_path = "temp_thumb.jpg"
+                        subprocess.run(["ffmpeg", "-i", local_file, "-ss", "00:00:01", "-vframes", "1", local_thumb_path, "-y"], capture_output=True)
+                        if os.path.exists(local_thumb_path):
+                            run_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/thumbs/{thumb_filename}"])
+                            existing_thumbs.add(thumb_filename)
+                            os.remove(local_thumb_path)
+                
+                os.remove(local_file)
+
+        # Adiciona a thumbnail URL se for um vídeo
         if category == "videos":
             thumb_basename = filename.rsplit('.', 1)[0]
             thumb_filename = f"{thumb_basename}.jpg"
             if thumb_filename in existing_thumbs:
-                encoded_thumb = urllib.parse.quote(thumb_filename)
-                item_data["thumbnail_url"] = f"{PUBLIC_URL}/thumbs/{encoded_thumb}"
+                item_data["thumbnail_url"] = f"{PUBLIC_URL}/thumbs/{urllib.parse.quote(thumb_filename)}"
             else:
                 item_data["thumbnail_url"] = "https://manmaxim0.github.io/Bia/imagens/work_thumb_video.png"
         

@@ -152,3 +152,75 @@
     color: var(--accent-color);
     transform: translateY(-3px);
 }
+
+/* --- ESTILOS DO DROPDOWN --- */
+
+/* Contentor principal do item dropdown */
+.main-nav .dropdown {
+    position: relative; /* Essencial para posicionar o submenu */
+}
+
+/* Link principal do dropdown (Fotografias, Vídeos) */
+.main-nav .dropdown .dropdown-toggle {
+    cursor: default; /* O cursor não será uma "mãozinha" */
+}
+
+/* Seta para baixo */
+.main-nav .dropdown .dropdown-toggle i {
+    font-size: 0.7em;
+    margin-left: 5px;
+    transition: transform 0.3s ease;
+}
+
+/* O submenu que fica escondido */
+.main-nav .dropdown .dropdown-menu {
+    display: none; /* Escondido por defeito */
+    position: absolute;
+    top: 100%; /* Posiciona-o logo abaixo do item pai */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--surface-color);
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    list-style: none;
+    padding: 10px 0;
+    margin-top: 10px; /* Pequeno espaço entre o link e o menu */
+    min-width: 160px; /* Largura mínima do menu */
+    z-index: 1001; /* Garante que fica por cima de outro conteúdo */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease, margin-top 0.2s ease;
+}
+
+/* Itens dentro do submenu */
+.main-nav .dropdown .dropdown-menu li {
+    margin: 0;
+}
+
+/* Links dentro do submenu */
+.main-nav .dropdown .dropdown-menu li a {
+    display: block;
+    padding: 10px 20px;
+    white-space: nowrap; /* Impede que o texto quebre em duas linhas */
+    font-size: 1em;
+}
+
+.main-nav .dropdown .dropdown-menu li a:hover {
+    background-color: var(--background-color);
+}
+
+/* Lógica para mostrar o submenu no hover (apenas em ecrãs grandes) */
+@media (min-width: 769px) {
+    .main-nav .dropdown:hover .dropdown-menu {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        margin-top: 5px;
+    }
+
+    .main-nav .dropdown:hover .dropdown-toggle i {
+        transform: rotate(180deg); /* Roda a seta para cima */
+    }
+}
+
+/* --- FIM DOS ESTILOS DO DROPDOWN --- */

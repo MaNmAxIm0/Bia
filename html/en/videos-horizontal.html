@@ -5,43 +5,34 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag( ){dataLayer.push(arguments);}
+    function gtag(  ){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-ZW5DLGF7RF');
   </script>
-  <!-- Adicionar APENAS no <head> de videos.html -->
+  <!-- Plyr.io - Custom Video Player -->
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title data-lang-key="videos_page_title">Beatriz Rodrigues - Videos</title>
+  <title data-lang-key="videos_horizontal_page_title">Beatriz Rodrigues - Horizontal Videos</title>
 
-  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
-  <meta name="description" content="A selection of videos by Beatriz Rodrigues, showcasing projects, presentations, and captured moments.">
-  <meta property="og:title" content="Portfolio - Beatriz Rodrigues - Videos">
-  <meta property="og:description" content="A selection of videos by Beatriz Rodrigues, showcasing projects, presentations, and captured moments.">
+  <!-- Metatags for SEO & Open Graph -->
+  <meta name="description" content="A selection of horizontal and landscape videos by Beatriz Rodrigues.">
+  <meta property="og:title" content="Portfolio - Beatriz Rodrigues - Horizontal Videos">
+  <meta property="og:description" content="A selection of horizontal and landscape videos by Beatriz Rodrigues.">
   <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/en/videos.html">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Portfolio - Beatriz Rodrigues - Videos">
-  <meta name="twitter:description" content="A selection of videos by Beatriz Rodrigues, showcasing projects, presentations, and captured moments.">
-  <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta name="robots" content="index, follow">
+  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/en/videos-horizontal.html">
+  
+  <!-- hreflang links -->
+  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/videos-horizontais.html" />
+  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/videos-horizontal.html" />
 
-  <!-- Links hreflang para SEO multilingue -->
-  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/videos.html" />
-  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/videos.html" />
-
-  <!-- Links para folhas de estilo CSS -->
+  <!-- Rest of your links and metatags -->
   <link rel="stylesheet" href="../../css/estilo.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="../../css/galeria-das-paginas.css" />
-
-  <!-- Links para favicons -->
   <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
   <link rel="shortcut icon" href="../../favicons/favicon.ico" />
@@ -49,11 +40,10 @@
   <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
   <link rel="manifest" href="../../favicons/site.webmanifest" />
 
-  <!-- Importmap para módulos JavaScript -->
+  <!-- Importmap -->
   <script type="importmap">
     {
       "imports": {
-        "carrossel": "../../js/carrossel.js",
         "gallery": "../../js/galeria.js",
         "lightbox": "../../js/pop-up.js",
         "ferramentas": "../../js/ferramentas.js",
@@ -64,14 +54,15 @@
     }
   </script>
 </head>
-<body data-page-title-key="videos_page_title">
+<body data-page-title-key="videos_horizontal_page_title">
   <div id="header-placeholder"></div>
 
   <main class="page-content">
     <section class="section-videos container">
-      <h2 data-lang-key="videos_section_title">My Videos</h2>
-      <p class="section-description" data-lang-key="videos_section_description">A selection of videos showcasing my projects, presentations, and captured moments.</p>
-      <div id="video-gallery" class="video-gallery"></div>
+      <h2 data-lang-key="videos_horizontal_section_title">Horizontal Videos</h2>
+      <p class="section-description" data-lang-key="videos_horizontal_section_description">A selection of videos in landscape format.</p>
+      <!-- Unique container ID -->
+      <div id="video-h-gallery" class="video-gallery"></div>
     </section>
   </main>
 

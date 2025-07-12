@@ -228,3 +228,30 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Re-add shadow for the dropdown */
     }
 }
+
+/* Estilos para o dropdown em modo telemóvel */
+@media (max-width: 768px) {
+    .main-nav .dropdown .dropdown-menu {
+        position: static; /* Remove o posicionamento absoluto */
+        display: none; /* Continua escondido por defeito */
+        transform: none;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+        margin-top: 0;
+        background-color: #f0f0f0; /* Um fundo ligeiramente diferente para destacar */
+    }
+
+    /* Mostra o submenu quando o pai tem a classe 'active' */
+    .main-nav .dropdown.active .dropdown-menu {
+        display: block;
+    }
+
+    .main-nav .dropdown .dropdown-menu li a {
+        padding-left: 40px; /* Indentação para mostrar que é um submenu */
+    }
+
+    .main-nav .dropdown.active .dropdown-toggle i {
+        transform: rotate(180deg);
+    }
+}

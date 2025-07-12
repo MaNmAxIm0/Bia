@@ -1,3 +1,5 @@
+// js/traducao.js (Versão Completa e Atualizada)
+
 export const translations = {
     pt: {
         // Common
@@ -8,6 +10,8 @@ export const translations = {
         videos: 'Vídeos',
         about_me: 'Sobre Mim',
         contact: 'Contactos',
+        horizontal: 'Horizontais',
+        vertical: 'Verticais',
         toggle_navigation: 'Alternar navegação',
         close: 'Fechar',
         all_rights_reserved: '&copy; 2025 Beatriz Rodrigues. Todos os direitos reservados.',
@@ -15,7 +19,7 @@ export const translations = {
         no_content_found: 'Nenhum conteúdo para \'{type}\' encontrado.',
         error_loading_content: 'Erro ao carregar {type}. Por favor, tente novamente mais tarde.',
         
-        // Home page (examples)
+        // Home page
         project_a_title: 'Projecto A',
         project_a_description: 'Um trabalho inovador que combina design e tecnologia.',
         short_film_title: 'Filme Curto "O Regresso"',
@@ -54,43 +58,31 @@ export const translations = {
         contact_section_title: 'Contacte-me',
         contact_section_description: 'Se tiver alguma questão, projeto em mente ou simplesmente quiser dizer olá, utilize o formulário abaixo ou os contactos alternativos.',
         send_message_title: 'Envie uma Mensagem',
-        form_name_label: 'Nome:',
-        form_name_placeholder: 'O seu nome',
-        form_email_label: 'Email:',
-        form_email_placeholder: 'O seu email',
-        form_message_label: 'Mensagem:',
-        form_message_placeholder: 'A sua mensagem',
-        send_message_button: 'Enviar Mensagem',
-        alternative_contact_title: 'Informações de Contacto Alternativas',
-        alternative_contact_intro: 'Pode também contactar-me através dos seguintes meios:',
-        phone_number: '+351 925 451 131',
-        whatsapp_link_text: 'Enviar mensagem',
-        contact_note: 'Responderei o mais breve possível. Agradeço o seu interesse!',
         
-        // Gallery Pages
-        photos_page_title: 'Beatriz Rodrigues - Fotografias',
-        photos_section_title: 'Fotografias',
-        photos_section_description: 'Explora algumas das fotografias captadas ao longo do meu percurso.',
-        photo_title: 'Título da Foto',
-        photo_description: 'Descrição da Foto.',
-
+        // Gallery Pages (Designs, Presentations)
         designs_page_title: 'Beatriz Rodrigues - Designs',
         designs_section_title: 'Meus Designs',
         designs_section_description: 'Explore uma variedade de projetos de design gráfico e digital que demonstram a minha criatividade e habilidades.',
-        design_title: 'Título do Design',
-        design_description: 'Descrição do Design.',
-        loading_designs: 'A carregar designs...',
-
-        videos_page_title: 'Beatriz Rodrigues - Vídeos',
-        videos_section_title: 'Meus Vídeos',
-        videos_section_description: 'Uma seleção de vídeos que demonstram os meus projetos, apresentações e momentos captados.',
-        video_title: 'Título do Vídeo',
-
         presentations_page_title: 'Beatriz Rodrigues - Apresentações',
         presentations_section_title: 'Minhas Apresentações',
         presentations_section_description: 'Uma coleção das minhas palestras, workshops e portfólios de apresentação, incorporados diretamente para sua visualização.',
         loading_presentations: 'A carregar apresentações...',
         no_presentations_found: 'Não foram encontradas apresentações.',
+
+        // --- NOVAS TRADUÇÕES ---
+        photos_horizontal_page_title: 'Beatriz Rodrigues - Fotografias Horizontais',
+        photos_horizontal_section_title: 'Fotografias Horizontais',
+        photos_horizontal_section_description: 'Uma seleção de fotografias em formato paisagem.',
+        photos_vertical_page_title: 'Beatriz Rodrigues - Fotografias Verticais',
+        photos_vertical_section_title: 'Fotografias Verticais',
+        photos_vertical_section_description: 'Uma seleção de fotografias em formato retrato.',
+        
+        videos_horizontal_page_title: 'Beatriz Rodrigues - Vídeos Horizontais',
+        videos_horizontal_section_title: 'Vídeos Horizontais',
+        videos_horizontal_section_description: 'Uma seleção de vídeos em formato paisagem.',
+        videos_vertical_page_title: 'Beatriz Rodrigues - Vídeos Verticais',
+        videos_vertical_section_title: 'Vídeos Verticais',
+        videos_vertical_section_description: 'Uma seleção de vídeos em formato retrato.',
     },
     en: {
         // Common
@@ -101,6 +93,8 @@ export const translations = {
         videos: 'Videos',
         about_me: 'About Me',
         contact: 'Contact',
+        horizontal: 'Horizontal',
+        vertical: 'Vertical',
         toggle_navigation: 'Toggle navigation',
         close: 'Close',
         all_rights_reserved: '&copy; 2025 Beatriz Rodrigues. All rights reserved.',
@@ -108,7 +102,7 @@ export const translations = {
         no_content_found: 'No content for \'{type}\' found.',
         error_loading_content: 'Error loading {type}. Please try again later.',
 
-        // Home page (examples)
+        // Home page
         project_a_title: 'Project A',
         project_a_description: 'An innovative work that combines design and technology.',
         short_film_title: 'Short Film "The Return"',
@@ -147,43 +141,30 @@ export const translations = {
         contact_section_title: 'Get in Touch',
         contact_section_description: 'If you have any questions, a project in mind, or simply want to say hello, use the form below or the alternative contacts.',
         send_message_title: 'Send a Message',
-        form_name_label: 'Name:',
-        form_name_placeholder: 'Your name',
-        form_email_label: 'Email:',
-        form_email_placeholder: 'Your email',
-        form_message_label: 'Message:',
-        form_message_placeholder: 'Your message',
-        send_message_button: 'Send Message',
-        alternative_contact_title: 'Alternative Contact Information',
-        alternative_contact_intro: 'You can also contact me through the following means:',
-        phone_number: '+351 925 451 131',
-        whatsapp_link_text: 'Send message',
-        contact_note: 'I will respond as soon as possible. Thank you for your interest!',
 
-        // Gallery Pages
-        photos_page_title: 'Beatriz Rodrigues - Photos',
-        photos_section_title: 'Photos',
-        photos_section_description: 'Explore some of the photographs captured throughout my journey.',
-        photo_title: 'Photo Title',
-        photo_description: 'Photo Description.',
-
+        // Gallery Pages (Designs, Presentations)
         designs_page_title: 'Beatriz Rodrigues - Designs',
         designs_section_title: 'My Designs',
         designs_section_description: 'Explore a variety of graphic and digital design projects that demonstrate my creativity and skills.',
-        design_title: 'Design Title',
-        design_description: 'Design Description.',
-        loading_designs: 'Loading designs...',
-
-        videos_page_title: 'Beatriz Rodrigues - Videos',
-        videos_section_title: 'My Videos',
-        videos_section_description: 'A selection of videos showcasing my projects, presentations, and captured moments.',
-        video_title: 'Video Title',
-        
         presentations_page_title: 'Beatriz Rodrigues - Presentations',
         presentations_section_title: 'My Presentations',
         presentations_section_description: 'A collection of my lectures, workshops, and presentation portfolios, embedded directly for your viewing.',
         loading_presentations: 'Loading presentations...',
         no_presentations_found: 'No presentations found.',
+
+        // --- NEW TRANSLATIONS ---
+        photos_horizontal_page_title: 'Beatriz Rodrigues - Horizontal Photos',
+        photos_horizontal_section_title: 'Horizontal Photos',
+        photos_horizontal_section_description: 'A selection of photos in landscape format.',
+        photos_vertical_page_title: 'Beatriz Rodrigues - Vertical Photos',
+        photos_vertical_section_title: 'Vertical Photos',
+        photos_vertical_section_description: 'A selection of photos in portrait format.',
+
+        videos_horizontal_page_title: 'Beatriz Rodrigues - Horizontal Videos',
+        videos_horizontal_section_title: 'Horizontal Videos',
+        videos_horizontal_section_description: 'A selection of videos in landscape format.',
+        videos_vertical_page_title: 'Beatriz Rodrigues - Vertical Videos',
+        videos_vertical_section_title: 'Vertical Videos',
+        videos_vertical_section_description: 'A selection of videos in portrait format.',
     }
 };
-
