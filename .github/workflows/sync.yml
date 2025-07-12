@@ -16,6 +16,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg jq unzip
+          # Instala a versão mais recente do rclone
           curl https://rclone.org/install.sh | sudo bash
 
       - name: Configurar rclone
@@ -28,7 +29,8 @@ jobs:
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
           echo "A sincronizar Google Drive para R2..."
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -P
+          # Usar o caminho explícito para o rclone
+          /usr/bin/rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -P
           echo "Sincronização concluída."
 
       - name: Gerar e Sincronizar Thumbnails com Metadados
@@ -36,17 +38,18 @@ jobs:
           echo "A iniciar a geração de thumbnails e metadados..."
           mkdir -p temp_thumbs
 
-          # Processa os vídeos
-          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while read -r video_file; do
+          # Usar o caminho explícito para o rclone
+          /usr/bin/rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while read -r video_file; do
             echo "A processar vídeo: ${video_file}"
-            rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
+            /usr/bin/rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
             
             if [ -f "./${video_file}" ]; then
               dims=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "./${video_file}" )
               width=$(echo $dims | cut -d'x' -f1)
               height=$(echo $dims | cut -d'x' -f2)
               echo "Dimensões do vídeo: ${width}x${height}"
-              rclone metadata set "R2:bia-portfolio-assets/Vídeos/${video_file}" --metadata "width=${width},height=${height}"
+
+              /usr/bin/rclone metadata set "R2:bia-portfolio-assets/Vídeos/${video_file}" --metadata "width=${width},height=${height}"
               
               thumb_name="${video_file%.*}.jpg"
               ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 "temp_thumbs/${thumb_name}"
@@ -56,19 +59,18 @@ jobs:
             fi
           done
           
-          rclone sync temp_thumbs "R2:bia-portfolio-assets/_thumbnails" -P
+          /usr/bin/rclone sync temp_thumbs "R2:bia-portfolio-assets/_thumbnails" -P
           
-          # Processa as imagens
           for dir in Fotografias Designs; do
-            rclone lsf "R2:bia-portfolio-assets/${dir}" --files-only | while read -r img_file; do
+            /usr/bin/rclone lsf "R2:bia-portfolio-assets/${dir}" --files-only | while read -r img_file; do
                 echo "A processar imagem: ${img_file}"
-                rclone copyto "R2:bia-portfolio-assets/${dir}/${img_file}" "./${img_file}"
+                /usr/bin/rclone copyto "R2:bia-portfolio-assets/${dir}/${img_file}" "./${img_file}"
                 if [ -f "./${img_file}" ]; then
                     dims=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "./${img_file}")
                     width=$(echo $dims | cut -d'x' -f1)
                     height=$(echo $dims | cut -d'x' -f2)
                     echo "Dimensões da imagem: ${width}x${height}"
-                    rclone metadata set "R2:bia-portfolio-assets/${dir}/${img_file}" --metadata "width=${width},height=${height}"
+                    /usr/bin/rclone metadata set "R2:bia-portfolio-assets/${dir}/${img_file}" --metadata "width=${width},height=${height}"
                     rm "./${img_file}"
                 fi
             done
