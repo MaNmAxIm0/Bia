@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 20 * * *'
+    # ADICIONE ESTA SECÇÃO
+permissions:
+  contents: write # Dá permissão para escrever (fazer commits) no repositório
 
 jobs:
   sync-and-build:
@@ -36,15 +39,31 @@ jobs:
           echo "A iniciar a geração de thumbnails..."
           mkdir -p temp_thumbs
           
-          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only | while read -r video_file; do
+          # Guarda o separador de campo padrão e define um novo (apenas nova linha)
+          OLD_IFS="$IFS"
+          IFS=$'\n'
+          
+          # O loop agora tratará cada linha como um único item
+          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only); do
             echo "A processar vídeo: ${video_file}"
+            
+            # Usar aspas em todas as variáveis com nomes de ficheiros
             rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
+            
             if [ -f "./${video_file}" ]; then
               thumb_name="${video_file%.*}.jpg"
-              ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 "temp_thumbs/${thumb_name}"
+              
+              # Comando ffmpeg melhorado com a opção -update e aspas
+              ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 -update 1 "temp_thumbs/${thumb_name}"
+              
               rm "./${video_file}"
+            else
+              echo "AVISO: Falha ao descarregar o vídeo '${video_file}'. A ignorar."
             fi
           done
+          
+          # Restaura o separador de campo padrão
+          IFS="$OLD_IFS"
           
           rclone sync temp_thumbs "R2:bia-portfolio-assets/_thumbnails" -P
           echo "Thumbnails sincronizadas."
