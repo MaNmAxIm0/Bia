@@ -81,8 +81,15 @@ jobs:
           # Adiciona a fonte necessária para o script Python
           git clone https://github.com/google/fonts.git --depth 1
           mkdir -p scripts/
-          cp fonts/ofl/montserrat/static/Montserrat-Medium.ttf scripts/Montserrat-Medium.ttf
-          
+          # Procura o ficheiro da fonte de forma robusta e copia-o
+          FONT_FILE_PATH=$(find fonts -name "Montserrat-Medium.ttf" -print -quit)
+          if [ -f "$FONT_FILE_PATH" ]; then
+            cp "$FONT_FILE_PATH" scripts/Montserrat-Medium.ttf
+            echo "Fonte Montserrat-Medium.ttf copiada com sucesso para a pasta scripts."
+          else
+            echo "ERRO CRÍTICO: Ficheiro Montserrat-Medium.ttf não foi encontrado no repositório de fontes clonado."
+            exit 1
+          fi
           python3 scripts/process_files.py
           echo "data.json gerado e media com marca de água enviada."
 
