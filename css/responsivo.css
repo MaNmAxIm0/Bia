@@ -33,7 +33,7 @@
 
     /* --- CABEÇALHO MÓVEL --- */
     .main-header .container {
-      flex-wrap: wrap; /* Permite que os itens quebrem para a linha seguinte */
+      flex-wrap: wrap;
     }
 
     .logo {
@@ -46,17 +46,17 @@
     }
 
     .menu-toggle {
-      display: block; /* Mostra o botão hamburger */
+      display: block;
     }
 
     .main-nav {
       width: 100%;
-      order: 3; /* Coloca a navegação por baixo do logo e dos controlos */
+      order: 3;
     }
 
     .main-nav .nav-links {
-      display: none; /* Menu principal escondido por defeito */
-      flex-direction: column; /* Itens do menu principal em coluna */
+      display: none;
+      flex-direction: column;
       width: 100%;
       margin-top: 15px;
       background-color: var(--surface-color);
@@ -66,11 +66,11 @@
     }
 
     .main-nav .nav-links.active {
-      display: flex; /* Mostra o menu quando o hamburger é clicado */
+      display: flex;
     }
 
     .main-nav ul {
-      flex-direction: column; /* Força TODAS as listas a serem colunas */
+      flex-direction: column;
       width: 100%;
       padding: 0;
     }
@@ -93,45 +93,58 @@
     }
 
     .main-nav ul li a::after {
-      display: none; /* Remove o sublinhado em mobile */
+      display: none;
     }
 
-    /* --- LÓGICA DO SUBMENU (A PARTE CRÍTICA) - VERSÃO FINAL --- */
-
+    /* --- LÓGICA DO SUBMENU (VERSÃO "À PROVA DE BALA") --- */
+    
     .main-nav .dropdown-menu {
-      display: none; /* Submenu começa escondido */
-      position: static; /* Remove posicionamento absoluto */
-      width: 100%;
-      background-color: #f8f9fa;
-      box-shadow: inset 0 4px 8px -4px rgba(0,0,0,0.1);
-      padding: 0;
-      border-top: 1px solid var(--border-color);
-      
-      /* Anula estilos de desktop que o possam esconder */
-      opacity: 1;
-      visibility: visible;
-      transform: none;
-      margin-top: 0;
+        display: none; 
+        position: static;
+        width: 100%;
+        background-color: #f8f9fa;
+        box-shadow: inset 0 4px 8px -4px rgba(0,0,0,0.1);
+        padding: 0;
+        margin: 0;
     }
 
-    /* QUANDO O <li> PAI TEM .active, O .dropdown-menu DENTRO DELE APARECE */
-    .main-nav .dropdown.active .dropdown-menu {
-      display: block; /* Esta é a regra que o torna visível */
+    /* Mostra o submenu quando o pai está ativo */
+    .main-nav .dropdown.active > .dropdown-menu {
+        display: block;
     }
 
+    /* Estiliza cada item do submenu. Garante que tem uma borda em cima. */
+    .main-nav .dropdown-menu li {
+        margin: 0;
+        width: 100%;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    /* Regra chave: Anula o flex e o justify-content herdados do link pai */
     .main-nav .dropdown-menu li a {
-      padding-left: 40px; /* Adiciona indentação para os sub-itens */
-      color: var(--secondary-color);
-      font-size: 1em;
+        display: block !important; /* Força o block display, anulando o flex */
+        padding: 15px 20px 15px 40px;
+        color: var(--primary-color);
+        font-size: 1em;
+        font-weight: 400;
+        text-align: left; /* Garante alinhamento à esquerda */
+        justify-content: initial; /* Anula a herança */
+        align-items: initial; /* Anula a herança */
+        transition: background-color 0.2s ease;
     }
 
+    .main-nav .dropdown-menu li a:hover,
+    .main-nav .dropdown-menu li a:active {
+        background-color: var(--background-color);
+    }
+
+    /* Roda a seta do dropdown principal quando está ativo */
     .main-nav .dropdown-toggle i {
-      transition: transform 0.3s ease;
+        transition: transform 0.3s ease;
     }
 
-    /* Roda a seta quando o dropdown está ativo */
-    .main-nav .dropdown.active .dropdown-toggle i {
-      transform: rotate(180deg);
+    .main-nav .dropdown.active > .dropdown-toggle i {
+        transform: rotate(180deg);
     }
 
     /* --- O resto das regras responsivas --- */

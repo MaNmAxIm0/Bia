@@ -43,7 +43,6 @@ function renderNextBatch(containerId) {
         mediaElement.oncontextmenu = () => false;
         
         imageContainer.appendChild(mediaElement);
-        imageContainer.appendChild(createWatermarkElement());
 
         if (isVideo) {
             const playIcon = document.createElement('i');

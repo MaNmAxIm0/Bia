@@ -23,15 +23,6 @@
 }
 /* css/galeria-das-paginas.css */
 
-@import './variaveis.css';
-@import './base.css';
-@import './cabecalho-rodape.css';
-@import './carrossel.css';
-@import './seccoes-iniciais.css';
-/* galeria-das-paginas.css é importado aqui, mas não o importamos a si mesmo */
-@import './contactos.css';
-@import './sobre-mim.css';
-@import './responsivo.css';
 
 /* Video Gallery */
 .section-videos {
@@ -341,31 +332,6 @@
     transition: transform 0.4s ease;
 }
 
-
-/* A marca d'água, agora posicionada sobre a imagem */
-.image-watermark {
-  position: absolute; /* Posicionamento relativo ao .image-container */
-  bottom: 10px;       /* 10px a partir da parte inferior */
-  right: 10px;        /* 10px a partir da direita */
-  color: rgba(255, 255, 255, 0.6); /* Branco semi-transparente */
-  background-color: rgba(0, 0, 0, 0.4); /* Fundo escuro semi-transparente */
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  pointer-events: none; /* Permite que cliques "passem através" da marca d'água */
-  z-index: 2; /* Garante que fica por cima da imagem */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Sombra para melhor legibilidade */
-  font-family: 'Montserrat', sans-serif;
-}
-
-/* Ajustes para a marca d'água no lightbox (pop-up) */
-.lightbox-content .image-watermark {
-  font-size: 1em;
-  padding: 8px 12px;
-  bottom: 20px;
-  right: 20px;
-}
 
 /* --- FIM DOS NOVOS ESTILOS DA MARCA D'ÁGUA --- */
 
@@ -698,30 +664,7 @@
     background-color: rgba(0, 0, 0, 0.8);
 }
 
-/* Watermark for images */
-.image-watermark {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    color: rgba(255, 255, 255, 0.7); /* Light white for contrast on dark/light images */
-    background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent background */
-    padding: 5px 8px;
-    border-radius: 5px;
-    font-size: 0.8em;
-    font-weight: 600;
-    pointer-events: none; /* Allows clicks/interactions to pass through */
-    z-index: 10; /* Increased z-index to ensure it stays on top of all other elements */
-    font-family: 'Montserrat', sans-serif;
-}
 
-/* Specific adjustments for lightbox watermark */
-.lightbox-content .image-watermark {
-    bottom: 20px;
-    right: 20px;
-    font-size: 1em;
-    padding: 8px 12px;
-    z-index: 25; /* Increased z-index for lightbox to ensure it's above other lightbox content */
-}
 
 .image-container .video-play-icon {
   position: absolute;
