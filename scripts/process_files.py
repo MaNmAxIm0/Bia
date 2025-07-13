@@ -14,48 +14,69 @@ CATEGORIES = {
     "Apresentações": "apresentacoes"
 }
 WATERMARK_TEXT = "© Beatriz Rodrigues"
-# Certifique-se que o ficheiro da fonte está na mesma pasta que o script
-FONT_PATH = os.path.join(os.path.dirname(__file__ ), 'Montserrat-Regular.ttf') 
-WATERMARKED_DIR = "temp_watermarked" # Pasta temporária para imagens com marca de água
+FONT_PATH = os.path.join(os.path.dirname(__file__ ), 'Montserrat-Regular.ttf')
+TEMP_DIR = "temp_files" # Pasta temporária para todos os ficheiros
+WATERMARKED_DIR_IMG = "_watermarked_images"
+WATERMARKED_DIR_VID = "_watermarked_videos"
 
-# Mapeia a orientação EXIF para a rotação necessária
+# Mapeia a orientação EXIF
 EXIF_ORIENTATION_TAG = next((tag for tag, name in ExifTags.TAGS.items() if name == 'Orientation'), None)
 
-def add_watermark(input_image_path, output_image_path):
+# --- Funções de Marca de Água ---
+
+def add_watermark_to_image(input_path, output_path):
     """Aplica uma marca de água de texto a uma imagem."""
     try:
-        with Image.open(input_image_path).convert("RGBA") as base:
-            # Cria um objeto para desenhar
+        with Image.open(input_path).convert("RGBA") as base:
             draw = ImageDraw.Draw(base)
-            
-            # Tenta carregar a fonte. O tamanho é ajustado dinamicamente.
-            # O tamanho da fonte será 2.5% da largura da imagem, com um mínimo de 16px.
             font_size = max(16, int(base.width * 0.025))
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size)
             except IOError:
-                print(f"AVISO: Ficheiro de fonte não encontrado em '{FONT_PATH}'. A usar fonte padrão.")
+                print(f"AVISO: Fonte não encontrada em '{FONT_PATH}'. Usando fonte padrão.")
                 font = ImageFont.load_default()
 
-            # Calcula a posição do texto
             textwidth, textheight = draw.textsize(WATERMARK_TEXT, font)
             margin = 15
             x = base.width - textwidth - margin
             y = base.height - textheight - margin
-
-            # Adiciona uma sombra subtil para legibilidade
-            shadow_color = "black"
-            draw.text((x + 1, y + 1), WATERMARK_TEXT, font=font, fill=shadow_color)
-
-            # Adiciona o texto principal
-            text_color = (255, 255, 255, 180) # Branco com 70% de opacidade
-            draw.text((x, y), WATERMARK_TEXT, font=font, fill=text_color)
-
-            base.save(output_image_path, "PNG") # Salva como PNG para manter a qualidade e transparência
+            
+            draw.text((x + 1, y + 1), WATERMARK_TEXT, font=font, fill="black")
+            draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 180))
+            
+            base.save(output_path, "PNG")
         return True
     except Exception as e:
-        print(f"ERRO: Falha ao aplicar marca de água em '{input_image_path}'. Erro: {e}")
+        print(f"ERRO ao aplicar marca de água na imagem '{input_path}': {e}")
         return False
+
+def add_watermark_to_video(input_path, output_path):
+    """Aplica uma marca de água de texto a um vídeo usando FFmpeg."""
+    print(f"A aplicar marca de água no vídeo: {input_path}")
+    # Prepara o texto para ser usado no FFmpeg (precisa de escapar caracteres especiais)
+    escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
+    
+    # Comando FFmpeg para adicionar a marca de água
+    # 'main_w' e 'main_h' são as larguras e alturas do vídeo
+    # 'x' e 'y' posicionam o texto no canto inferior direito com uma margem de 10px
+    command = [
+        "ffmpeg",
+        "-i", input_path,
+        "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize=24:fontcolor=white@0.7:x=main_w-text_w-10:y=main_h-text_h-10:shadowcolor=black:shadowx=1:shadowy=1",
+        "-c:a", "copy", # Copia o áudio sem re-codificar para ser mais rápido
+        "-y", # Sobrescreve o ficheiro de saída se já existir
+        output_path
+    ]
+    try:
+        subprocess.run(command, check=True, capture_output=True, text=True)
+        print(f"Marca de água aplicada com sucesso em '{output_path}'")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"ERRO ao aplicar marca de água no vídeo '{input_path}':")
+        print(f"FFmpeg Stderr: {e.stderr}")
+        return False
+
+# --- Funções Auxiliares ---
 
 def get_file_list():
     """Obtém a lista de todos os ficheiros do R2."""
@@ -82,8 +103,16 @@ def get_dimensions(local_path, file_type):
         except Exception as e:
             print(f"AVISO: Pillow não conseguiu processar a imagem '{local_path}'. Erro: {e}")
     elif file_type == 'videos':
-        # Esta função não será usada para vídeos neste workflow, mas mantém-se por consistência
-        pass
+        try:
+            command = [
+                "ffprobe", "-v", "error", "-select_streams", "v:0",
+                "-show_entries", "stream=width,height", "-of", "json", local_path
+            ]
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
+            dims = json.loads(result.stdout)["streams"][0]
+            width, height = int(dims.get("width", 0)), int(dims.get("height", 0))
+        except Exception as e:
+            print(f"AVISO: ffprobe não conseguiu obter dimensões para o vídeo '{local_path}'. Erro: {e}")
     return width, height
 
 def parse_filename(filename):
@@ -97,6 +126,8 @@ def parse_filename(filename):
     else:
         return {'pt': name_without_ext, 'en': name_without_ext, 'es': name_without_ext}
 
+# --- Função Principal ---
+
 def process_files():
     """Função principal do workflow."""
     all_files = get_file_list()
@@ -104,14 +135,15 @@ def process_files():
         print("Nenhum ficheiro encontrado no R2. A sair.")
         return
 
-    # Cria a pasta temporária para as imagens com marca de água, se não existir
-    if not os.path.exists(WATERMARKED_DIR):
-        os.makedirs(WATERMARKED_DIR)
+    # Cria as pastas temporárias, se não existirem
+    for dir_path in [TEMP_DIR, os.path.join(TEMP_DIR, WATERMARKED_DIR_IMG), os.path.join(TEMP_DIR, WATERMARKED_DIR_VID)]:
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
 
     output_data = {cat: [] for cat in CATEGORIES.values()}
 
     for path in all_files:
-        if "desktop.ini" in path or "/_thumbnails/" in path or "/_watermarked/" in path or not path:
+        if any(x in path for x in ["desktop.ini", "/_thumbnails/", f"/{WATERMARKED_DIR_IMG}/", f"/{WATERMARKED_DIR_VID}/"]) or not path:
             continue
 
         try:
@@ -121,57 +153,42 @@ def process_files():
 
         if category_name in CATEGORIES:
             category_key = CATEGORIES[category_name]
+            local_original_path = os.path.join(TEMP_DIR, filename)
             
-            if category_key in ["fotografias", "designs"]:
-                print(f"A processar imagem: {path}")
-                local_original_path = f"./{filename}"
-                
-                # 1. Descarregar a imagem original
-                try:
-                    subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_original_path], check=True, capture_output=True)
-                except subprocess.CalledProcessError as e:
-                    print(f"AVISO: Falha ao descarregar '{path}'. A ignorar. Erro: {e.stderr.decode()}")
-                    continue
+            # 1. Descarregar o ficheiro original
+            try:
+                subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_original_path], check=True, capture_output=True)
+            except subprocess.CalledProcessError as e:
+                print(f"AVISO: Falha ao descarregar '{path}'. A ignorar. Erro: {e.stderr.decode()}")
+                continue
 
-                # 2. Aplicar a marca de água
+            width, height = get_dimensions(local_original_path, category_key)
+            orientation = "horizontal" if width >= height else "vertical"
+            file_data = {"name": filename, "titles": parse_filename(filename), "orientation": orientation}
+
+            if category_key in ["fotografias", "designs"]:
                 base_name, _ = os.path.splitext(filename)
-                watermarked_filename = f"{base_name}.png" # Sempre PNG
-                local_watermarked_path = os.path.join(WATERMARKED_DIR, watermarked_filename)
+                watermarked_filename = f"{base_name}.png"
+                local_watermarked_path = os.path.join(TEMP_DIR, WATERMARKED_DIR_IMG, watermarked_filename)
                 
-                if add_watermark(local_original_path, local_watermarked_path):
-                    # 3. Enviar a imagem com marca de água para uma nova pasta no R2
-                    print(f"A enviar imagem com marca de água para R2: _watermarked/{watermarked_filename}")
-                    subprocess.run(["rclone", "copyto", local_watermarked_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/_watermarked/{watermarked_filename}"], check=True)
-                    
-                    # 4. Obter dimensões e criar entrada no JSON
-                    width, height = get_dimensions(local_original_path, category_key)
-                    orientation = "horizontal" if width >= height else "vertical"
-                    
-                    file_data = {
-                        "name": filename,
-                        "titles": parse_filename(filename),
-                        "url": f"{PUBLIC_URL}/_watermarked/{watermarked_filename.replace(' ', '%20')}", # URL aponta para a imagem com marca de água
-                        "orientation": orientation
-                    }
+                if add_watermark_to_image(local_original_path, local_watermarked_path):
+                    subprocess.run(["rclone", "copyto", local_watermarked_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{WATERMARKED_DIR_IMG}/{watermarked_filename}"], check=True)
+                    file_data["url"] = f"{PUBLIC_URL}/{WATERMARKED_DIR_IMG}/{watermarked_filename.replace(' ', '%20')}"
                     output_data[category_key].append(file_data)
 
-                # Limpar ficheiros locais
-                os.remove(local_original_path)
-                if os.path.exists(local_watermarked_path):
-                    os.remove(local_watermarked_path)
-
             elif category_key == "videos":
-                # Lógica para vídeos permanece a mesma
-                file_data = {
-                    "name": filename,
-                    "titles": parse_filename(filename),
-                    "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}",
-                    "orientation": "vertical", # Pode ser melhorado se necessário
-                    "thumbnail_url": f"{PUBLIC_URL}/_thumbnails/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
-                }
-                output_data[category_key].append(file_data)
+                base_name, ext = os.path.splitext(filename)
+                watermarked_filename = f"{base_name}_wm{ext}" # Adiciona _wm para evitar conflitos
+                local_watermarked_path = os.path.join(TEMP_DIR, WATERMARKED_DIR_VID, watermarked_filename)
+
+                if add_watermark_to_video(local_original_path, local_watermarked_path):
+                    subprocess.run(["rclone", "copyto", local_watermarked_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{WATERMARKED_DIR_VID}/{watermarked_filename}"], check=True)
+                    file_data["url"] = f"{PUBLIC_URL}/{WATERMARKED_DIR_VID}/{watermarked_filename.replace(' ', '%20')}"
+                    file_data["thumbnail_url"] = f"{PUBLIC_URL}/_thumbnails/{base_name}.jpg".replace(' ', '%20')
+                    output_data[category_key].append(file_data)
             
-            # Adicionar aqui a lógica para apresentações se necessário
+            # Limpar ficheiro original descarregado
+            os.remove(local_original_path)
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
