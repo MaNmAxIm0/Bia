@@ -18,7 +18,6 @@ THUMBNAILS_DIR = "Thumbnails"
 
 # --- Funções Auxiliares ---
 def rclone_lsf_recursive(remote_path):
-    # Executa um único comando recursivo para máxima eficiência
     command = ["rclone", "lsf", remote_path, "--recursive", "--files-only"]
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
@@ -45,25 +44,39 @@ def get_dimensions(local_path, file_type):
     except Exception as e: print(f"AVISO Dimensões: {e}")
     return width, height
 
+# --- Funções de Processamento Corrigidas ---
+
 def apply_watermark_to_image(input_path, output_path):
     try:
         with Image.open(input_path) as base_img:
             img_corrected = ImageOps.exif_transpose(base_img)
             final_img = img_corrected.convert("RGBA")
             draw = ImageDraw.Draw(final_img)
-            font_size = max(20, int(final_img.width * 0.045))
+            
+            # Tamanho da fonte baseado no LADO MAIS CURTO da imagem para consistência
+            font_size = max(20, int(min(final_img.width, final_img.height) * 0.065))
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size); font.set_variation_by_name('SemiBold')
             except (IOError, AttributeError): font = ImageFont.load_default()
-            _, _, text_width, text_height = font.getbbox(WATERMARK_TEXT)
-            margin = int(final_img.width * 0.02); x = final_img.width - text_width - margin; y = final_img.height - text_height - margin
+
+            # Usar font.getbbox() para um cálculo mais preciso do tamanho do texto.
+            _, top, _, bottom = font.getbbox(WATERMARK_TEXT)
+            text_width = font.getlength(WATERMARK_TEXT)
+            text_height = bottom - top
+            margin = int(final_img.width * 0.02)
+            x = final_img.width - text_width - margin
+            y = final_img.height - text_height - margin - int(font_size * 0.1)
+            
             draw.text((x + 2, y + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
             draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220)); final_img.save(output_path, "PNG")
         return True
     except Exception as e: return f"PIL Error: {e}"
 
-def apply_watermark_to_video(input_path, output_path, video_width):
-    escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", ""); font_size = max(24, int(video_width * 0.045)); margin = int(video_width * 0.02)
+def apply_watermark_to_video(input_path, output_path, video_width, video_height):
+    escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", ""); 
+    # Tamanho da fonte baseado no LADO MAIS CURTO do vídeo para consistência
+    font_size = max(24, int(min(video_width, video_height) * 0.065))
+    margin = int(video_width * 0.02)
     command = ["ffmpeg", "-i", input_path, "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.9:x=main_w-text_w-{margin}:y=main_h-text_h-{margin}:borderw=2:bordercolor=black@0.6", "-c:a", "copy", "-y", output_path]
     try:
         subprocess.run(command, check=True, capture_output=True, text=True, timeout=300); return True
@@ -85,7 +98,7 @@ def main():
                     if item.get('name'): old_data_map[item['name']] = item
         print(f"Ficheiro data.json anterior carregado com {len(old_data_map)} itens em cache.")
 
-    print("\n--- [FASE 1] A mapear todos os ficheiros de origem no R2 de uma só vez ---")
+    print("\n--- A mapear todos os ficheiros de origem no R2 de uma só vez ---")
     all_source_files = rclone_lsf_recursive(f"R2:{BUCKET_NAME}")
     
     source_files_r2 = {}
@@ -95,8 +108,7 @@ def main():
             category_folder, filename = path.split('/', 1)
             if category_folder in reverse_categories:
                 source_files_r2[filename] = {'category_key': category_folder, 'category_name': reverse_categories[category_folder]}
-        except ValueError:
-            continue
+        except ValueError: continue
     print(f"MAPEAMENTO CONCLUÍDO: Encontrados {len(source_files_r2)} ficheiros de origem no R2.")
 
     new_data = {cat: [] for cat in CATEGORIES.values()}
@@ -105,7 +117,8 @@ def main():
         category_name = data['category_name']
         
         cached_entry = old_data_map.get(filename)
-        expected_url = f"{PUBLIC_URL}/{category_name}/{filename.replace(' ', '%20')}" if category_key in ['videos', 'apresentacoes'] else f"{PUBLIC_URL}/{category_name}/{os.path.splitext(filename)[0]}.png".replace(' ', '%20')
+        base_name, ext = os.path.splitext(filename)
+        expected_url = f"{PUBLIC_URL}/{category_name}/{filename if category_key == 'videos' else f'{base_name}.png'}".replace(' ', '%20')
         
         if cached_entry and cached_entry.get('url') == expected_url:
             new_data[category_key].append(cached_entry)
@@ -122,8 +135,6 @@ def main():
             file_data = {"name": filename, "titles": parse_filename(filename), "orientation": "horizontal" if width >= height else "vertical"}
             
             processing_result = True
-            base_name, ext = os.path.splitext(filename)
-            final_filename = filename
             
             if category_key in ["fotografias", "designs"]:
                 final_filename = f"{base_name}.png"
@@ -131,11 +142,12 @@ def main():
                 local_processed_path = os.path.join(TEMP_DIR, final_filename)
                 processing_result = apply_watermark_to_image(local_original_path, local_processed_path)
                 file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
-
+            
             elif category_key == "videos":
+                final_filename = filename
                 local_processed_path = os.path.join(TEMP_DIR, f"wm_{filename}")
                 remote_path = f"{category_name}/{final_filename}"
-                processing_result = apply_watermark_to_video(local_original_path, local_processed_path, width)
+                processing_result = apply_watermark_to_video(local_original_path, local_processed_path, width, height)
                 file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
                 file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{base_name}.jpg".replace(' ', '%20')
                 if processing_result is True: os.rename(local_processed_path, local_original_path)
@@ -150,18 +162,16 @@ def main():
             else:
                 raise Exception(processing_result)
 
-        except Exception as e:
-            errors.append(f"FALHA AO PROCESSAR '{filename}': {e}")
+        except Exception as e: errors.append(f"FALHA AO PROCESSAR '{filename}': {e}")
         finally:
             if os.path.exists(local_original_path): os.remove(local_original_path)
-            for f in os.listdir(TEMP_DIR):
-                 if f.startswith("wm_") or f.endswith(".png"): os.remove(os.path.join(TEMP_DIR, f))
+            if 'local_processed_path' in locals() and os.path.exists(local_processed_path): os.remove(local_processed_path)
             
-    # CORREÇÃO AQUI: Usa a lista de ficheiros do R2 que já foi obtida
-    for path in all_source_files:
+    apresentacoes_files = rclone_lsf_recursive(f"R2:{BUCKET_NAME}/Apresentações")
+    for path in apresentacoes_files:
         if path.startswith("Apresentações/"):
             f = os.path.basename(path)
-            new_data['apresentacoes'].append({ "name": f, "titles": parse_filename(f), "url": f"{PUBLIC_URL}/Apresentações/{f.replace(' ', '%20')}", "orientation": "square" })
+            new_data['apresentacoes'].append({ "name": f, "titles": parse_filename(f), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}", "orientation": "square" })
 
     print("\nA gerar ficheiro data.json final...")
     with open(DATA_FILE, "w", encoding="utf-8") as f: json.dump(new_data, f, indent=2, ensure_ascii=False)
