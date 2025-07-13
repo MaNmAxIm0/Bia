@@ -1,11 +1,12 @@
 import subprocess
 import json
 import os
+import time
 from PIL import Image, ImageDraw, ImageFont, ExifTags
 
 # --- Configuração ---
 RCLONE_REMOTE_NAME = "R2"
-GDRIVE_REMOTE_NAME = "Drive" # Certifique-se que o seu remote do GDrive se chama 'Drive'
+GDRIVE_REMOTE_NAME = "Drive"
 BUCKET_NAME = "bia-portfolio-assets"
 GDRIVE_SOURCE_PATH = "Portfólio Bia"
 PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
@@ -30,22 +31,19 @@ EXIF_ORIENTATION_TAG = next((tag for tag, name in ExifTags.TAGS.items() if name 
 # --- Funções Rclone Auxiliares ---
 
 def rclone_lsf(remote_path):
-    """Lista ficheiros num remote rclone, retorna uma lista vazia em caso de erro."""
     command = ["rclone", "lsf", remote_path, "--files-only"]
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
-        # Filtra linhas vazias que podem aparecer
         return [line for line in result.stdout.strip().split('\n') if line]
     except subprocess.CalledProcessError:
         return []
 
 def rclone_delete_file(remote_path):
-    """Apaga um único ficheiro de um remote rclone."""
-    print(f"A apagar ficheiro obsoleto: {remote_path}")
+    print(f"  - Apagando ficheiro obsoleto: {remote_path}")
     command = ["rclone", "deletefile", remote_path]
     subprocess.run(command, check=True, capture_output=True)
 
-# --- Funções de Processamento (sem alterações na lógica interna) ---
+# --- Funções de Processamento ---
 
 def add_watermark_to_image(input_path, output_path):
     try:
@@ -82,21 +80,20 @@ def add_watermark_to_video(input_path, output_path, video_width):
 
 def get_dimensions(local_path, file_type):
     width, height = 0, 0
-    if file_type in ['fotografias', 'designs']:
-        try:
+    try:
+        if file_type in ['fotografias', 'designs']:
             with Image.open(local_path) as img:
                 width, height = img.size
                 if EXIF_ORIENTATION_TAG and hasattr(img, '_getexif'):
                     exif = img._getexif()
                     if exif and EXIF_ORIENTATION_TAG in exif and exif[EXIF_ORIENTATION_TAG] in [5, 6, 7, 8]: width, height = height, width
-        except Exception: pass
-    elif file_type == 'videos':
-        try:
+        elif file_type == 'videos':
             command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "json", local_path]
             result = subprocess.run(command, capture_output=True, text=True, check=True)
             dims = json.loads(result.stdout)["streams"][0]
             width, height = int(dims.get("width", 0)), int(dims.get("height", 0))
-        except Exception: pass
+    except Exception as e:
+        print(f"  AVISO: Não foi possível obter dimensões para {local_path}. Erro: {e}")
     return width, height
 
 def parse_filename(filename):
@@ -107,30 +104,39 @@ def parse_filename(filename):
     else: return {'pt': name_without_ext, 'en': name_without_ext, 'es': name_without_ext}
 
 
-# --- Lógica Principal (Totalmente Reestruturada) ---
+# --- Lógica Principal (Mais "Faladora") ---
 
 def main():
-    print("Iniciando o processo de sincronização e processamento.")
+    start_time = time.time()
+    print(">>> INICIANDO SCRIPT DE PROCESSAMENTO...")
     if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
 
     # 1. Obter a lista de ficheiros de origem do Google Drive
+    print("\n--- [FASE 1 de 4] A mapear ficheiros de origem no Google Drive ---")
     source_files = {}
     for category_name, category_key in CATEGORIES.items():
-        if category_key == "apresentacoes": continue # Ignora apresentações para processamento
+        if category_key == "apresentacoes": continue
+        print(f"A listar ficheiros da categoria: {category_name}...")
         path = f"{GDRIVE_REMOTE_NAME}:{GDRIVE_SOURCE_PATH}/{category_name}"
         files = rclone_lsf(path)
         for f in files:
             source_files[f] = {'category_key': category_key, 'category_name': category_name}
-    
-    print(f"Encontrados {len(source_files)} ficheiros de imagem/vídeo no Google Drive.")
+    print(f"MAPEAMENTO CONCLUÍDO: Encontrados {len(source_files)} ficheiros de imagem/vídeo no Google Drive.")
 
     # 2. Obter listas de ficheiros já processados no R2
+    print("\n--- [FASE 2 de 4] A verificar ficheiros já existentes no R2 ---")
+    print("A listar imagens com marca de água...")
     watermarked_images_r2 = set(rclone_lsf(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{WATERMARKED_DIR_IMG}"))
+    print(f"Encontradas {len(watermarked_images_r2)} imagens processadas.")
+    print("A listar vídeos com marca de água...")
     watermarked_videos_r2 = set(rclone_lsf(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{WATERMARKED_DIR_VID}"))
+    print(f"Encontrados {len(watermarked_videos_r2)} vídeos processados.")
+    print("A listar thumbnails...")
     thumbnails_r2 = set(rclone_lsf(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{THUMBNAILS_DIR}"))
-    
+    print(f"Encontradas {len(thumbnails_r2)} thumbnails.")
+
     # 3. Limpar ficheiros obsoletos no R2
-    print("\n--- Fase de Limpeza ---")
+    print("\n--- [FASE 3 de 4] A limpar ficheiros obsoletos no R2 ---")
     expected_images = {f"{os.path.splitext(f)[0]}.png" for f, data in source_files.items() if data['category_key'] in ['fotografias', 'designs']}
     expected_videos = {f"{os.path.splitext(f)[0]}_wm{os.path.splitext(f)[1]}" for f, data in source_files.items() if data['category_key'] == 'videos'}
     expected_thumbnails = {f"{os.path.splitext(f)[0]}.jpg" for f, data in source_files.items() if data['category_key'] == 'videos'}
@@ -141,84 +147,80 @@ def main():
         rclone_delete_file(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{WATERMARKED_DIR_VID}/{file_to_check}")
     for file_to_check in thumbnails_r2 - expected_thumbnails:
         rclone_delete_file(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{THUMBNAILS_DIR}/{file_to_check}")
+    print("Limpeza concluída.")
 
     # 4. Processar novos ficheiros e gerar data.json
-    print("\n--- Fase de Processamento e Geração do JSON ---")
+    print("\n--- [FASE 4 de 4] A gerar data.json e a processar ficheiros novos ---")
     output_data = {cat: [] for cat in CATEGORIES.values()}
+    all_processed_files = watermarked_images_r2.union(watermarked_videos_r2)
 
-    for filename, data in source_files.items():
+    for i, (filename, data) in enumerate(source_files.items()):
+        print(f"A processar ficheiro {i+1}/{len(source_files)}: {filename}")
         category_key = data['category_key']
         category_name = data['category_name']
         base_name, ext = os.path.splitext(filename)
         
-        file_data = {"name": filename, "titles": parse_filename(filename)}
-        
+        # Inicializa o dicionário para o JSON
+        file_data = {"name": filename, "titles": parse_filename(filename), "orientation": "unknown"}
+
         # Define nomes e URLs
+        remote_watermarked_path = ""
+        watermarked_filename_only = ""
         process_this_file = False
-        if category_key in ["fotografias", "designs"]:
-            watermarked_filename = f"{base_name}.png"
-            remote_path = f"{WATERMARKED_DIR_IMG}/{watermarked_filename}"
-            if watermarked_filename not in watermarked_images_r2:
-                process_this_file = True
-            file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
-        elif category_key == "videos":
-            watermarked_filename = f"{base_name}_wm{ext}"
-            remote_path = f"{WATERMARKED_DIR_VID}/{watermarked_filename}"
-            if watermarked_filename not in watermarked_videos_r2:
-                process_this_file = True
-            file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
-            file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{base_name}.jpg".replace(' ', '%20')
         
-        # Descarrega APENAS SE FOR NECESSÁRIO PROCESSAR
+        if category_key in ["fotografias", "designs"]:
+            watermarked_filename_only = f"{base_name}.png"
+            remote_watermarked_path = f"{WATERMARKED_DIR_IMG}/{watermarked_filename_only}"
+            if watermarked_filename_only not in all_processed_files:
+                process_this_file = True
+            file_data["url"] = f"{PUBLIC_URL}/{remote_watermarked_path.replace(' ', '%20')}"
+        elif category_key == "videos":
+            watermarked_filename_only = f"{base_name}_wm{ext}"
+            remote_watermarked_path = f"{WATERMARKED_DIR_VID}/{watermarked_filename_only}"
+            if watermarked_filename_only not in all_processed_files:
+                process_this_file = True
+            file_data["url"] = f"{PUBLIC_URL}/{remote_watermarked_path.replace(' ', '%20')}"
+            file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{base_name}.jpg".replace(' ', '%20')
+
+        # Descarrega e processa APENAS se for um ficheiro novo
         if process_this_file:
-            print(f"A processar novo ficheiro: {filename}")
+            print(f"  - Ficheiro novo detectado. A descarregar e processar...")
             local_original_path = os.path.join(TEMP_DIR, filename)
             subprocess.run(["rclone", "copyto", f"{GDRIVE_REMOTE_NAME}:{GDRIVE_SOURCE_PATH}/{category_name}/{filename}", local_original_path], check=True)
             
             width, height = get_dimensions(local_original_path, category_key)
             file_data["orientation"] = "horizontal" if width >= height else "vertical"
 
+            local_watermarked_path = os.path.join(TEMP_DIR, watermarked_filename_only)
             if category_key in ["fotografias", "designs"]:
-                local_watermarked_path = os.path.join(TEMP_DIR, watermarked_filename)
                 if add_watermark_to_image(local_original_path, local_watermarked_path):
-                    subprocess.run(["rclone", "copyto", local_watermarked_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{remote_path}"], check=True)
-                    os.remove(local_watermarked_path)
+                    subprocess.run(["rclone", "copyto", local_watermarked_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{remote_watermarked_path}"], check=True)
             elif category_key == "videos":
-                local_watermarked_path = os.path.join(TEMP_DIR, watermarked_filename)
                 if add_watermark_to_video(local_original_path, local_watermarked_path, width):
-                    subprocess.run(["rclone", "copyto", local_watermarked_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{remote_path}"], check=True)
-                    os.remove(local_watermarked_path)
+                    subprocess.run(["rclone", "copyto", local_watermarked_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{remote_watermarked_path}"], check=True)
             
-            os.remove(local_original_path)
-        
-        # Para ficheiros já existentes, precisamos de adicionar a orientação ao data.json
-        # Esta parte continua a ser um desafio sem descarregar. Uma solução futura seria guardar o data.json como cache.
-        # Por agora, vamos deixar a orientação vazia para ficheiros não processados nesta execução.
-        if not process_this_file:
-             file_data["orientation"] = "unknown" # Ou podemos tentar ler um data.json antigo
+            if os.path.exists(local_watermarked_path): os.remove(local_watermarked_path)
+            if os.path.exists(local_original_path): os.remove(local_original_path)
+            print("  - Processamento concluído.")
         
         output_data[category_key].append(file_data)
     
     # Adicionar as apresentações, que não são processadas
     apresentacoes_files = rclone_lsf(f"{GDRIVE_REMOTE_NAME}:{GDRIVE_SOURCE_PATH}/Apresentações")
     for f in apresentacoes_files:
-        if f:
-             output_data['apresentacoes'].append({
-                 "name": f,
-                 "titles": parse_filename(f),
-                 "url": f"{PUBLIC_URL}/Apresentações/{f.replace(' ', '%20')}",
-                 "orientation": "square"
-             })
+        output_data['apresentacoes'].append({
+            "name": f,
+            "titles": parse_filename(f),
+            "url": f"{PUBLIC_URL}/Apresentações/{f.replace(' ', '%20')}",
+            "orientation": "square"
+        })
 
-    # Idealmente, aqui leríamos o data.json antigo para preencher as orientações "unknown"
-    # Por simplicidade, vamos reconstruir na totalidade por agora, aceitando a lentidão na primeira execução.
-    # O código fornecido já faz a verificação, o que é a otimização principal.
-
+    print("\nA gerar ficheiro data.json final...")
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 
-    print("\nFicheiro data.json gerado com sucesso.")
-    print("Processo concluído.")
+    end_time = time.time()
+    print(f"\n>>> SCRIPT CONCLUÍDO em {end_time - start_time:.2f} segundos.")
 
 if __name__ == "__main__":
     main()
