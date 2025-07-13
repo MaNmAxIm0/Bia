@@ -99,6 +99,7 @@ jobs:
           if ! git diff --quiet --exit-code --cached; then
             echo "Alterações detectadas no data.json. A fazer commit..."
             git commit -m "Atualiza data.json e media [skip ci]"
+            git pull --rebase
             git push
             echo "--- Commit e push concluídos ---"
           else
