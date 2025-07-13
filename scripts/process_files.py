@@ -16,9 +16,7 @@ DATA_FILE = "data.json"
 ERROR_LOG_FILE = "error_log.txt"
 THUMBNAILS_DIR = "Thumbnails"
 
-EXIF_ORIENTATION_TAG = next((tag for tag, name in ExifTags.TAGS.items() if name == 'Orientation'), None)
-
-# --- Funções Auxiliares (sem alterações) ---
+# --- Funções Auxiliares ---
 def rclone_lsf(remote_path):
     command = ["rclone", "lsf", remote_path, "--files-only"]
     try:
@@ -49,15 +47,11 @@ def get_dimensions(local_path, file_type):
 # --- Funções de Processamento Corrigidas ---
 
 def apply_watermark_to_image(input_path, output_path):
-    """Aplica uma marca de água a uma imagem, com posicionamento e tamanho corrigidos."""
     try:
         with Image.open(input_path) as base_img:
             img_corrected = ImageOps.exif_transpose(base_img)
             final_img = img_corrected.convert("RGBA")
             draw = ImageDraw.Draw(final_img)
-            
-            # --- CORREÇÃO DE TAMANHO ---
-            # Tamanho da fonte como 4.5% da largura da imagem, com um mínimo de 20px.
             font_size = max(20, int(final_img.width * 0.045))
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size)
@@ -65,8 +59,6 @@ def apply_watermark_to_image(input_path, output_path):
             except (IOError, AttributeError):
                 font = ImageFont.load_default()
 
-            # --- CORREÇÃO DE POSICIONAMENTO ---
-            # Usar font.getbbox() para um cálculo mais preciso do tamanho do texto.
             _, _, text_width, text_height = font.getbbox(WATERMARK_TEXT)
             margin = int(final_img.width * 0.02)
             x = final_img.width - text_width - margin
@@ -80,10 +72,7 @@ def apply_watermark_to_image(input_path, output_path):
         return f"PIL Error: {e}"
 
 def apply_watermark_to_video(input_path, output_path, video_width):
-    """Aplica uma marca de água a um vídeo, com tamanho consistente."""
     escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
-    # --- CORREÇÃO DE TAMANHO ---
-    # Tamanho da fonte como 4.5% da largura do vídeo, com um mínimo de 24px.
     font_size = max(24, int(video_width * 0.045))
     margin = int(video_width * 0.02)
     command = ["ffmpeg", "-i", input_path, "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.9:x=main_w-text_w-{margin}:y=main_h-text_h-{margin}:borderw=2:bordercolor=black@0.6", "-c:a", "copy", "-y", output_path]
@@ -93,7 +82,7 @@ def apply_watermark_to_video(input_path, output_path, video_width):
     except subprocess.CalledProcessError as e: return f"FFmpeg Error: {e.stderr}"
     except subprocess.TimeoutExpired: return "FFmpeg Error: O processamento demorou demasiado tempo (timeout)."
 
-# --- Lógica Principal (sem alterações) ---
+# --- Lógica Principal Final ---
 def main():
     start_time = time.time(); print(">>> INICIANDO SCRIPT DE PROCESSAMENTO...")
     if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
@@ -120,9 +109,18 @@ def main():
     for filename, data in source_files_r2.items():
         category_key = data['category_key']
         category_name = data['category_name']
-        
+        base_name, ext = os.path.splitext(filename)
+
+        # Constrói o URL final esperado
+        expected_url = ""
+        if category_key in ["fotografias", "designs"]:
+            expected_url = f"{PUBLIC_URL}/{category_name}/{base_name}.png".replace(' ', '%20')
+        elif category_key == "videos":
+            expected_url = f"{PUBLIC_URL}/{category_name}/{filename}".replace(' ', '%20')
+
         cached_entry = old_data_map.get(filename)
-        if cached_entry and '_watermarked' not in cached_entry.get('url', ''):
+        # Se a cache existir E o URL for o esperado, salta o processamento
+        if cached_entry and cached_entry.get('url') == expected_url:
             new_data[category_key].append(cached_entry)
             continue
 
@@ -137,20 +135,19 @@ def main():
             file_data = {"name": filename, "titles": parse_filename(filename), "orientation": "horizontal" if width >= height else "vertical"}
             
             processing_result = True
-            base_name, ext = os.path.splitext(filename)
-            final_filename = filename
             
             if category_key in ["fotografias", "designs"]:
                 final_filename = f"{base_name}.png"
                 local_processed_path = os.path.join(TEMP_DIR, final_filename)
-                processing_result = apply_watermark_to_image(local_original_path, local_processed_path)
                 remote_path = f"{category_name}/{final_filename}"
+                processing_result = apply_watermark_to_image(local_original_path, local_processed_path)
                 file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
 
             elif category_key == "videos":
+                final_filename = filename
                 local_processed_path = os.path.join(TEMP_DIR, f"wm_{filename}")
-                processing_result = apply_watermark_to_video(local_original_path, local_processed_path, width)
                 remote_path = f"{category_name}/{final_filename}"
+                processing_result = apply_watermark_to_video(local_original_path, local_processed_path, width)
                 file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
                 file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{base_name}.jpg".replace(' ', '%20')
                 if processing_result is True: os.rename(local_processed_path, local_original_path)
@@ -168,7 +165,9 @@ def main():
         except Exception as e:
             errors.append(f"FALHA AO PROCESSAR '{filename}': {e}")
         finally:
-            for f in os.listdir(TEMP_DIR): os.remove(os.path.join(TEMP_DIR, f))
+            if os.path.exists(local_original_path): os.remove(local_original_path)
+            for f in os.listdir(TEMP_DIR):
+                 if f.startswith("wm_") or f.endswith(".png"): os.remove(os.path.join(TEMP_DIR, f))
             
     apresentacoes_files = rclone_lsf(f"R2:{BUCKET_NAME}/Apresentações")
     for f in apresentacoes_files:
