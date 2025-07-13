@@ -80,6 +80,10 @@ jobs:
           echo "A gerar data.json e a aplicar marcas de água..."
           # Adiciona a fonte necessária para o script Python
           git clone https://github.com/google/fonts.git --depth 1
+          # --- PASSO DE DEPURAÇÃO ---
+          # Lista o conteúdo da pasta Montserrat para vermos a estrutura real
+          echo "A listar o conteúdo de fonts/ofl/montserrat/..."
+          ls -R fonts/ofl/montserrat
           mkdir -p scripts/
           # Procura o ficheiro da fonte de forma robusta e copia-o
           FONT_FILE_PATH=$(find fonts -name "Montserrat-Medium.ttf" -print -quit)
