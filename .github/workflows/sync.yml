@@ -41,7 +41,7 @@ jobs:
             --exclude "/Thumbnails/**" \
             --exclude "/WatermarkedImages/**" \
             --exclude "/WatermarkedVideos/**" \
-            -P
+            -v
           echo "--- Sincronização Drive -> R2 concluída ---"
 
       - name: Gerar Thumbnails para Vídeos
