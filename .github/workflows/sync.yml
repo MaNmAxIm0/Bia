@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 20 * * *'
-    # ADICIONE ESTA SECÇÃO
+
 permissions:
   contents: write # Dá permissão para escrever (fazer commits) no repositório
 
@@ -22,10 +22,9 @@ jobs:
           pip3 install Pillow
           curl https://rclone.org/install.sh | sudo bash
 
-
       - name: Configurar rclone
         env:
-          RCLONE_CONF: ${{ secrets.RCLONE_CONF }} # github-actions-ignore
+          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
         run: |
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
@@ -33,7 +32,13 @@ jobs:
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
           echo "A sincronizar Google Drive para R2..."
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -P
+          # Exclui as pastas geradas para não as apagar acidentalmente do R2
+          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" \
+            --exclude "desktop.ini" \
+            --exclude "/Thumbnails/**" \
+            --exclude "/WatermarkedImages/**" \
+            --exclude "/WatermarkedVideos/**" \
+            -P
           echo "Sincronização concluída."
 
       - name: Gerar Thumbnails para Vídeos
@@ -41,12 +46,11 @@ jobs:
           echo "A iniciar a geração de thumbnails..."
           mkdir -p temp_thumbs
           
-          # Guarda o separador de campo padrão e define um novo (apenas nova linha)
           OLD_IFS="$IFS"
           IFS=$'\n'
           
           # O loop agora tratará cada linha como um único item
-          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only); do
+          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only ); do
             echo "A processar vídeo: ${video_file}"
             
             # Usar aspas em todas as variáveis com nomes de ficheiros
@@ -64,22 +68,33 @@ jobs:
             fi
           done
           
-          # Restaura o separador de campo padrão
           IFS="$OLD_IFS"
           
-          rclone sync temp_thumbs "R2:bia-portfolio-assets/_thumbnails" -P
-          echo "Thumbnails sincronizadas."
+          # --- ALTERAÇÃO PRINCIPAL AQUI ---
+          # O caminho de destino foi atualizado para a nova pasta "Thumbnails"
+          rclone sync temp_thumbs "R2:bia-portfolio-assets/Thumbnails" -P
+          echo "Thumbnails sincronizadas para a pasta Thumbnails."
 
-      - name: Gerar o ficheiro data.json
+      - name: Gerar o ficheiro data.json com marcas de água
         run: |
-          echo "A gerar data.json..."
+          echo "A gerar data.json e a aplicar marcas de água..."
+          # Adiciona a fonte necessária para o script Python
+          git clone https://github.com/google/fonts.git --depth 1
+          mkdir -p scripts/
+          cp fonts/ofl/montserrat/Montserrat-Regular.ttf scripts/Montserrat-Regular.ttf
+          
           python3 scripts/process_files.py
-          echo "data.json gerado."
+          echo "data.json gerado e media com marca de água enviada."
 
       - name: Fazer commit e push do data.json
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add data.json
-          git diff --quiet --exit-code --cached || git commit -m "Atualiza data.json [skip ci]"
-          git push
+          # Verifica se há alterações antes de fazer commit para evitar commits vazios
+          if ! git diff --quiet --exit-code --cached; then
+            git commit -m "Atualiza data.json e media [skip ci]"
+            git push
+          else
+            echo "Nenhuma alteração no data.json para fazer commit."
+          fi
