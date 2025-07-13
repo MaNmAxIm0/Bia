@@ -52,21 +52,16 @@ def apply_watermark_to_image(input_path, output_path):
             img_corrected = ImageOps.exif_transpose(base_img)
             final_img = img_corrected.convert("RGBA")
             draw = ImageDraw.Draw(final_img)
-            
-            # Tamanho da fonte baseado no LADO MAIS CURTO da imagem para consistência
             font_size = max(20, int(min(final_img.width, final_img.height) * 0.065))
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size); font.set_variation_by_name('SemiBold')
             except (IOError, AttributeError): font = ImageFont.load_default()
-
-            # Usar font.getbbox() para um cálculo mais preciso do tamanho do texto.
             _, top, _, bottom = font.getbbox(WATERMARK_TEXT)
             text_width = font.getlength(WATERMARK_TEXT)
             text_height = bottom - top
             margin = int(final_img.width * 0.02)
             x = final_img.width - text_width - margin
             y = final_img.height - text_height - margin - int(font_size * 0.1)
-            
             draw.text((x + 2, y + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
             draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220)); final_img.save(output_path, "PNG")
         return True
@@ -74,7 +69,6 @@ def apply_watermark_to_image(input_path, output_path):
 
 def apply_watermark_to_video(input_path, output_path, video_width, video_height):
     escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", ""); 
-    # Tamanho da fonte baseado no LADO MAIS CURTO do vídeo para consistência
     font_size = max(24, int(min(video_width, video_height) * 0.065))
     margin = int(video_width * 0.02)
     command = ["ffmpeg", "-i", input_path, "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.9:x=main_w-text_w-{margin}:y=main_h-text_h-{margin}:borderw=2:bordercolor=black@0.6", "-c:a", "copy", "-y", output_path]
@@ -115,11 +109,13 @@ def main():
     for filename, data in source_files_r2.items():
         category_key = data['category_key']
         category_name = data['category_name']
-        
-        cached_entry = old_data_map.get(filename)
         base_name, ext = os.path.splitext(filename)
+
+        # Constrói o URL final esperado para verificar a cache
         expected_url = f"{PUBLIC_URL}/{category_name}/{filename if category_key == 'videos' else f'{base_name}.png'}".replace(' ', '%20')
+        cached_entry = old_data_map.get(filename)
         
+        # Se a cache existir E o URL for o esperado, salta o processamento
         if cached_entry and cached_entry.get('url') == expected_url:
             new_data[category_key].append(cached_entry)
             continue
@@ -135,16 +131,16 @@ def main():
             file_data = {"name": filename, "titles": parse_filename(filename), "orientation": "horizontal" if width >= height else "vertical"}
             
             processing_result = True
+            final_filename = filename
             
             if category_key in ["fotografias", "designs"]:
                 final_filename = f"{base_name}.png"
-                remote_path = f"{category_name}/{final_filename}"
                 local_processed_path = os.path.join(TEMP_DIR, final_filename)
+                remote_path = f"{category_name}/{final_filename}"
                 processing_result = apply_watermark_to_image(local_original_path, local_processed_path)
                 file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
-            
+
             elif category_key == "videos":
-                final_filename = filename
                 local_processed_path = os.path.join(TEMP_DIR, f"wm_{filename}")
                 remote_path = f"{category_name}/{final_filename}"
                 processing_result = apply_watermark_to_video(local_original_path, local_processed_path, width, height)
