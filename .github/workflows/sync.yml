@@ -78,22 +78,28 @@ jobs:
       - name: Gerar o ficheiro data.json com marcas de água
         run: |
           echo "A gerar data.json e a aplicar marcas de água..."
-          # Adiciona a fonte necessária para o script Python
+          # Clona o repositório de fontes
           git clone https://github.com/google/fonts.git --depth 1
+          
           # --- PASSO DE DEPURAÇÃO ---
           # Lista o conteúdo da pasta Montserrat para vermos a estrutura real
           echo "A listar o conteúdo de fonts/ofl/montserrat/..."
           ls -R fonts/ofl/montserrat
-          mkdir -p scripts/
+          # -------------------------
+
           # Procura o ficheiro da fonte de forma robusta e copia-o
+          echo "A procurar o ficheiro Montserrat-Medium.ttf..."
           FONT_FILE_PATH=$(find fonts -name "Montserrat-Medium.ttf" -print -quit)
+          
           if [ -f "$FONT_FILE_PATH" ]; then
+            mkdir -p scripts/
             cp "$FONT_FILE_PATH" scripts/Montserrat-Medium.ttf
             echo "Fonte Montserrat-Medium.ttf copiada com sucesso para a pasta scripts."
           else
             echo "ERRO CRÍTICO: Ficheiro Montserrat-Medium.ttf não foi encontrado no repositório de fontes clonado."
             exit 1
           fi
+          
           python3 scripts/process_files.py
           echo "data.json gerado e media com marca de água enviada."
 
