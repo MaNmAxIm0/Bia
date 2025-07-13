@@ -81,7 +81,7 @@ jobs:
           # Adiciona a fonte necessária para o script Python
           git clone https://github.com/google/fonts.git --depth 1
           mkdir -p scripts/
-          cp fonts/ofl/montserrat/Montserrat-Medium.ttf scripts/Montserrat-Medium.ttf
+          cp fonts/ofl/montserrat/static/Montserrat-Medium.ttf scripts/Montserrat-Medium.ttf
           
           python3 scripts/process_files.py
           echo "data.json gerado e media com marca de água enviada."
