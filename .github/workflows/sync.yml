@@ -1,4 +1,4 @@
-name: Sincronizar Drive, Gerar Thumbs e Dados
+name: Sincronizar Drive, Gerar Thumbs e Dados 
 
 on:
   workflow_dispatch:
