@@ -14,7 +14,7 @@ CATEGORIES = {
     "Apresentações": "apresentacoes"
 }
 WATERMARK_TEXT = "© Beatriz Rodrigues"
-FONT_PATH = os.path.join(os.path.dirname(__file__ ), 'Montserrat-Regular.ttf')
+FONT_PATH = os.path.join(os.path.dirname(__file__ ), 'Montserrat-Medium.ttf')
 TEMP_DIR = "temp_files"
 
 # Novos nomes para as pastas no R2 (sem underscore, com letra maiúscula)
