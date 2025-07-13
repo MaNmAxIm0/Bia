@@ -2,7 +2,7 @@ import subprocess
 import json
 import os
 import time
-from PIL import Image, ImageDraw, ImageFont, ExifTags
+from PIL import Image, ImageDraw, ImageFont, ExifTags, ImageOps
 
 # --- Configuração ---
 RCLONE_REMOTE_NAME = "R2"
@@ -14,12 +14,11 @@ FONT_PATH = os.path.join(os.path.dirname(__file__), 'Montserrat.ttf')
 TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
 ERROR_LOG_FILE = "error_log.txt"
-# A pasta de thumbnails permanece separada
 THUMBNAILS_DIR = "Thumbnails"
 
 EXIF_ORIENTATION_TAG = next((tag for tag, name in ExifTags.TAGS.items() if name == 'Orientation'), None)
 
-# --- Funções Auxiliares (sem alterações) ---
+# --- Funções Auxiliares ---
 def rclone_lsf(remote_path):
     command = ["rclone", "lsf", remote_path, "--files-only"]
     try:
@@ -28,31 +27,45 @@ def rclone_lsf(remote_path):
     except subprocess.CalledProcessError:
         return set()
 
-def rclone_delete_file(remote_path):
-    print(f"  - Apagando thumbnail obsoleto: {remote_path}")
-    command = ["rclone", "deletefile", remote_path]
-    subprocess.run(command, check=True, capture_output=True)
+def parse_filename(filename):
+    name_without_ext = os.path.splitext(filename)[0]; parts = name_without_ext.split('_')
+    if len(parts) >= 3: return {'pt': parts[0], 'en': parts[1], 'es': parts[2]}
+    elif len(parts) == 2: return {'pt': parts[0], 'en': parts[1], 'es': parts[1]}
+    else: return {'pt': name_without_ext, 'en': name_without_ext, 'es': name_without_ext}
+
+# --- Funções de Processamento Corrigidas ---
 
 def add_watermark_to_image(input_path, output_path):
+    """Aplica uma marca de água a uma imagem, corrigindo a rotação EXIF."""
     try:
-        with Image.open(input_path).convert("RGBA") as base:
-            draw = ImageDraw.Draw(base)
-            font_size = max(20, int(base.width * 0.04))
+        with Image.open(input_path) as base_img:
+            # CORREÇÃO: Aplica a rotação com base nos dados EXIF
+            img_corrected = ImageOps.exif_transpose(base_img)
+            
+            # Converte para RGBA para suportar transparência na marca de água
+            final_img = img_corrected.convert("RGBA")
+            draw = ImageDraw.Draw(final_img)
+            
+            font_size = max(20, int(final_img.width * 0.04))
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size)
                 font.set_variation_by_name('SemiBold')
             except (IOError, AttributeError):
                 font = ImageFont.load_default()
+
             bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font); textwidth, textheight = bbox[2] - bbox[0], bbox[3] - bbox[1]
-            margin = int(base.width * 0.02); x, y = base.width - textwidth - margin, base.height - textheight - margin
+            margin = int(final_img.width * 0.02); x, y = final_img.width - textwidth - margin, final_img.height - textheight - margin
+            
             draw.text((x + 2, y + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
-            draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220)); base.save(output_path, "PNG")
+            draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220))
+            
+            final_img.save(output_path, "PNG")
         return True
-    except Exception as e: return f"PIL Error: {e}"
+    except Exception as e:
+        return f"PIL Error: {e}"
 
 def add_watermark_to_video(input_path, output_path, video_width):
-    escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
-    font_size = max(24, int(video_width * 0.035)); margin = int(video_width * 0.02)
+    escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", ""); font_size = max(24, int(video_width * 0.035)); margin = int(video_width * 0.02)
     command = ["ffmpeg", "-i", input_path, "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.9:x=main_w-text_w-{margin}:y=main_h-text_h-{margin}:borderw=2:bordercolor=black@0.6", "-c:a", "copy", "-y", output_path]
     try:
         subprocess.run(command, check=True, capture_output=True, text=True, timeout=300)
@@ -65,110 +78,99 @@ def get_dimensions(local_path, file_type):
     try:
         if file_type in ['fotografias', 'designs']:
             with Image.open(local_path) as img:
-                width, height = img.size
-                if EXIF_ORIENTATION_TAG and hasattr(img, '_getexif'):
-                    exif = img._getexif();
-                    if exif and EXIF_ORIENTATION_TAG in exif and exif[EXIF_ORIENTATION_TAG] in [5, 6, 7, 8]: width, height = height, width
+                img_corrected = ImageOps.exif_transpose(img)
+                width, height = img_corrected.size
         elif file_type == 'videos':
             result = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "json", local_path], capture_output=True, text=True, check=True)
             dims = json.loads(result.stdout)["streams"][0]; width, height = int(dims.get("width", 0)), int(dims.get("height", 0))
     except Exception as e: print(f"AVISO Dimensões: {e}")
     return width, height
 
-def parse_filename(filename):
-    name_without_ext = os.path.splitext(filename)[0]; parts = name_without_ext.split('_')
-    if len(parts) >= 3: return {'pt': parts[0], 'en': parts[1], 'es': parts[2]}
-    elif len(parts) == 2: return {'pt': parts[0], 'en': parts[1], 'es': parts[1]}
-    else: return {'pt': name_without_ext, 'en': name_without_ext, 'es': name_without_ext}
-
-
 # --- Lógica Principal Final ---
 def main():
-    start_time = time.time(); print(">>> INICIANDO SCRIPT DE PROCESSAMENTO INTELIGENTE...")
+    start_time = time.time(); print(">>> INICIANDO SCRIPT DE PROCESSAMENTO...")
     if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
     errors = []
 
-    # 1. Carregar o data.json antigo para usar como cache
     old_data_map = {}
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as f: old_data = json.load(f)
         for category, items in old_data.items():
-            for item in items: old_data_map[item['name']] = item
+            for item in items: old_data_map[item.get('name')] = item
         print(f"Ficheiro data.json anterior carregado com {len(old_data_map)} itens em cache.")
 
-    # 2. Obter a lista atual de ficheiros de origem no R2
     source_files_r2 = {}
     for category_name, category_key in CATEGORIES.items():
-        if category_key == 'apresentacoes': continue # Apresentações não são processadas
-        path = f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{category_name}"
+        if category_key == 'apresentacoes': continue
+        path = f"R2:{BUCKET_NAME}/{category_name}"
         files = rclone_lsf(path)
         for f in files: source_files_r2[f] = {'category_key': category_key, 'category_name': category_name}
-    print(f"Encontrados {len(source_files_r2)} ficheiros de imagem/vídeo no R2 para verificar.")
+    print(f"Encontrados {len(source_files_r2)} ficheiros de origem no R2.")
 
-    # 3. Limpar thumbnails obsoletas
-    print("\n--- A limpar thumbnails obsoletas ---")
-    expected_thumbnails = {f"{os.path.splitext(f)[0]}.jpg" for f, data in source_files_r2.items() if data['category_key'] == 'videos'}
-    thumbnails_r2 = rclone_lsf(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{THUMBNAILS_DIR}")
-    for thumb_to_check in thumbnails_r2 - expected_thumbnails:
-        rclone_delete_file(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{THUMBNAILS_DIR}/{thumb_to_check}")
-    print("Limpeza de thumbnails concluída.")
-
-    # 4. Processar ficheiros e construir o novo data.json
-    print("\n--- A gerar data.json e a processar ficheiros novos ---")
     new_data = {cat: [] for cat in CATEGORIES.values()}
     for filename, data in source_files_r2.items():
         category_key = data['category_key']
         category_name = data['category_name']
         
-        # Se o ficheiro já está na cache, reutiliza a informação e continua
-        if filename in old_data_map:
-            new_data[category_key].append(old_data_map[filename])
+        cached_entry = old_data_map.get(filename)
+        if cached_entry:
+            new_data[category_key].append(cached_entry)
             continue
 
-        print(f"NOVO FICHEIRO DETECTADO: {filename}. A processar...")
+        print(f"NOVO/ALTERADO: {filename}. A processar...")
         local_original_path = os.path.join(TEMP_DIR, filename)
         
         try:
-            # Descarrega o original
-            subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{category_name}/{filename}", local_original_path], check=True)
+            subprocess.run(["rclone", "copyto", f"R2:{BUCKET_NAME}/{category_name}/{filename}", local_original_path], check=True)
             width, height = get_dimensions(local_original_path, category_key)
-            if width == 0: raise ValueError("Não foi possível obter as dimensões do ficheiro.")
+            if width == 0: raise ValueError("Dimensões inválidas.")
 
             file_data = {"name": filename, "titles": parse_filename(filename), "orientation": "horizontal" if width >= height else "vertical"}
             
-            # Aplica marca de água e define URL
             processing_result = True
+            base_name, ext = os.path.splitext(filename)
+            
             if category_key in ["fotografias", "designs"]:
-                processing_result = add_watermark_to_image(local_original_path, local_original_path) # Substitui o ficheiro local
-                file_data["url"] = f"{PUBLIC_URL}/{category_name}/{filename.replace(' ', '%20')}"
+                final_filename = f"{base_name}.png"
+                local_processed_path = os.path.join(TEMP_DIR, final_filename)
+                processing_result = add_watermark_to_image(local_original_path, local_processed_path)
+                remote_path = f"{category_name}/{final_filename}"
+                file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
 
             elif category_key == "videos":
-                local_watermarked_path = os.path.join(TEMP_DIR, f"wm_{filename}")
-                processing_result = add_watermark_to_video(local_original_path, local_watermarked_path, width)
-                if processing_result is True: os.rename(local_watermarked_path, local_original_path) # Renomeia para o nome original
-                file_data["url"] = f"{PUBLIC_URL}/{category_name}/{filename.replace(' ', '%20')}"
-                file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
-
-            # Faz o upload do ficheiro modificado, substituindo o original no R2
+                final_filename = filename # O nome do ficheiro de vídeo não muda
+                local_processed_path = os.path.join(TEMP_DIR, f"wm_{filename}")
+                processing_result = add_watermark_to_video(local_original_path, local_processed_path, width)
+                remote_path = f"{category_name}/{final_filename}"
+                file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
+                file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{base_name}.jpg".replace(' ', '%20')
+            
             if processing_result is True:
-                subprocess.run(["rclone", "copyto", local_original_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{category_name}/{filename}"], check=True)
+                # Renomeia o ficheiro processado para o nome final antes de fazer o upload
+                if category_key == "videos": os.rename(local_processed_path, local_original_path)
+                else: os.rename(local_processed_path, os.path.join(TEMP_DIR, final_filename))
+
+                final_local_path = os.path.join(TEMP_DIR, final_filename)
+                subprocess.run(["rclone", "copyto", final_local_path, f"R2:{BUCKET_NAME}/{remote_path}"], check=True)
+                
+                # Se o nome mudou (ex: .jpeg para .png), apaga o ficheiro antigo
+                if filename != final_filename: subprocess.run(["rclone", "deletefile", f"R2:{BUCKET_NAME}/{category_name}/{filename}"], check=True)
+
                 new_data[category_key].append(file_data)
-                print(f"  -> Sucesso: {filename} processado e atualizado no R2.")
+                print(f"  -> Sucesso: {filename} processado e atualizado.")
             else:
                 raise Exception(processing_result)
 
         except Exception as e:
-            error_message = f"FALHA AO PROCESSAR '{filename}': {e}"
-            print(error_message); errors.append(error_message)
+            errors.append(f"FALHA AO PROCESSAR '{filename}': {e}")
         finally:
-            if os.path.exists(local_original_path): os.remove(local_original_path)
+            for f in os.listdir(TEMP_DIR): os.remove(os.path.join(TEMP_DIR, f))
             
-    # Adicionar as apresentações, que não são processadas
-    apresentacoes_files = rclone_lsf(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/Apresentações")
+    # Adicionar as apresentações
+    apresentacoes_files = rclone_lsf(f"R2:{BUCKET_NAME}/Apresentações")
     for f in apresentacoes_files:
         new_data['apresentacoes'].append({ "name": f, "titles": parse_filename(f), "url": f"{PUBLIC_URL}/Apresentações/{f.replace(' ', '%20')}", "orientation": "square" })
 
-    # Escrever os ficheiros de saída
     print("\nA gerar ficheiro data.json final...")
     with open(DATA_FILE, "w", encoding="utf-8") as f: json.dump(new_data, f, indent=2, ensure_ascii=False)
 
