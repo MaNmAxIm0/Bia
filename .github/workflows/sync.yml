@@ -32,7 +32,6 @@ jobs:
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
           echo "A sincronizar Google Drive para R2..."
-          # Exclui as pastas geradas para não as apagar acidentalmente do R2
           rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" \
             --exclude "desktop.ini" \
             --exclude "/Thumbnails/**" \
@@ -49,19 +48,14 @@ jobs:
           OLD_IFS="$IFS"
           IFS=$'\n'
           
-          # O loop agora tratará cada linha como um único item
-          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only ); do
+          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only  ); do
             echo "A processar vídeo: ${video_file}"
             
-            # Usar aspas em todas as variáveis com nomes de ficheiros
             rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
             
             if [ -f "./${video_file}" ]; then
               thumb_name="${video_file%.*}.jpg"
-              
-              # Comando ffmpeg melhorado com a opção -update e aspas
               ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 -update 1 "temp_thumbs/${thumb_name}"
-              
               rm "./${video_file}"
             else
               echo "AVISO: Falha ao descarregar o vídeo '${video_file}'. A ignorar."
@@ -70,31 +64,33 @@ jobs:
           
           IFS="$OLD_IFS"
           
-          # --- ALTERAÇÃO PRINCIPAL AQUI ---
-          # O caminho de destino foi atualizado para a nova pasta "Thumbnails"
           rclone sync temp_thumbs "R2:bia-portfolio-assets/Thumbnails" -P
           echo "Thumbnails sincronizadas para a pasta Thumbnails."
 
+      # --- ALTERAÇÃO PRINCIPAL AQUI ---
       - name: Gerar o ficheiro data.json com marcas de água
         run: |
           echo "A gerar data.json e a aplicar marcas de água..."
-          # Adiciona a fonte necessária para o script Python
-          git clone https://github.com/google/fonts.git --depth 1
           mkdir -p scripts/
           
-          # Copia o ficheiro de fonte variável correto e renomeia-o
-          cp "fonts/ofl/montserrat/Montserrat[wght].ttf" "scripts/Montserrat.ttf"
-          echo "Fonte variável Montserrat copiada para scripts/Montserrat.ttf"
+          # Descarrega APENAS o ficheiro de fonte necessário, em vez de clonar o repositório inteiro.
+          echo "A descarregar a fonte Montserrat..."
+          curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
           
-          python3 scripts/process_files.py
-          echo "data.json gerado e media com marca de água enviada."
+          if [ -f "scripts/Montserrat.ttf" ]; then
+            echo "Fonte Montserrat descarregada com sucesso para scripts/Montserrat.ttf"
+            python3 scripts/process_files.py
+            echo "data.json gerado e media com marca de água enviada."
+          else
+            echo "ERRO: Falha ao descarregar a fonte Montserrat. A abortar."
+            exit 1
+          fi
 
       - name: Fazer commit e push do data.json
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add data.json
-          # Verifica se há alterações antes de fazer commit para evitar commits vazios
           if ! git diff --quiet --exit-code --cached; then
             git commit -m "Atualiza data.json e media [skip ci]"
             git push
