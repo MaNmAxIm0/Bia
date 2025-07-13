@@ -25,7 +25,7 @@ jobs:
 
       - name: Configurar rclone
         env:
-          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+          RCLONE_CONF: ${{ secrets.RCLONE_CONF }} # github-actions-ignore
         run: |
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf

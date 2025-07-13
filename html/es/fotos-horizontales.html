@@ -1,36 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag( ){dataLayer.push(arguments);}
+    function gtag(   ){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-ZW5DLGF7RF');
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-lang-key="designs_page_title">Beatriz Rodrigues - Designs</title>
+  <title data-lang-key="photos_horizontal_page_title">Beatriz Rodrigues - Fotografías Horizontales</title>
 
-  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
-  <meta name="description" content="Explore a variety of graphic and digital design projects by Beatriz Rodrigues, showcasing creativity and skills.">
-  <meta property="og:title" content="Portfolio - Beatriz Rodrigues - Designs">
-  <meta property="og:description" content="Explore a variety of graphic and digital design projects by Beatriz Rodrigues, showcasing creativity and skills.">
+  <!-- Metatags para SEO y Open Graph/Twitter Cards -->
+  <meta name="description" content="Explora una galería de fotografías horizontales y panorámicas capturadas por Beatriz Rodrigues.">
+  <meta property="og:title" content="Porfolio - Beatriz Rodrigues - Fotografías Horizontales">
+  <meta property="og:description" content="Explora una galería de fotografías horizontales y panorámicas capturadas por Beatriz Rodrigues.">
   <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/en/designs.html">
+  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/es/fotos-horizontales.html">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Portfolio - Beatriz Rodrigues - Designs">
-  <meta name="twitter:description" content="Explore a variety of graphic and digital design projects by Beatriz Rodrigues, showcasing creativity and skills.">
+  <meta name="twitter:title" content="Porfolio - Beatriz Rodrigues - Fotografías Horizontales">
+  <meta name="twitter:description" content="Explora una galería de fotografías horizontales y panorámicas capturadas por Beatriz Rodrigues.">
   <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
   <meta name="robots" content="index, follow">
 
-  <!-- Links hreflang para SEO multilingue -->
-  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/designs.html" />
-  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/designs.html" />
+  <!-- Links hreflang para SEO multilingüe -->
+  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/fotos-horizontais.html" />
+  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/photos-horizontal.html" />
+  <link rel="alternate" hreflang="es" href="https://manmaxim0.github.io/Bia/html/es/fotos-horizontales.html" />
 
   <!-- Links para folhas de estilo CSS -->
   <link rel="stylesheet" href="../../css/estilo.css">
@@ -38,7 +39,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="../../css/galeria-das-paginas.css" />
 
-  <!-- CSS para Ícones de Bandeiras (flag-icons) -->
+  <!-- CSS para Ícones de Bandeiras (flag-icons ) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
 
   <!-- Links para favicons -->
@@ -53,7 +54,6 @@
   <script type="importmap">
     {
       "imports": {
-        "carrossel": "../../js/carrossel.js",
         "gallery": "../../js/galeria.js",
         "lightbox": "../../js/pop-up.js",
         "ferramentas": "../../js/ferramentas.js",
@@ -64,17 +64,14 @@
     }
   </script>
 </head>
-<body data-page-title-key="designs_page_title">
+<body data-page-title-key="photos_horizontal_page_title">
   <div id="header-placeholder"></div>
 
   <main class="page-content">
-    <section class="section-designs container">
-      <h2 data-lang-key="designs_section_title">My Designs</h2>
-      <p class="section-description" data-lang-key="designs_section_description">Explore a variety of graphic and digital design projects that demonstrate my creativity and skills.</p>
-      <div id="design-gallery" class="design-gallery">
-        <!-- Designs will be loaded dynamically here -->
-        <p style="text-align: center; color: var(--light-text-color  );" data-lang-key="loading_designs">Loading designs...</p>
-      </div>
+    <section class="section-photos container">
+      <h2 data-lang-key="photos_horizontal_section_title">Fotografías Horizontales</h2>
+      <p class="section-description" data-lang-key="photos_horizontal_section_description">Una selección de fotografías en formato apaisado.</p>
+      <div class="photo-gallery" id="photo-h-gallery"></div>
     </section>
   </main>
 

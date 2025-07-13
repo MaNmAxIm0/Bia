@@ -1,14 +1,13 @@
 <header class="main-header">
   <div class="container">
     <h1 class="logo"><a href="index.html"><img src="../../imagens/logo.png" alt="Beatriz Rodrigues"></a></h1>
+    
     <nav class="main-nav">
-      <button class="menu-toggle" aria-label="Alternar navegação" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
       <ul class="nav-links">
         <li><a href="index.html" data-lang-key="home">Início</a></li>
         <li><a href="apresentacoes.html" data-lang-key="presentations">Apresentações</a></li>
         <li><a href="designs.html" data-lang-key="designs">Designs</a></li>
 
-        <!-- INÍCIO DO DROPDOWN FOTOGRAFIAS -->
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-lang-key="photos">Fotografias <i class="fas fa-chevron-down"></i></a>
           <ul class="dropdown-menu">
@@ -16,9 +15,6 @@
             <li><a href="fotos-verticais.html" data-lang-key="vertical">Verticais</a></li>
           </ul>
         </li>
-        <!-- FIM DO DROPDOWN FOTOGRAFIAS -->
-
-        <!-- INÍCIO DO DROPDOWN VÍDEOS -->
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-lang-key="videos">Vídeos <i class="fas fa-chevron-down"></i></a>
           <ul class="dropdown-menu">
@@ -26,15 +22,42 @@
             <li><a href="videos-verticais.html" data-lang-key="vertical">Verticais</a></li>
           </ul>
         </li>
-        <!-- FIM DO DROPDOWN VÍDEOS -->
 
         <li><a href="sobre-mim.html" data-lang-key="about_me">Sobre Mim</a></li>
         <li><a href="contactos.html" data-lang-key="contact">Contactos</a></li>
       </ul>
-      <div class="language-switcher">
-        <a href="#" class="lang-btn active">PT</a>
-        <a href="#" class="lang-btn lang-en-link">EN</a>
-      </div>
     </nav>
+
+    <div class="header-controls">
+      <!-- SELETOR DE IDIOMAS ATUALIZADO COM CLASSES CSS -->
+      <div class="language-dropdown">
+        <button class="language-selected">
+          <span class="fi fi-pt"></span> <!-- Bandeira de Portugal -->
+          <span>PT</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <ul class="language-options">
+          <li>
+            <a href="#" class="lang-option active" data-lang="pt">
+              <span class="fi fi-pt"></span> <!-- Bandeira de Portugal -->
+              <span data-lang-key="portuguese">Português</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="lang-option lang-en-link" data-lang="en">
+              <span class="fi fi-gb"></span> <!-- Bandeira do Reino Unido -->
+              <span data-lang-key="english">Inglês</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="lang-option lang-es-link" data-lang="es">
+              <span class="fi fi-es"></span> <!-- Bandeira de Espanha -->
+              <span data-lang-key="spanish">Espanhol</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <button class="menu-toggle" aria-label="Alternar navegação" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
+    </div>
   </div>
 </header>

@@ -1,46 +1,47 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="es">
 <head>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag( ){dataLayer.push(arguments);}
+    function gtag(  ){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-ZW5DLGF7RF');
   </script>
-  <!-- Adicionar APENAS no <head> de videos.html -->
-  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title data-lang-key="videos_page_title">Beatriz Rodrigues - Vídeos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-lang-key="presentations_page_title">Beatriz Rodrigues - Presentaciones</title>
 
-  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
-  <meta name="description" content="Uma seleção de vídeos de Beatriz Rodrigues, mostrando projetos, apresentações e momentos captados.">
-  <meta property="og:title" content="Portfólio - Beatriz Rodrigues - Vídeos">
-  <meta property="og:description" content="Uma seleção de vídeos de Beatriz Rodrigues, mostrando projetos, apresentações e momentos captados.">
+  <!-- Metatags para SEO y Open Graph/Twitter Cards -->
+  <meta name="description" content="Ve una colección de charlas, talleres y porfolios de presentación de Beatriz Rodrigues, incrustados directamente para tu visualización.">
+  <meta property="og:title" content="Porfolio - Beatriz Rodrigues - Presentaciones">
+  <meta property="og:description" content="Ve una colección de charlas, talleres y porfolios de presentación de Beatriz Rodrigues, incrustados directamente para tu visualización.">
   <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/pt/videos.html">
+  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/es/presentaciones.html">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Portfólio - Beatriz Rodrigues - Vídeos">
-  <meta name="twitter:description" content="Uma seleção de vídeos de Beatriz Rodrigues, mostrando projetos, apresentações e momentos captados.">
+  <meta name="twitter:title" content="Porfolio - Beatriz Rodrigues - Presentaciones">
+  <meta name="twitter:description" content="Ve una colección de charlas, talleres y porfolios de presentación de Beatriz Rodrigues, incrustados directamente para tu visualización.">
   <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
   <meta name="robots" content="index, follow">
 
-  <!-- Links hreflang para SEO multilingue -->
-  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/videos.html" />
-  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/videos.html" />
+  <!-- Links hreflang para SEO multilingüe -->
+  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/apresentacoes.html" />
+  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/presentations.html" />
+  <link rel="alternate" hreflang="es" href="https://manmaxim0.github.io/Bia/html/es/presentaciones.html" />
 
   <!-- Links para folhas de estilo CSS -->
   <link rel="stylesheet" href="../../css/estilo.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="../../css/galeria-das-paginas.css" />
-
+  
+  <!-- CSS para Ícones de Bandeiras (flag-icons ) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
+  
   <!-- Links para favicons -->
   <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
@@ -64,14 +65,16 @@
     }
   </script>
 </head>
-<body data-page-title-key="videos_page_title">
+<body data-page-title-key="presentations_page_title">
   <div id="header-placeholder"></div>
 
   <main class="page-content">
-    <section class="section-videos container">
-      <h2 data-lang-key="videos_section_title">Meus Vídeos</h2>
-      <p class="section-description" data-lang-key="videos_section_description">Uma seleção de vídeos que demonstram os meus projetos, apresentações e momentos captados.</p>
-      <div id="video-gallery" class="video-gallery"></div>
+    <section class="section-presentations container">
+      <h2 data-lang-key="presentations_section_title">Mis Presentaciones</h2>
+      <p class="section-description" data-lang-key="presentations_section_description">Una colección de mis charlas, talleres y porfolios de presentación, incrustados directamente para tu visualización.</p>
+      <div class="presentation-gallery" id="presentation-gallery">
+        <!-- El contenido se cargará dinámicamente -->
+      </div>
     </section>
   </main>
 

@@ -1,105 +1,88 @@
 import { setLanguage, getTranslation, getCurrentLanguage } from './gestor-de-linguagem.js';
 
 /**
- * Applies translations to all elements with `data-lang-key` attributes on the page.
+ * Aplica as traduções a todos os elementos da página que possuem o atributo `data-lang-key`.
  */
 export function applyTranslations() {
-    // Set page title
-    const pageTitleElement = document.querySelector('title[data-lang-key]');
-    if (pageTitleElement) {
-        pageTitleElement.textContent = getTranslation(pageTitleElement.dataset.langKey);
-    } else {
-        // Fallback for pages without data-lang-key on title tag or root index.html
-        const path = window.location.pathname;
-        if (path.includes('/html/pt/index.html') || path.endsWith('/html/pt/') || path === '/index.html') {
-            document.title = getTranslation('home') + ' - Beatriz Rodrigues';
-        } else if (path.includes('/html/en/index.html') || path.endsWith('/html/en/')) {
-            document.title = getTranslation('home') + ' - Beatriz Rodrigues';
-        }
+    // Traduz o título da página usando a chave definida no body
+    const pageTitleKey = document.body.getAttribute('data-page-title-key');
+    if (pageTitleKey) {
+        document.title = getTranslation(pageTitleKey);
     }
 
+    // Itera sobre todos os elementos que precisam de tradução
     document.querySelectorAll('[data-lang-key]').forEach(element => {
         const key = element.dataset.langKey;
         const translation = getTranslation(key);
 
+        // Não traduz os links do menu de idiomas, pois eles já têm o texto correto
+        if (element.classList.contains('lang-option')) {
+            return;
+        }
+
+        // Trata de placeholders em inputs e textareas
         if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
             if (element.placeholder) {
                 element.placeholder = translation;
             }
-            if (key === 'form_name_label' || key === 'form_email_label' || key === 'form_message_label') {
-                element.textContent = translation; // For <label> elements
-            }
-        } else if (element.tagName === 'BUTTON') {
-            if (key === 'send_message_button') {
-                element.innerHTML = `${translation} <i class="fas fa-paper-plane"></i>`;
-            } else if (key === 'toggle_navigation') {
-                element.setAttribute('aria-label', translation);
-            } else if (key === 'close') {
-                element.setAttribute('aria-label', translation);
-            } else if (!element.classList.contains('lang-btn')) { // Avoid changing lang-btn text content
-                element.textContent = translation;
-            }
-        } else if (element.tagName === 'A' && element.classList.contains('lang-btn')) {
-            // Handled by hardcoded PT/EN text and active class
-        } else if (key === 'all_rights_reserved') {
-            element.innerHTML = translation; // Preserve HTML for 
-        } else if (key.startsWith('view_')) { // Special handling for "Ver/View" buttons
-             element.innerHTML = `${translation} <i class="fas fa-arrow-right"></i>`;
+        } 
+        // Trata de atributos 'aria-label' para acessibilidade
+        else if (key === 'toggle_navigation' || key === 'close') {
+            element.setAttribute('aria-label', translation);
         }
+        // Usa innerHTML para preservar tags como &copy; ou <i>
         else {
-            element.textContent = translation;
-        }
-    });
-
-    // Handle language switcher buttons active state
-    document.querySelectorAll('.language-switcher .lang-btn').forEach(btn => {
-        const targetLang = btn.getAttribute('href').split('/')[2]; // 'pt' or 'en'
-        if (targetLang === getCurrentLanguage()) { // Use getCurrentLanguage from manager
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
+            element.innerHTML = translation;
         }
     });
 }
 
-// Initialize language and apply translations on DOMContentLoaded
+/**
+ * Função principal que é executada quando o DOM da página é carregado.
+ * Deteta o idioma, define-o e aplica as traduções.
+ */
 document.addEventListener('DOMContentLoaded', () => {
-    // Determine the current language based on the URL path, e.g., /html/pt/somepage.html -> 'pt'
+    // --- LÓGICA DE DETEÇÃO DE IDIOMA A PARTIR DO URL (ROBUSTA) ---
+    let langFromPath = 'pt'; // Define 'pt' como idioma padrão
     const pathSegments = window.location.pathname.split('/');
-    let langFromPath = 'pt'; // Default
-    if (pathSegments.includes('html')) {
-        const htmlIndex = pathSegments.indexOf('html');
-        if (htmlIndex > -1 && pathSegments.length > htmlIndex + 1) {
-            const langSegment = pathSegments[htmlIndex + 1];
-            if (langSegment === 'en' || langSegment === 'pt') {
-                langFromPath = langSegment;
-            }
+
+    // Procura por 'pt', 'en', ou 'es' na parte correta do URL (ex: /html/es/...)
+    const langCodes = ['pt', 'en', 'es'];
+    for (const code of langCodes) {
+        if (pathSegments.includes(code)) {
+            langFromPath = code;
+            break; // Para assim que encontrar o primeiro código de idioma
         }
     }
 
-    // Initialize the language manager with the language from the URL.
-    // This will also load the stored preferredLanguage if it exists and matches.
+    // 1. Define o idioma detetado no gestor de linguagem
     setLanguage(langFromPath); 
 
-    // Apply translations to the loaded page content
+    // 2. Aplica as traduções a todo o conteúdo estático da página
     applyTranslations();
 
-    // Set up event listeners for language switcher buttons
-    document.querySelectorAll('.language-switcher .lang-btn').forEach(button => {
-        button.addEventListener('click', (event) => {
-            event.preventDefault();
-            
-            // The href of the button already points to the correct language version of the current page.
-            const targetHref = button.getAttribute('href');
-            
-            // Extract the target language from the href to set it in the manager
-            const targetLangMatch = targetHref.match(/\/html\/(pt|en)\//);
-            if (targetLangMatch && targetLangMatch[1]) {
-                const targetLang = targetLangMatch[1];
-                setLanguage(targetLang); // Update preferred language in localStorage via manager
-            }
-            
-            window.location.href = targetHref; // Redirect to the new language page
+    // 3. Adiciona os listeners de clique aos links de idioma no cabeçalho.
+    //    Isto é feito após o evento 'headerLoaded' ser disparado pelo html-injector.js,
+    //    garantindo que o cabeçalho já foi injetado na página.
+    document.addEventListener('headerLoaded', () => {
+        document.querySelectorAll('.language-options .lang-option').forEach(button => {
+            // Remove listeners antigos para evitar duplicação, se houver
+            button.replaceWith(button.cloneNode(true));
+        });
+
+        // Adiciona novos listeners
+        document.querySelectorAll('.language-options .lang-option').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                
+                const targetLang = button.dataset.lang;
+                
+                // Define o novo idioma preferido no localStorage
+                setLanguage(targetLang); 
+                
+                // Redireciona para a página no idioma selecionado
+                window.location.href = button.href; 
+            });
         });
     });
 });

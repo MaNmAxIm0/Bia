@@ -8,3 +8,26 @@
 @import './sobre-mim.css';
 @import './responsivo.css';
 
+@media (max-width: 768px) {
+
+    /* Garante que o submenu .dropdown-menu, que está escondido por defeito,
+       se torna visível quando o seu elemento pai <li> tem a classe .active. */
+    .main-nav .dropdown.active > .dropdown-menu {
+        display: block !important;
+    }
+
+    /* Garante que os links <a> dentro do submenu são visíveis e clicáveis.
+       Isto força-os a serem blocos com cor e padding corretos. */
+    .main-nav .dropdown-menu li a {
+        display: block !important;
+        color: var(--secondary-color) !important;
+        padding: 12px 20px 12px 40px !important; /* Adiciona indentação à esquerda */
+        font-size: 1em !important;
+        justify-content: flex-start !important;
+    }
+
+    /* Esconde a seta nos itens do submenu, pois eles não têm mais níveis. */
+    .main-nav .dropdown-menu li a i {
+        display: none !important;
+    }
+}

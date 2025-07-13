@@ -1,8 +1,13 @@
-// js/traducao.js (Versão Completa e Atualizada)
+// js/traducao.js (Versão Final com todas as chaves de tradução)
 
 export const translations = {
     pt: {
-        // Common
+        // Nomes dos idiomas
+        portuguese: 'Português',
+        english: 'Inglês',
+        spanish: 'Espanhol',
+
+        // Comum
         home: 'Início',
         presentations: 'Apresentações',
         designs: 'Designs',
@@ -19,33 +24,21 @@ export const translations = {
         no_content_found: 'Nenhum conteúdo para \'{type}\' encontrado.',
         error_loading_content: 'Erro ao carregar {type}. Por favor, tente novamente mais tarde.',
         
-        // Home page
-        project_a_title: 'Projecto A',
+        // Página Inicial
+        project_a_title: 'Projeto A',
         project_a_description: 'Um trabalho inovador que combina design e tecnologia.',
-        short_film_title: 'Filme Curto "O Regresso"',
+        short_film_title: 'Curta-metragem "O Regresso"',
         short_film_description: 'Uma narrativa visual emocionante e envolvente.',
         corporate_presentation_title: 'Apresentação Corporativa',
         corporate_presentation_description: 'Estratégias de marketing para o futuro.',
         best_works: 'Melhores Trabalhos',
-        urban_documentary_title: 'Documentário Urbano',
-        urban_documentary_description: 'Uma exploração profunda da vida na cidade, com entrevistas e imagens cativantes.',
-        natural_landscapes_title: 'Paisagens Naturais',
-        natural_landscapes_description: 'Coleção de fotografias que capturam a beleza intocada da natureza.',
-        innovation_workshop_title: 'Workshop de Inovação',
-        innovation_workshop_description: 'Uma apresentação interativa sobre as últimas tendências em inovação tecnológica.',
-        graphic_design_creations_title: 'Criações em Design Gráfico',
-        graphic_design_creations_description: 'Designs criativos desenvolvidos em várias ferramentas, incluindo Canva.',
         view_video: 'Ver Vídeo',
         view_photos: 'Ver Fotografias',
         view_presentation: 'Ver Apresentação',
         view_designs: 'Ver Designs',
         discover_more: 'Descobrir Mais',
-        videos_thumb_desc: 'Criações audiovisuais que contam histórias.',
-        photos_thumb_desc: 'Galeria de imagens que capturam momentos únicos.',
-        presentations_thumb_desc: 'Projetos e ideias transformados em apresentações impactantes.',
-        designs_thumb_desc: 'Elementos gráficos criativos e layouts profissionais.',
 
-        // About Me Page
+        // Página Sobre Mim
         about_me_page_title: 'Beatriz Rodrigues - Sobre Mim',
         about_me_section_title: 'Sobre Mim',
         about_me_greeting: 'Olá, sou a Beatriz!',
@@ -53,13 +46,18 @@ export const translations = {
         about_me_paragraph_2: 'A minha jornada começou com uma simples câmara e um desejo de contar histórias. Hoje, essa paixão evoluiu para um conjunto de competências diversificado que me permite abordar projetos de diferentes ângulos, sempre com um foco na clareza, estética e impacto.',
         about_me_paragraph_3: 'Neste portfólio, encontrará uma seleção dos meus trabalhos que refletem o meu percurso e a minha dedicação. Vamos criar algo incrível juntos!',
 
-        // Contact Page
+        // Página de Contactos (CHAVES CORRIGIDAS E COMPLETAS)
         contact_page_title: 'Beatriz Rodrigues - Contactos',
         contact_section_title: 'Contacte-me',
         contact_section_description: 'Se tiver alguma questão, projeto em mente ou simplesmente quiser dizer olá, utilize o formulário abaixo ou os contactos alternativos.',
         send_message_title: 'Envie uma Mensagem',
+        alternative_contact_title: 'Informações de Contacto Alternativas',
+        alternative_contact_intro: 'Pode também contactar-me através dos seguintes meios:',
+        phone_number: '+351 925 451 131',
+        whatsapp_link_text: 'Enviar mensagem',
+        contact_note: 'Responderei o mais breve possível. Agradeço o seu interesse!',
         
-        // Gallery Pages (Designs, Presentations)
+        // Páginas de Galerias
         designs_page_title: 'Beatriz Rodrigues - Designs',
         designs_section_title: 'Meus Designs',
         designs_section_description: 'Explore uma variedade de projetos de design gráfico e digital que demonstram a minha criatividade e habilidades.',
@@ -68,15 +66,12 @@ export const translations = {
         presentations_section_description: 'Uma coleção das minhas palestras, workshops e portfólios de apresentação, incorporados diretamente para sua visualização.',
         loading_presentations: 'A carregar apresentações...',
         no_presentations_found: 'Não foram encontradas apresentações.',
-
-        // --- NOVAS TRADUÇÕES ---
         photos_horizontal_page_title: 'Beatriz Rodrigues - Fotografias Horizontais',
         photos_horizontal_section_title: 'Fotografias Horizontais',
         photos_horizontal_section_description: 'Uma seleção de fotografias em formato paisagem.',
         photos_vertical_page_title: 'Beatriz Rodrigues - Fotografias Verticais',
         photos_vertical_section_title: 'Fotografias Verticais',
         photos_vertical_section_description: 'Uma seleção de fotografias em formato retrato.',
-        
         videos_horizontal_page_title: 'Beatriz Rodrigues - Vídeos Horizontais',
         videos_horizontal_section_title: 'Vídeos Horizontais',
         videos_horizontal_section_description: 'Uma seleção de vídeos em formato paisagem.',
@@ -85,6 +80,11 @@ export const translations = {
         videos_vertical_section_description: 'Uma seleção de vídeos em formato retrato.',
     },
     en: {
+        // Language names
+        portuguese: 'Portuguese',
+        english: 'English',
+        spanish: 'Spanish',
+
         // Common
         home: 'Home',
         presentations: 'Presentations',
@@ -110,23 +110,11 @@ export const translations = {
         corporate_presentation_title: 'Corporate Presentation',
         corporate_presentation_description: 'Marketing strategies for the future.',
         best_works: 'Best Works',
-        urban_documentary_title: 'Urban Documentary',
-        urban_documentary_description: 'A deep exploration of city life, with captivating interviews and footage.',
-        natural_landscapes_title: 'Natural Landscapes',
-        natural_landscapes_description: 'A collection of photographs that capture the untouched beauty of nature.',
-        innovation_workshop_title: 'Innovation Workshop',
-        innovation_workshop_description: 'An interactive presentation on the latest trends in technological innovation.',
-        graphic_design_creations_title: 'Graphic Design Creations',
-        graphic_design_creations_description: 'Creative designs developed using various tools, including Canva.',
         view_video: 'View Video',
         view_photos: 'View Photos',
         view_presentation: 'View Presentation',
         view_designs: 'View Designs',
         discover_more: 'Discover More',
-        videos_thumb_desc: 'Audiovisual creations that tell stories.',
-        photos_thumb_desc: 'A gallery of images capturing unique moments.',
-        presentations_thumb_desc: 'Projects and ideas transformed into impactful presentations.',
-        designs_thumb_desc: 'Creative graphic elements and professional layouts.',
 
         // About Me Page
         about_me_page_title: 'Beatriz Rodrigues - About Me',
@@ -136,13 +124,18 @@ export const translations = {
         about_me_paragraph_2: 'My journey began with a simple camera and a desire to tell stories. Today, this passion has evolved into a diverse set of skills that allows me to approach projects from different angles, always focusing on clarity, aesthetics, and impact.',
         about_me_paragraph_3: 'In this portfolio, you\'ll find a selection of my works that reflect my journey and dedication. Let\'s create something amazing together!',
 
-        // Contact Page
+        // Contact Page (CHAVES CORRIGIDAS E COMPLETAS)
         contact_page_title: 'Beatriz Rodrigues - Contact',
         contact_section_title: 'Get in Touch',
         contact_section_description: 'If you have any questions, a project in mind, or simply want to say hello, use the form below or the alternative contacts.',
         send_message_title: 'Send a Message',
+        alternative_contact_title: 'Alternative Contact Information',
+        alternative_contact_intro: 'You can also contact me through the following means:',
+        phone_number: '+351 925 451 131',
+        whatsapp_link_text: 'Send message',
+        contact_note: 'I will respond as soon as possible. Thank you for your interest!',
 
-        // Gallery Pages (Designs, Presentations)
+        // Gallery Pages
         designs_page_title: 'Beatriz Rodrigues - Designs',
         designs_section_title: 'My Designs',
         designs_section_description: 'Explore a variety of graphic and digital design projects that demonstrate my creativity and skills.',
@@ -151,20 +144,95 @@ export const translations = {
         presentations_section_description: 'A collection of my lectures, workshops, and presentation portfolios, embedded directly for your viewing.',
         loading_presentations: 'Loading presentations...',
         no_presentations_found: 'No presentations found.',
-
-        // --- NEW TRANSLATIONS ---
         photos_horizontal_page_title: 'Beatriz Rodrigues - Horizontal Photos',
         photos_horizontal_section_title: 'Horizontal Photos',
         photos_horizontal_section_description: 'A selection of photos in landscape format.',
         photos_vertical_page_title: 'Beatriz Rodrigues - Vertical Photos',
         photos_vertical_section_title: 'Vertical Photos',
         photos_vertical_section_description: 'A selection of photos in portrait format.',
-
         videos_horizontal_page_title: 'Beatriz Rodrigues - Horizontal Videos',
         videos_horizontal_section_title: 'Horizontal Videos',
         videos_horizontal_section_description: 'A selection of videos in landscape format.',
         videos_vertical_page_title: 'Beatriz Rodrigues - Vertical Videos',
         videos_vertical_section_title: 'Vertical Videos',
         videos_vertical_section_description: 'A selection of videos in portrait format.',
+    },
+    es: {
+        // Nombres de los idiomas
+        portuguese: 'Portugués',
+        english: 'Inglés',
+        spanish: 'Español',
+
+        // Común
+        home: 'Inicio',
+        presentations: 'Presentaciones',
+        designs: 'Diseños',
+        photos: 'Fotografías',
+        videos: 'Vídeos',
+        about_me: 'Sobre Mí',
+        contact: 'Contactos',
+        horizontal: 'Horizontales',
+        vertical: 'Verticales',
+        toggle_navigation: 'Alternar navegación',
+        close: 'Cerrar',
+        all_rights_reserved: '&copy; 2025 Beatriz Rodrigues. Todos los derechos reservados.',
+        loading_content: 'Cargando contenido...',
+        no_content_found: 'No se encontró contenido para \'{type}\'.',
+        error_loading_content: 'Error al cargar {type}. Por favor, inténtelo de nuevo más tarde.',
+
+        // Página de Inicio
+        project_a_title: 'Proyecto A',
+        project_a_description: 'Un trabajo innovador que combina diseño y tecnología.',
+        short_film_title: 'Cortometraje "El Regreso"',
+        short_film_description: 'Una narrativa visual emocionante y cautivadora.',
+        corporate_presentation_title: 'Presentación Corporativa',
+        corporate_presentation_description: 'Estrategias de marketing para el futuro.',
+        best_works: 'Mejores Trabajos',
+        view_video: 'Ver Vídeo',
+        view_photos: 'Ver Fotografías',
+        view_presentation: 'Ver Presentación',
+        view_designs: 'Ver Diseños',
+        discover_more: 'Descubrir Más',
+
+        // Página Sobre Mí
+        about_me_page_title: 'Beatriz Rodrigues - Sobre Mí',
+        about_me_section_title: 'Sobre Mí',
+        about_me_greeting: '¡Hola, soy Beatriz!',
+        about_me_paragraph_1: 'Soy una creadora de contenido apasionada por transformar ideas en realidad visual. Con una base sólida en comunicación y una curiosidad insaciable por las nuevas tecnologías, me dedico a crear presentaciones, diseños, fotografías y vídeos que no solo informan, sino que también inspiran e involucran.',
+        about_me_paragraph_2: 'Mi viaje comenzó con una simple cámara y el deseo de contar historias. Hoy, esa pasión ha evolucionado a un conjunto de habilidades diversificado que me permite abordar proyectos desde diferentes ángulos, siempre con un enfoque en la claridad, la estética y el impacto.',
+        about_me_paragraph_3: 'En este porfolio, encontrarás una selección de mis trabajos que reflejan mi trayectoria y dedicación. ¡Vamos a crear algo increíble juntos!',
+
+        // Página de Contacto (CHAVES CORRIGIDAS E COMPLETAS)
+        contact_page_title: 'Beatriz Rodrigues - Contactos',
+        contact_section_title: 'Contáctame',
+        contact_section_description: 'Si tienes alguna pregunta, un proyecto en mente o simplemente quieres saludar, utiliza el formulario a continuación o los contactos alternativos.',
+        send_message_title: 'Envía un Mensaje',
+        alternative_contact_title: 'Información de Contacto Alternativa',
+        alternative_contact_intro: 'También puedes contactarme a través de los siguientes medios:',
+        phone_number: '+351 925 451 131',
+        whatsapp_link_text: 'Enviar mensaje',
+        contact_note: 'Responderé lo antes posible. ¡Gracias por tu interés!',
+
+        // Páginas de Galerías
+        designs_page_title: 'Beatriz Rodrigues - Diseños',
+        designs_section_title: 'Mis Diseños',
+        designs_section_description: 'Explora una variedad de proyectos de diseño gráfico y digital que demuestran mi creatividad y habilidades.',
+        presentations_page_title: 'Beatriz Rodrigues - Presentaciones',
+        presentations_section_title: 'Mis Presentaciones',
+        presentations_section_description: 'Una colección de mis charlas, talleres y porfolios de presentación, incrustados directamente para tu visualización.',
+        loading_presentations: 'Cargando presentaciones...',
+        no_presentations_found: 'No se encontraron presentaciones.',
+        photos_horizontal_page_title: 'Beatriz Rodrigues - Fotografías Horizontales',
+        photos_horizontal_section_title: 'Fotografías Horizontales',
+        photos_horizontal_section_description: 'Una selección de fotografías en formato apaisado.',
+        photos_vertical_page_title: 'Beatriz Rodrigues - Fotografías Verticales',
+        photos_vertical_section_title: 'Fotografías Verticales',
+        photos_vertical_section_description: 'Una selección de fotografías en formato retrato.',
+        videos_horizontal_page_title: 'Beatriz Rodrigues - Vídeos Horizontales',
+        videos_horizontal_section_title: 'Vídeos Horizontales',
+        videos_horizontal_section_description: 'Una selección de vídeos en formato apaisado.',
+        videos_vertical_page_title: 'Beatriz Rodrigues - Vídeos Verticales',
+        videos_vertical_section_title: 'Vídeos Verticales',
+        videos_vertical_section_description: 'Una selección de vídeos en formato retrato.',
     }
 };

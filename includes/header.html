@@ -1,14 +1,13 @@
 <header class="main-header">
   <div class="container">
     <h1 class="logo"><a href="index.html"><img src="../../imagens/logo.png" alt="Beatriz Rodrigues"></a></h1>
+    
     <nav class="main-nav">
-      <button class="menu-toggle" aria-label="Toggle navigation" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
       <ul class="nav-links">
         <li><a href="index.html" data-lang-key="home">Home</a></li>
         <li><a href="presentations.html" data-lang-key="presentations">Presentations</a></li>
         <li><a href="designs.html" data-lang-key="designs">Designs</a></li>
 
-        <!-- START OF PHOTOS DROPDOWN -->
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-lang-key="photos">Photos <i class="fas fa-chevron-down"></i></a>
           <ul class="dropdown-menu">
@@ -16,9 +15,6 @@
             <li><a href="photos-vertical.html" data-lang-key="vertical">Vertical</a></li>
           </ul>
         </li>
-        <!-- END OF PHOTOS DROPDOWN -->
-
-        <!-- START OF VIDEOS DROPDOWN -->
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-lang-key="videos">Videos <i class="fas fa-chevron-down"></i></a>
           <ul class="dropdown-menu">
@@ -26,15 +22,42 @@
             <li><a href="videos-vertical.html" data-lang-key="vertical">Vertical</a></li>
           </ul>
         </li>
-        <!-- END OF VIDEOS DROPDOWN -->
 
         <li><a href="about-me.html" data-lang-key="about_me">About Me</a></li>
         <li><a href="contacts.html" data-lang-key="contact">Contact</a></li>
       </ul>
-      <div class="language-switcher">
-        <a href="#" class="lang-btn lang-pt-link">PT</a>
-        <a href="#" class="lang-btn active">EN</a>
-      </div>
     </nav>
+
+    <div class="header-controls">
+      <!-- LANGUAGE SWITCHER UPDATED WITH CSS CLASSES -->
+      <div class="language-dropdown">
+        <button class="language-selected">
+          <span class="fi fi-gb"></span> <!-- Flag of the United Kingdom -->
+          <span>EN</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <ul class="language-options">
+          <li>
+            <a href="#" class="lang-option lang-pt-link" data-lang="pt">
+              <span class="fi fi-pt"></span> <!-- Flag of Portugal -->
+              <span data-lang-key="portuguese">Portuguese</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="lang-option active" data-lang="en">
+              <span class="fi fi-gb"></span> <!-- Flag of the United Kingdom -->
+              <span data-lang-key="english">English</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="lang-option lang-es-link" data-lang="es">
+              <span class="fi fi-es"></span> <!-- Flag of Spain -->
+              <span data-lang-key="spanish">Spanish</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <button class="menu-toggle" aria-label="Toggle navigation" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
+    </div>
   </div>
 </header>

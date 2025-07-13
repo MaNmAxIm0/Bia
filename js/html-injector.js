@@ -1,69 +1,92 @@
+// js/html-injector.js (VERSÃO CORRIGIDA E FINAL)
+
 document.addEventListener("DOMContentLoaded", function() {
-  // Deteta o idioma da página atual com base no URL
-  const path = window.location.pathname;
-  const lang = path.includes('/en/') ? 'en' : 'pt';
+    const headerPlaceholder = document.getElementById('header-placeholder');
+    const footerPlaceholder = document.getElementById('footer-placeholder');
 
-  // Define os nomes dos ficheiros com base no idioma
-  const headerFile = lang === 'en' ? 'header.html' : 'cabecalho.html';
-  const footerFile = lang === 'en' ? 'footer.html' : 'rodape.html';
+    if (!headerPlaceholder && !footerPlaceholder) {
+        return; // Sai se não houver placeholders na página
+    }
 
-  // Define os caminhos completos para os ficheiros de include
-  const headerPath = `../../includes/${headerFile}`;
-  const footerPath = `../../includes/${footerFile}`;
+    // --- LÓGICA DE DETEÇÃO DE IDIOMA CORRIGIDA ---
+    let lang = 'pt'; // Idioma padrão
+    const pathname = window.location.pathname;
 
-  // Função para carregar e injetar o HTML
-  const loadHTML = (filePath, placeholderId) => {
-    fetch(filePath)
-      .then(response => {
-        if (!response.ok) throw new Error(`Ficheiro não encontrado: ${filePath}`);
-        return response.text();
-      })
-      .then(data => {
-        const placeholder = document.getElementById(placeholderId);
-        if (placeholder) {
-          placeholder.innerHTML = data;
-          // Após injetar o cabeçalho, configura o link de troca de idioma
-          if (placeholderId === 'header-placeholder') {
-            setupLanguageSwitcher();
-          }
-        } else {
-          console.error(`Erro: Placeholder com ID "${placeholderId}" não foi encontrado.`);
+    if (pathname.includes('/en/')) {
+        lang = 'en';
+    } else if (pathname.includes('/es/')) {
+        lang = 'es';
+    }
+    // Se não for 'en' nem 'es', assume-se 'pt'.
+
+    // --- MAPEAMENTO DE FICHEIROS ---
+    const fileMap = {
+        pt: {
+            header: 'cabecalho.html',
+            footer: 'rodape.html'
+        },
+        en: {
+            header: 'header.html',
+            footer: 'footer.html'
+        },
+        es: {
+            // Assumindo que os ficheiros para espanhol se chamarão assim
+            header: 'cabecera.html', 
+            footer: 'pie-de-pagina.html'
         }
-      })
-      .catch(error => console.error(`Erro ao carregar ${placeholderId}:`, error));
-  };
-
-  // Função para fazer o seletor de idioma funcionar corretamente
-  const setupLanguageSwitcher = () => {
-    const currentPath = window.location.pathname; // ex: /html/pt/fotos.html
-    
-    // Mapeamento de nomes de ficheiros entre idiomas
-    const pageMap = {
-      'index.html': 'index.html',
-      'apresentacoes.html': 'presentations.html',
-      'contactos.html': 'contacts.html',
-      'designs.html': 'designs.html',
-      'fotos.html': 'photos.html',
-      'sobre-mim.html': 'about-me.html',
-      'videos.html': 'videos.html'
     };
 
-    const linkEn = document.querySelector('.lang-en-link');
-    const linkPt = document.querySelector('.lang-pt-link');
+    const headerFile = fileMap[lang].header;
+    const footerFile = fileMap[lang].footer;
 
-    if (lang === 'pt' && linkEn) {
-      const currentPageFile = currentPath.split('/').pop();
-      const equivalentEnFile = pageMap[currentPageFile] || 'index.html';
-      linkEn.href = `../en/${equivalentEnFile}`;
-    } else if (lang === 'en' && linkPt) {
-      const currentPageFile = currentPath.split('/').pop();
-      // Inverte o mapeamento para encontrar o ficheiro em português
-      const equivalentPtFile = Object.keys(pageMap).find(key => pageMap[key] === currentPageFile) || 'index.html';
-      linkPt.href = `../pt/${equivalentPtFile}`;
+    // Constrói os caminhos corretos
+    const headerPath = `../../includes/${headerFile}`;
+    const footerPath = `../../includes/${footerFile}`;
+
+    // Função para carregar e injetar o HTML
+    const loadHTML = (filePath, placeholder) => {
+        return new Promise((resolve, reject) => {
+            if (!placeholder) {
+                resolve();
+                return;
+            }
+            fetch(filePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Ficheiro não encontrado: ${filePath}. Verifique se o ficheiro existe no caminho correto.`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    placeholder.innerHTML = data;
+                    resolve();
+                })
+                .catch(error => reject(error));
+        });
+    };
+
+    // Carrega o rodapé
+    if (footerPlaceholder) {
+        loadHTML(footerPath, footerPlaceholder)
+            .catch(error => console.error(`Erro ao carregar rodapé:`, error));
     }
-  };
 
-  // Carrega o cabeçalho e o rodapé corretos
-  loadHTML(headerPath, 'header-placeholder');
-  loadHTML(footerPath, 'footer-placeholder');
+    // Carrega o cabeçalho e, DEPOIS, executa os scripts que dependem dele
+    if (headerPlaceholder) {
+        loadHTML(headerPath, headerPlaceholder)
+            .then(() => {
+                // O cabeçalho está 100% garantido no DOM neste ponto.
+                if (typeof window.initializeMenu === 'function') {
+                    window.initializeMenu();
+                }
+                if (typeof window.setupLanguageSwitcher === 'function') {
+                    window.setupLanguageSwitcher(lang);
+                }
+                
+                // !! ADICIONE ESTA LINHA !!
+                // Avisa outros scripts que o cabeçalho foi carregado
+                document.dispatchEvent(new CustomEvent('headerLoaded'));
+            })
+            .catch(error => console.error(`Erro ao carregar cabeçalho:`, error));
+    }
 });

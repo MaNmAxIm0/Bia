@@ -1,4 +1,7 @@
-/* Header & Navigation */
+/* ==========================================================================
+   Cabeçalho e Navegação Principal
+   ========================================================================== */
+
 .main-header {
     background-color: var(--surface-color);
     padding: 15px 0;
@@ -17,26 +20,20 @@
 }
 
 .logo a {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 600;
-    font-size: 1.5em; 
-    color: var(--primary-color);
-    white-space: nowrap;
     display: flex;
     align-items: center;
 }
 
 .logo img {
-    max-height: 40px; /* Changed from height to max-height for responsiveness */
+    max-height: 40px;
     width: auto;
     object-fit: contain;
-    max-width: 100%; /* Ensure image scales down within its container */
 }
 
 .main-nav {
-    display: flex; /* Make main-nav a flex container */
-    align-items: center; /* Align items vertically */
-    gap: 20px; /* Space between nav links and language switcher */
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .main-nav ul {
@@ -55,8 +52,12 @@
     color: var(--primary-color);
     position: relative;
     padding-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
+/* Regra base para o sublinhado (inicia com largura 0) */
 .main-nav ul li a::after {
     content: '';
     position: absolute;
@@ -68,13 +69,31 @@
     transition: width 0.3s ease;
 }
 
+/* 
+   Regra ATUALIZADA para mostrar o sublinhado:
+   - Mostra no hover de QUALQUER link.
+   - Mostra se o link tiver a classe .active, mas APENAS se NÃO for um link dentro de um .dropdown-menu.
+*/
 .main-nav ul li a:hover::after,
-.main-nav ul li a.active::after {
+.main-nav ul li > a.active:not(.dropdown-toggle)::after {
     width: 100%;
 }
 
+/* Regra específica para o item PAI do dropdown (ex: "Fotografias") ficar ativo */
+.main-nav .dropdown.active > a::after {
+    width: 100%;
+}
+
+
+/* Controles do cabeçalho para mobile */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 .menu-toggle {
-    display: none; 
+    display: none;
     background: none;
     border: none;
     font-size: 1.8em;
@@ -87,54 +106,175 @@
     color: var(--accent-color);
 }
 
-/* Language Switcher */
-.language-switcher {
-    display: flex;
-    gap: 5px;
-    margin-left: 20px;
-}
 
-.language-switcher .lang-btn {
-    background-color: transparent;
-    color: var(--text-color);
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 400;
-    font-size: 0.9em;
-    transition: color 0.2s ease;
-    text-decoration: none;
+/* ==========================================================================
+   Dropdowns do Menu de Navegação (Fotografias, Vídeos)
+   ========================================================================== */
+
+.main-nav .dropdown {
     position: relative;
 }
 
-.language-switcher .lang-btn::after {
-    content: '/';
-    margin: 0 0 0 8px;
-    color: var(--border-color);
+.main-nav .dropdown .dropdown-toggle {
+    cursor: default;
 }
 
-.language-switcher .lang-btn:last-child::after {
-    content: '';
+.main-nav .dropdown .dropdown-toggle i {
+    font-size: 0.7em;
+    transition: transform 0.3s ease;
+}
+
+.main-nav .dropdown .dropdown-menu {
+    flex-direction: column; /* Garante que os itens ficam em coluna */
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    top: 100%; 
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--surface-color);
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    list-style: none;
+    padding: 10px 0;
+    margin-top: 15px;
+    min-width: 180px; 
+    z-index: 1001; 
+    transition: opacity 0.2s ease, visibility 0.2s ease, margin-top 0.2s ease;
+}
+
+.main-nav .dropdown .dropdown-menu li {
     margin: 0;
+    width: 100%;
 }
 
-.language-switcher .lang-btn:hover {
-    color: var(--accent-color);
+.main-nav .dropdown .dropdown-menu li a {
+    display: block;
+    padding: 10px 20px;
+    white-space: nowrap;
+    font-size: 1em;
 }
 
-.language-switcher .lang-btn.active {
+.main-nav .dropdown .dropdown-menu li a:hover {
+    background-color: var(--background-color);
+}
+
+/* Lógica para mostrar o submenu no hover (apenas em ecrãs grandes) */
+@media (min-width: 769px) {
+    .main-nav .dropdown:hover .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        margin-top: 5px;
+    }
+
+    .main-nav .dropdown:hover .dropdown-toggle i {
+        transform: rotate(180deg);
+    }
+}
+
+
+/* ==========================================================================
+   Dropdown de Seleção de Idioma
+   ========================================================================== */
+
+.language-dropdown {
+    position: relative;
+}
+
+.language-selected {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text-color);
+}
+
+.language-selected:hover {
+    background-color: var(--background-color);
+}
+
+.language-selected .fi {
+    font-size: 1.2em;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.language-selected span {
     font-weight: 600;
-    color: var(--accent-color);
 }
 
-/* Footer */
+.language-selected i {
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+}
+
+.language-dropdown.open .language-selected i {
+    transform: rotate(180deg);
+}
+
+.language-options {
+    display: none;
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    background-color: var(--surface-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    list-style: none;
+    padding: 5px;
+    margin: 0;
+    min-width: 180px;
+    z-index: 1002;
+    border: 1px solid var(--border-color);
+}
+
+.language-dropdown.open .language-options {
+    display: block;
+}
+
+.language-options .lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    color: var(--text-color);
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.language-options .lang-option:hover {
+    background-color: var(--background-color);
+    color: var(--primary-color);
+}
+
+.language-options .lang-option.active {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 600;
+}
+
+.language-options .lang-option .fi {
+    font-size: 1.5em;
+    border-radius: 3px;
+}
+
+
+/* ==========================================================================
+   Rodapé Principal
+   ========================================================================== */
+
 .main-footer {
     background-color: var(--secondary-color);
     color: var(--background-color);
     padding: 30px 0;
     text-align: center;
-    margin-top: auto; 
+    margin-top: auto;
 }
 
 .main-footer .social-links {
@@ -153,110 +293,7 @@
     transform: translateY(-3px);
 }
 
-/* --- ESTILOS DO DROPDOWN --- */
-
-/* Contentor principal do item dropdown */
-.main-nav .dropdown {
-    position: relative; /* Essencial para posicionar o submenu */
-}
-
-/* Link principal do dropdown (Fotografias, Vídeos) */
-.main-nav .dropdown .dropdown-toggle {
-    cursor: default; /* O cursor não será uma "mãozinha" */
-}
-
-/* Seta para baixo */
-.main-nav .dropdown .dropdown-toggle i {
-    font-size: 0.7em;
-    margin-left: 5px;
-    transition: transform 0.3s ease;
-}
-
-/* O submenu que fica escondido */
-.main-nav .dropdown .dropdown-menu {
-    display: none; /* Escondido por defeito */
-    position: absolute;
-    top: 100%; /* Posiciona-o logo abaixo do item pai */
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--surface-color);
-    box-shadow: var(--box-shadow);
-    border-radius: var(--border-radius);
-    list-style: none;
-    padding: 10px 0;
-    margin-top: 10px; /* Pequeno espaço entre o link e o menu */
-    min-width: 160px; /* Largura mínima do menu */
-    z-index: 1001; /* Garante que fica por cima de outro conteúdo */
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease 0.2s, margin-top 0.2s ease;
-}
-
-/* Itens dentro do submenu */
-.main-nav .dropdown .dropdown-menu li {
+.main-footer p {
     margin: 0;
+    font-size: 0.9em;
 }
-
-/* Links dentro do submenu */
-.main-nav .dropdown .dropdown-menu li a {
-    display: block;
-    padding: 10px 20px;
-    white-space: nowrap; /* Impede que o texto quebre em duas linhas */
-    font-size: 1em;
-}
-
-.main-nav .dropdown .dropdown-menu li a:hover {
-    background-color: var(--background-color);
-}
-
-/* Lógica para mostrar o submenu no hover (apenas em ecrãs grandes) */
-@media (min-width: 769px) {
-    .main-nav .dropdown:hover .dropdown-menu {
-        display: block;
-        opacity: 1;
-        visibility: visible;
-        margin-top: 5px;
-    }
-
-    .main-nav .dropdown:hover .dropdown-toggle i {
-        transform: rotate(180deg); /* Roda a seta para cima */
-    }
-}
-
-.main-nav .dropdown {
-    position: relative;
-    padding-bottom: 15px; /* Aumenta a área de hover para baixo */
-    margin-bottom: -15px; /* Compensa o padding para não afetar o layout */
-}
-
-/* 2. A "ponte" invisível que preenche o espaço entre o link e o submenu */
-.main-nav .dropdown::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%; /* Começa logo abaixo do link */
-    height: 15px; /* A altura da nossa ponte */
-    background-color: transparent; /* É invisível */
-}
-
-/* 3. Ajusta a posição do submenu para ele aparecer sobre a ponte */
-.main-nav .dropdown .dropdown-menu {
-    margin-top: 0; /* Remove a margem antiga, a ponte já cria o espaço */
-}
-
-/* 4. Quando o utilizador faz hover no dropdown (incluindo a ponte), o menu aparece */
-@media (min-width: 769px) {
-    .main-nav .dropdown:hover .dropdown-menu {
-        display: block;
-        opacity: 1;
-        visibility: visible;
-        transition-delay: 0s; /* Remove o atraso ao aparecer para ser instantâneo */
-    }
-
-    .main-nav .dropdown:hover .dropdown-toggle i {
-        transform: rotate(180deg);
-    }
-}
-
-/* --- FIM DOS ESTILOS DO DROPDOWN --- */
