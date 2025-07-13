@@ -1,5 +1,5 @@
 import subprocess
-import json 
+import json
 import os
 import time
 from PIL import Image, ImageDraw, ImageFont, ExifTags, ImageOps
