@@ -16,7 +16,9 @@ DATA_FILE = "data.json"
 ERROR_LOG_FILE = "error_log.txt"
 THUMBNAILS_DIR = "Thumbnails"
 
-# --- Funções Auxiliares ---
+EXIF_ORIENTATION_TAG = next((tag for tag, name in ExifTags.TAGS.items() if name == 'Orientation'), None)
+
+# --- Funções Auxiliares (sem alterações) ---
 def rclone_lsf(remote_path):
     command = ["rclone", "lsf", remote_path, "--files-only"]
     try:
@@ -47,26 +49,43 @@ def get_dimensions(local_path, file_type):
 # --- Funções de Processamento Corrigidas ---
 
 def apply_watermark_to_image(input_path, output_path):
+    """Aplica uma marca de água a uma imagem, com posicionamento e tamanho corrigidos."""
     try:
         with Image.open(input_path) as base_img:
             img_corrected = ImageOps.exif_transpose(base_img)
             final_img = img_corrected.convert("RGBA")
             draw = ImageDraw.Draw(final_img)
-            font_size = max(20, int(final_img.width * 0.04))
+            
+            # --- CORREÇÃO DE TAMANHO ---
+            # Tamanho da fonte como 4.5% da largura da imagem, com um mínimo de 20px.
+            font_size = max(20, int(final_img.width * 0.045))
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size)
                 font.set_variation_by_name('SemiBold')
             except (IOError, AttributeError):
                 font = ImageFont.load_default()
-            bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font); textwidth, textheight = bbox[2] - bbox[0], bbox[3] - bbox[1]
-            margin = int(final_img.width * 0.02); x, y = final_img.width - textwidth - margin, final_img.height - textheight - margin
+
+            # --- CORREÇÃO DE POSICIONAMENTO ---
+            # Usar font.getbbox() para um cálculo mais preciso do tamanho do texto.
+            _, _, text_width, text_height = font.getbbox(WATERMARK_TEXT)
+            margin = int(final_img.width * 0.02)
+            x = final_img.width - text_width - margin
+            y = final_img.height - text_height - margin
+            
             draw.text((x + 2, y + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
-            draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220)); final_img.save(output_path, "PNG")
+            draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220))
+            final_img.save(output_path, "PNG")
         return True
-    except Exception as e: return f"PIL Error: {e}"
+    except Exception as e:
+        return f"PIL Error: {e}"
 
 def apply_watermark_to_video(input_path, output_path, video_width):
-    escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", ""); font_size = max(24, int(video_width * 0.035)); margin = int(video_width * 0.02)
+    """Aplica uma marca de água a um vídeo, com tamanho consistente."""
+    escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
+    # --- CORREÇÃO DE TAMANHO ---
+    # Tamanho da fonte como 4.5% da largura do vídeo, com um mínimo de 24px.
+    font_size = max(24, int(video_width * 0.045))
+    margin = int(video_width * 0.02)
     command = ["ffmpeg", "-i", input_path, "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.9:x=main_w-text_w-{margin}:y=main_h-text_h-{margin}:borderw=2:bordercolor=black@0.6", "-c:a", "copy", "-y", output_path]
     try:
         subprocess.run(command, check=True, capture_output=True, text=True, timeout=300)
@@ -74,7 +93,7 @@ def apply_watermark_to_video(input_path, output_path, video_width):
     except subprocess.CalledProcessError as e: return f"FFmpeg Error: {e.stderr}"
     except subprocess.TimeoutExpired: return "FFmpeg Error: O processamento demorou demasiado tempo (timeout)."
 
-# --- Lógica Principal Final ---
+# --- Lógica Principal (sem alterações) ---
 def main():
     start_time = time.time(); print(">>> INICIANDO SCRIPT DE PROCESSAMENTO...")
     if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
@@ -119,6 +138,7 @@ def main():
             
             processing_result = True
             base_name, ext = os.path.splitext(filename)
+            final_filename = filename
             
             if category_key in ["fotografias", "designs"]:
                 final_filename = f"{base_name}.png"
@@ -128,9 +148,7 @@ def main():
                 file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
 
             elif category_key == "videos":
-                final_filename = filename
                 local_processed_path = os.path.join(TEMP_DIR, f"wm_{filename}")
-                # AQUI ESTAVA O ERRO
                 processing_result = apply_watermark_to_video(local_original_path, local_processed_path, width)
                 remote_path = f"{category_name}/{final_filename}"
                 file_data["url"] = f"{PUBLIC_URL}/{remote_path.replace(' ', '%20')}"
@@ -150,9 +168,7 @@ def main():
         except Exception as e:
             errors.append(f"FALHA AO PROCESSAR '{filename}': {e}")
         finally:
-            if os.path.exists(local_original_path): os.remove(local_original_path)
-            for f in os.listdir(TEMP_DIR):
-                 if f.startswith("wm_") or f.endswith(".png"): os.remove(os.path.join(TEMP_DIR, f))
+            for f in os.listdir(TEMP_DIR): os.remove(os.path.join(TEMP_DIR, f))
             
     apresentacoes_files = rclone_lsf(f"R2:{BUCKET_NAME}/Apresentações")
     for f in apresentacoes_files:
