@@ -17,45 +17,48 @@ jobs:
 
       - name: Instalar ferramentas e dependências
         run: |
+          echo "--- A iniciar instalação de dependências ---"
           sudo apt-get update
           sudo apt-get install -y ffmpeg jq unzip python3-pip
           pip3 install Pillow
           curl https://rclone.org/install.sh | sudo bash
+          echo "--- Dependências instaladas com sucesso ---"
 
       - name: Configurar rclone
         env:
           RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
         run: |
+          echo "--- A configurar o rclone ---"
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
+          echo "--- Rclone configurado ---"
 
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
-          echo "A sincronizar Google Drive para R2..."
+          echo "--- A iniciar sincronização do Google Drive para o R2 ---"
           rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" \
             --exclude "desktop.ini" \
             --exclude "/Thumbnails/**" \
             --exclude "/WatermarkedImages/**" \
             --exclude "/WatermarkedVideos/**" \
             -P
-          echo "Sincronização concluída."
+          echo "--- Sincronização Drive -> R2 concluída ---"
 
       - name: Gerar Thumbnails para Vídeos
         run: |
-          echo "A iniciar a geração de thumbnails..."
+          echo "--- A iniciar geração de thumbnails para vídeos ---"
           mkdir -p temp_thumbs
           
           OLD_IFS="$IFS"
           IFS=$'\n'
           
           for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only  ); do
-            echo "A processar vídeo: ${video_file}"
-            
+            echo "A processar vídeo para thumbnail: ${video_file}"
             rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
             
             if [ -f "./${video_file}" ]; then
               thumb_name="${video_file%.*}.jpg"
-              ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 -update 1 "temp_thumbs/${thumb_name}"
+              ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 -update 1 "temp_thumbs/${thumb_name}" > /dev/null 2>&1
               rm "./${video_file}"
             else
               echo "AVISO: Falha ao descarregar o vídeo '${video_file}'. A ignorar."
@@ -65,22 +68,22 @@ jobs:
           IFS="$OLD_IFS"
           
           rclone sync temp_thumbs "R2:bia-portfolio-assets/Thumbnails" -P
-          echo "Thumbnails sincronizadas para a pasta Thumbnails."
+          echo "--- Geração de thumbnails concluída ---"
 
-      # --- ALTERAÇÃO PRINCIPAL AQUI ---
       - name: Gerar o ficheiro data.json com marcas de água
         run: |
-          echo "A gerar data.json e a aplicar marcas de água..."
+          echo "--- A preparar para executar o script Python (process_files.py) ---"
           mkdir -p scripts/
           
-          # Descarrega APENAS o ficheiro de fonte necessário, em vez de clonar o repositório inteiro.
           echo "A descarregar a fonte Montserrat..."
           curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
           
           if [ -f "scripts/Montserrat.ttf" ]; then
-            echo "Fonte Montserrat descarregada com sucesso para scripts/Montserrat.ttf"
+            echo "Fonte descarregada. A iniciar o script principal de processamento..."
+            # A execução do script Python começa aqui. As mensagens de progresso virão do próprio script.
             python3 scripts/process_files.py
-            echo "data.json gerado e media com marca de água enviada."
+            # Esta mensagem só aparecerá quando o script terminar com sucesso.
+            echo "--- Script Python (process_files.py ) concluído com sucesso ---"
           else
             echo "ERRO: Falha ao descarregar a fonte Montserrat. A abortar."
             exit 1
@@ -88,12 +91,17 @@ jobs:
 
       - name: Fazer commit e push do data.json
         run: |
+          echo "--- A iniciar o processo de commit e push para o data.json ---"
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add data.json
+          
           if ! git diff --quiet --exit-code --cached; then
+            echo "Alterações detectadas no data.json. A fazer commit..."
             git commit -m "Atualiza data.json e media [skip ci]"
             git push
+            echo "--- Commit e push concluídos ---"
           else
             echo "Nenhuma alteração no data.json para fazer commit."
+            echo "--- Processo de commit finalizado sem alterações ---"
           fi
