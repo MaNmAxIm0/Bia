@@ -31,13 +31,12 @@ async function loadDynamicCarousel() {
 
             const img = document.createElement('img');
             img.src = item.url;
-            img.alt = item.descriptions[lang] || item.descriptions.pt || 'Imagem do Carrossel'; // Fallback para a descrição
+            img.alt = item.descriptions[lang] || item.descriptions.pt || 'Imagem do Carrossel';
 
             const captionDiv = document.createElement('div');
             captionDiv.className = 'carousel-caption';
             
             const descriptionP = document.createElement('p');
-            // Usa a descrição do idioma atual, ou português como fallback
             descriptionP.textContent = item.descriptions[lang] || item.descriptions.pt || '';
 
             captionDiv.appendChild(descriptionP);
@@ -46,12 +45,12 @@ async function loadDynamicCarousel() {
             slidesContainer.appendChild(slideDiv);
         });
 
-        // Reinicializa o carrossel depois de adicionar os slides dinâmicos
+        // Inicializa o carrossel DEPOIS de adicionar os slides dinâmicos
         initCarousel(carouselSection);
 
     } catch (error) {
         console.error('Erro ao carregar dados do carrossel:', error);
-        carouselSection.style.display = 'none'; // Esconde em caso de erro
+        carouselSection.style.display = 'none';
     }
 }
 
@@ -93,7 +92,7 @@ function initializeMenu() {
     document.querySelectorAll('.dropdown-menu a').forEach(link => {
         const parentKey = link.closest('.dropdown').querySelector('a').dataset.langKey;
         const selfKey = link.dataset.langKey;
-        const fullKey = selfKey === 'horizontal' ? `${selfKey}_${parentKey}` : `${selfKey}_${parentKey}`;
+        const fullKey = `${selfKey}_${parentKey}`;
         if (pageFileMap[fullKey]) link.href = pageFileMap[fullKey][currentLang];
     });
 
@@ -167,7 +166,7 @@ function onPageLoad() {
     setLanguage(pathLang);
     applyTranslations();
 
-    // Carrega o carrossel dinâmico na página inicial
+    // Carrega o carrossel dinâmico APENAS na página inicial
     if (window.location.pathname.endsWith('index.html')) {
         loadDynamicCarousel();
     }

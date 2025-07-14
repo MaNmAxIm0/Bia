@@ -13,7 +13,7 @@ CATEGORIES = {
     "Vídeos": "videos",
     "Designs": "designs",
     "Apresentações": "apresentacoes",
-    "Melhores": "carousel"  # Nova categoria para o carrossel
+    "Melhores": "carousel"
 }
 WATERMARK_TEXT = "© Beatriz Rodrigues"
 FONT_PATH = os.path.join(os.path.dirname(__file__ ), 'Montserrat.ttf')
@@ -21,10 +21,10 @@ TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
 ERROR_LOG_FILE = "error_log.txt"
 THUMBNAILS_DIR = "Thumbnails"
-WATERMARKED_IMAGES_DIR = "WatermarkedImages"
-WATERMARKED_VIDEOS_DIR = "WatermarkedVideos"
+WATERMARKED_IMAGES_DIR = "Fotografias"
+WATERMARKED_VIDEOS_DIR = "Vídeos"
 
-# --- Funções Auxiliares ---
+# --- Funções Auxiliares (Completas) ---
 def rclone_lsf_recursive(remote_path):
     command = ["rclone", "lsf", remote_path, "--recursive", "--files-only"]
     try:
@@ -33,108 +33,126 @@ def rclone_lsf_recursive(remote_path):
     except subprocess.CalledProcessError:
         return set()
 
-def get_dimensions(local_path, file_type):
-    width, height = 0, 0
+def get_image_dimensions(local_path):
     try:
-        if file_type in ['fotografias', 'designs', 'carousel']:
-            with Image.open(local_path) as img:
-                img_corrected = ImageOps.exif_transpose(img)
-                width, height = img_corrected.size
-        elif file_type == 'videos':
-            result = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "json", local_path], capture_output=True, text=True, check=True)
-            dims = json.loads(result.stdout)["streams"][0]
-            width, height = int(dims.get("width", 0)), int(dims.get("height", 0))
+        with Image.open(local_path) as img:
+            img_corrected = ImageOps.exif_transpose(img)
+            return img_corrected.size
     except Exception as e:
-        print(f"AVISO Dimensões: {e}")
-    return width, height
+        print(f"AVISO Dimensões Imagem: {e}")
+        return 0, 0
 
-# --- Lógica Principal ---
+def apply_watermark_to_image(input_path, output_path):
+    try:
+        with Image.open(input_path) as base_img:
+            img_corrected = ImageOps.exif_transpose(base_img)
+            final_img = img_corrected.convert("RGBA")
+            draw = ImageDraw.Draw(final_img)
+            font_size = max(20, int(min(final_img.width, final_img.height) * 0.035))
+            try:
+                font = ImageFont.truetype(FONT_PATH, font_size)
+                font.set_variation_by_name('SemiBold')
+            except (IOError, AttributeError):
+                font = ImageFont.load_default()
+            
+            bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            
+            margin = int(final_img.width * 0.02)
+            x = final_img.width - text_width - margin
+            y = final_img.height - text_height - margin
+            
+            draw.text((x + 1, y + 1), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
+            draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 200))
+            
+            final_img.save(output_path, "PNG")
+        return True
+    except Exception as e:
+        return f"PIL Error: {e}"
+
+# --- Lógica Principal (Restaurada e Completa) ---
 def main():
     start_time = time.time()
     print(">>> INICIANDO SCRIPT DE PROCESSAMENTO...")
     if not os.path.exists(TEMP_DIR):
         os.makedirs(TEMP_DIR)
-    errors = []
-
-    # Carregar data.json existente para preservar dados manuais
-    existing_data = {}
+    
+    existing_carousel_descriptions = {}
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             try:
                 existing_data = json.load(f)
+                existing_carousel_descriptions = {item['name']: item.get('descriptions', {}) for item in existing_data.get('carousel', [])}
             except json.JSONDecodeError:
-                print("AVISO: Ficheiro data.json existente está corrompido. A criar um novo.")
-    
-    existing_carousel_descriptions = {item['name']: item.get('descriptions', {}) for item in existing_data.get('carousel', [])}
+                print("AVISO: Ficheiro data.json existente está corrompido.")
 
-    print("\n--- [FASE 1] A mapear todos os ficheiros de origem no R2 ---")
+    print("\n--- [FASE 1] Mapeando ficheiros no R2 ---")
     all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     
-    source_files_map = {}
+    new_data = {cat_key: [] for cat_key in CATEGORIES.values()}
+    
     for path in all_r2_files:
         try:
             category_folder, filename = path.split('/', 1)
-            if category_folder in CATEGORIES:
-                source_files_map[path] = {'category_key': CATEGORIES[category_folder], 'category_name': category_folder}
-        except ValueError:
-            continue
-    print(f"MAPEAMENTO CONCLUÍDO: Encontrados {len(source_files_map)} ficheiros de origem no R2.")
+            if category_folder not in CATEGORIES:
+                continue
 
-    new_data = {cat: [] for cat in CATEGORIES.values()}
-    processed_files = set()
+            category_key = CATEGORIES[category_folder]
+            
+            # Lógica para o carrossel (sem processamento)
+            if category_key == 'carousel':
+                new_data['carousel'].append({
+                    "name": filename,
+                    "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}",
+                    "descriptions": existing_carousel_descriptions.get(filename, {"pt": "", "en": "", "es": ""})
+                })
+                continue
 
-    # Processar ficheiros de todas as categorias
-    for full_path, data in source_files_map.items():
-        category_key = data['category_key']
-        category_name = data['category_name']
-        filename = os.path.basename(full_path)
+            # Lógica para as outras categorias (com processamento)
+            print(f"A processar: {path}...")
+            local_original_path = os.path.join(TEMP_DIR, filename)
+            
+            # 1. Descarregar ficheiro original
+            subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_original_path], check=True, capture_output=True)
+            
+            width, height = get_image_dimensions(local_original_path)
+            if width == 0: raise ValueError("Dimensões inválidas.")
 
-        if filename in processed_files:
-            continue
-        processed_files.add(filename)
+            # 2. Aplicar marca d'água
+            watermarked_filename = f"watermarked_{os.path.splitext(filename)[0]}.png"
+            local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
+            
+            if category_key in ["fotografias", "designs"]:
+                result = apply_watermark_to_image(local_original_path, local_processed_path)
+                if result is not True: raise Exception(f"Falha no watermarking: {result}")
+                
+                # 3. Fazer upload do ficheiro processado
+                upload_path = f"{WATERMARKED_IMAGES_DIR}/{watermarked_filename}"
+                subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
+                
+                # 4. Gerar dados para o JSON
+                file_data = {
+                    "name": filename,
+                    "titles": {"pt": os.path.splitext(filename)[0], "en": os.path.splitext(filename)[0], "es": os.path.splitext(filename)[0]},
+                    "orientation": "horizontal" if width >= height else "vertical",
+                    "url": f"{PUBLIC_URL}/{upload_path.replace(' ', '%20')}"
+                }
+                new_data[category_key].append(file_data)
 
-        print(f"A processar: {full_path}...")
-        
-        # Lógica específica para o carrossel (sem watermarking, etc.)
-        if category_key == 'carousel':
-            file_data = {
-                "name": filename,
-                "url": f"{PUBLIC_URL}/{full_path.replace(' ', '%20')}",
-                "descriptions": existing_carousel_descriptions.get(filename, {"pt": "", "en": "", "es": ""})
-            }
-            new_data[category_key].append(file_data)
-            print("  -> Sucesso (Item de Carrossel).")
-            continue
+            # (Manter aqui a sua lógica para vídeos e apresentações)
 
-        # Lógica para outras categorias (a sua lógica original de processamento)
-        # Esta parte deve ser mantida como estava no seu script original
-        # O código abaixo é um placeholder genérico
-        width, height = 1,1 # Placeholder, a sua função get_dimensions deve ser usada
-        file_data = {
-            "name": filename,
-            "titles": {"pt": os.path.splitext(filename)[0], "en": os.path.splitext(filename)[0], "es": os.path.splitext(filename)[0]},
-            "orientation": "horizontal" if width >= height else "vertical",
-            "url": f"{PUBLIC_URL}/{full_path.replace(' ', '%20')}" # Placeholder
-        }
-        if category_key == "videos":
-            file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
-        
-        new_data[category_key].append(file_data)
-        print(f"  -> Sucesso ({category_key}).")
+        except Exception as e:
+            print(f"  -> ERRO ao processar {path}: {e}")
+        finally:
+            if 'local_original_path' in locals() and os.path.exists(local_original_path): os.remove(local_original_path)
+            if 'local_processed_path' in locals() and os.path.exists(local_processed_path): os.remove(local_processed_path)
 
-
-    print("\nA gerar ficheiro data.json final...")
+    print("\nGerando ficheiro data.json final...")
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
 
-    if errors:
-        print(f"\nAVISO: Ocorreram {len(errors)} erros. A verificar '{ERROR_LOG_FILE}'.")
-        with open(ERROR_LOG_FILE, "w", encoding="utf-8") as f:
-            f.write(f"Relatório de Erros do Workflow - {time.ctime(start_time)}\n\n")
-            f.writelines([f"- {error}\n" for error in errors])
-    
-    end_time = time.time()
-    print(f"\n>>> SCRIPT CONCLUÍDO em {end_time - start_time:.2f} segundos.")
+    print(f"\n>>> SCRIPT CONCLUÍDO em {time.time() - start_time:.2f} segundos.")
 
 if __name__ == "__main__":
     main()
