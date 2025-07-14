@@ -2,26 +2,5 @@
   "fotografias": [],
   "videos": [],
   "designs": [],
-  "apresentacoes": [
-    {
-      "name": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos.pdf",
-      "titles": {
-        "pt": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos",
-        "en": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos",
-        "es": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos"
-      },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Apresentações/A%20crise%20da%20habitação%20em%20Portugal%20e%20a%20sua%20relação%20com%20os%20Direitos%20Humanos.pdf",
-      "orientation": "square"
-    },
-    {
-      "name": "Senegal.pdf",
-      "titles": {
-        "pt": "Senegal",
-        "en": "Senegal",
-        "es": "Senegal"
-      },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Apresentações/Senegal.pdf",
-      "orientation": "square"
-    }
-  ]
+  "apresentacoes": []
 }
