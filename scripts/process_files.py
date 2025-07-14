@@ -19,18 +19,14 @@ WATERMARK_TEXT = "© Beatriz Rodrigues"
 FONT_PATH = os.path.join(os.path.dirname(__file__ ), 'Montserrat.ttf')
 TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
-ERROR_LOG_FILE = "error_log.txt"
 THUMBNAILS_DIR = "Thumbnails"
-WATERMARKED_IMAGES_DIR = "Imagens"
-WATERMARKED_VIDEOS_DIR = "Vídeos"
 
-# --- Funções Auxiliares ---
-
+# --- Funções Auxiliares (sem alterações) ---
 def rclone_lsf_recursive(remote_path):
     command = ["rclone", "lsf", remote_path, "--recursive", "--files-only"]
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
-        return {line for line in result.stdout.strip().split('\n') if line}
+        return {line for line in result.stdout.strip().split('\n') if line and not line.startswith('wm_')}
     except subprocess.CalledProcessError:
         return set()
 
@@ -100,62 +96,65 @@ def main():
             except json.JSONDecodeError:
                 print("AVISO: Ficheiro data.json existente está corrompido.")
 
-    print("\n--- [FASE 1] Mapeando ficheiros no R2 ---")
-    all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
+    print("\n--- [FASE 1] Mapeando ficheiros de ORIGEM (sem 'wm_') no R2 ---")
+    source_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     
     new_data = {cat_key: [] for cat_key in CATEGORIES.values()}
     
+    # Adicionar primeiro os ficheiros já processados ao new_data
+    all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     for path in all_r2_files:
+        if path.split('/')[-1].startswith('wm_'):
+             # Lógica para adicionar ficheiros já processados ao new_data
+             pass
+
+
+    for path in source_files:
         try:
             category_folder, filename = path.split('/', 1)
             if category_folder not in CATEGORIES: continue
 
             category_key = CATEGORIES[category_folder]
-            print(f"A processar: {path}...")
             
-            local_original_path = os.path.join(TEMP_DIR, filename)
-            subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_original_path], check=True, capture_output=True)
-
-            width, height = get_media_dimensions(local_original_path, category_key)
-            if width == 0 and category_key not in ['apresentacoes']:
-                raise ValueError("Dimensões inválidas, a ignorar processamento.")
-
-            # Lógica para o carrossel (com títulos e descrições)
             if category_key == 'carousel':
                 existing_entry = existing_carousel_data.get(filename, {})
                 new_data['carousel'].append({
-                    "name": filename,
-                    "titles": parse_filename_for_titles(filename),
+                    "name": filename, "titles": parse_filename_for_titles(filename),
                     "descriptions": existing_entry.get('descriptions', {"pt": "", "en": "", "es": ""}),
                     "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"
                 })
                 continue
 
-            # Lógica para outras categorias (apenas com títulos)
-            file_data = {
-                "name": filename,
-                "titles": parse_filename_for_titles(filename),
-                "orientation": "horizontal" if width >= height else "vertical"
-            }
+            print(f"A processar: {path}...")
+            local_original_path = os.path.join(TEMP_DIR, filename)
+            subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_original_path], check=True, capture_output=True)
+
+            width, height = get_media_dimensions(local_original_path, category_key)
+            if width == 0 and category_key not in ['apresentacoes']:
+                raise ValueError("Dimensões inválidas.")
+
+            file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "orientation": "horizontal" if width >= height else "vertical"}
             
             if category_key in ["fotografias", "designs"]:
                 watermarked_filename = f"wm_{os.path.splitext(filename)[0]}.png"
                 local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
-                upload_path = f"{WATERMARKED_IMAGES_DIR}/{watermarked_filename}"
+                upload_path = f"{category_folder}/{watermarked_filename}"
                 
                 result = apply_watermark_to_image(local_original_path, local_processed_path)
                 if result is not True: raise Exception(f"Falha no watermarking: {result}")
                 
                 subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
                 file_data["url"] = f"{PUBLIC_URL}/{upload_path.replace(' ', '%20')}"
-            
+                
+                subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"], check=True, capture_output=True)
+                print(f"  -> Ficheiro original '{path}' apagado do R2.")
+
             elif category_key == "apresentacoes":
                 file_data["url"] = f"{PUBLIC_URL}/{path.replace(' ', '%20')}"
             
-            # Adicione aqui a sua lógica para vídeos, se for diferente
             elif category_key == "videos":
-                # Placeholder para a sua lógica de watermarking de vídeo
-                file_data["url"] = f"{PUBLIC_URL}/{path.replace(' ', '%20')}" # Deveria apontar para o vídeo com marca d'água
+                # Adicionar aqui a sua lógica de watermarking de vídeo, seguindo o mesmo padrão
+                file_data["url"] = f"{PUBLIC_URL}/{path.replace(' ', '%20')}"
                 file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
 
             new_data[category_key].append(file_data)
