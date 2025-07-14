@@ -21,12 +21,17 @@ TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
 THUMBNAILS_DIR = "Thumbnails"
 
-# --- Funções Auxiliares (sem alterações) ---
+# Configuração de Otimização
+MAX_IMAGE_WIDTH = 1920
+JPEG_QUALITY = 85
+
+# --- Funções Auxiliares ---
+
 def rclone_lsf_recursive(remote_path):
-    command = ["rclone", "lsf", remote_path, "--recursive", "--files-only"]
+    command = ["rclone", "lsf", remote_path, "--recursive", "--files-only", "--exclude", "wm_*"]
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
-        return {line for line in result.stdout.strip().split('\n') if line and not line.startswith('wm_')}
+        return {line for line in result.stdout.strip().split('\n') if line}
     except subprocess.CalledProcessError:
         return set()
 
@@ -56,13 +61,16 @@ def get_media_dimensions(local_path, media_type):
         print(f"  AVISO: Não foi possível obter dimensões para '{local_path}'. Erro: {e}")
     return width, height
 
-def apply_watermark_to_image(input_path, output_path):
+def apply_watermark_and_optimize(input_path, output_path):
     try:
-        with Image.open(input_path) as base_img:
-            img_corrected = ImageOps.exif_transpose(base_img)
-            final_img = img_corrected.convert("RGBA")
-            draw = ImageDraw.Draw(final_img)
-            font_size = max(20, int(min(final_img.width, final_img.height) * 0.035))
+        with Image.open(input_path) as img:
+            img_corrected = ImageOps.exif_transpose(img)
+            if img_corrected.width > MAX_IMAGE_WIDTH:
+                new_height = int(MAX_IMAGE_WIDTH * img_corrected.height / img_corrected.width)
+                img_corrected = img_corrected.resize((MAX_IMAGE_WIDTH, new_height), Image.Resampling.LANCZOS)
+            
+            draw = ImageDraw.Draw(img_corrected)
+            font_size = max(20, int(min(img_corrected.width, img_corrected.height) * 0.035))
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size)
                 font.set_variation_by_name('SemiBold')
@@ -71,15 +79,40 @@ def apply_watermark_to_image(input_path, output_path):
             
             bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
             text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
-            margin = int(final_img.width * 0.02)
-            x, y = final_img.width - text_width - margin, final_img.height - text_height - margin
+            margin = int(img_corrected.width * 0.02)
+            x, y = img_corrected.width - text_width - margin, img_corrected.height - text_height - margin
             
             draw.text((x + 1, y + 1), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
             draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 200))
-            final_img.save(output_path, "PNG")
+            img_corrected.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True, subsampling=0)
         return True
     except Exception as e:
         return f"PIL Error: {e}"
+
+# --- NOVA FUNÇÃO PARA APLICAR MARCA D'ÁGUA EM VÍDEOS ---
+def apply_watermark_to_video(input_path, output_path, video_width, video_height):
+    """Aplica marca d'água a um vídeo usando FFmpeg."""
+    escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
+    font_size = max(24, int(min(video_width, video_height) * 0.035))
+    margin = int(video_width * 0.02)
+    
+    # Comando FFmpeg para desenhar o texto no canto inferior direito
+    command = [
+        "ffmpeg", "-i", input_path,
+        "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2",
+        "-c:v", "libx264", # Recodifica o vídeo para garantir que a marca d'água é aplicada
+        "-preset", "fast",  # Um bom equilíbrio entre velocidade e tamanho
+        "-crf", "23",       # Controlo de qualidade (valores mais baixos = melhor qualidade)
+        "-c:a", "copy",     # Copia o áudio sem o recodificar
+        "-y", output_path
+    ]
+    try:
+        subprocess.run(command, check=True, capture_output=True, text=True, timeout=600) # Timeout de 10 minutos
+        return True
+    except subprocess.CalledProcessError as e:
+        return f"FFmpeg Error: {e.stderr}"
+    except subprocess.TimeoutExpired:
+        return "FFmpeg Error: O processamento demorou demasiado tempo (timeout)."
 
 # --- Lógica Principal ---
 def main():
@@ -96,7 +129,7 @@ def main():
             except json.JSONDecodeError:
                 print("AVISO: Ficheiro data.json existente está corrompido.")
 
-    print("\n--- [FASE 1] Mapeando ficheiros de ORIGEM (sem 'wm_') no R2 ---")
+    print("\n--- [FASE 1] Mapeando ficheiros de ORIGEM no R2 ---")
     source_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     
     new_data = {cat_key: [] for cat_key in CATEGORIES.values()}
@@ -105,9 +138,7 @@ def main():
     all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     for path in all_r2_files:
         if path.split('/')[-1].startswith('wm_'):
-             # Lógica para adicionar ficheiros já processados ao new_data
              pass
-
 
     for path in source_files:
         try:
@@ -136,12 +167,12 @@ def main():
             file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "orientation": "horizontal" if width >= height else "vertical"}
             
             if category_key in ["fotografias", "designs"]:
-                watermarked_filename = f"wm_{os.path.splitext(filename)[0]}.png"
+                watermarked_filename = f"wm_{os.path.splitext(filename)[0]}.jpg"
                 local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
                 upload_path = f"{category_folder}/{watermarked_filename}"
                 
-                result = apply_watermark_to_image(local_original_path, local_processed_path)
-                if result is not True: raise Exception(f"Falha no watermarking: {result}")
+                result = apply_watermark_and_optimize(local_original_path, local_processed_path)
+                if result is not True: raise Exception(f"Falha na otimização: {result}")
                 
                 subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
                 file_data["url"] = f"{PUBLIC_URL}/{upload_path.replace(' ', '%20')}"
@@ -149,13 +180,24 @@ def main():
                 subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"], check=True, capture_output=True)
                 print(f"  -> Ficheiro original '{path}' apagado do R2.")
 
+            elif category_key == "videos":
+                # LÓGICA DE VÍDEO CORRIGIDA
+                watermarked_filename = f"wm_{filename}"
+                local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
+                upload_path = f"{category_folder}/{watermarked_filename}"
+
+                result = apply_watermark_to_video(local_original_path, local_processed_path, width, height)
+                if result is not True: raise Exception(f"Falha no watermarking de vídeo: {result}")
+
+                subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
+                file_data["url"] = f"{PUBLIC_URL}/{upload_path.replace(' ', '%20')}"
+                file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
+
+                subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"], check=True, capture_output=True)
+                print(f"  -> Ficheiro de vídeo original '{path}' apagado do R2.")
+
             elif category_key == "apresentacoes":
                 file_data["url"] = f"{PUBLIC_URL}/{path.replace(' ', '%20')}"
-            
-            elif category_key == "videos":
-                # Adicionar aqui a sua lógica de watermarking de vídeo, seguindo o mesmo padrão
-                file_data["url"] = f"{PUBLIC_URL}/{path.replace(' ', '%20')}"
-                file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
 
             new_data[category_key].append(file_data)
 
