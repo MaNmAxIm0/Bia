@@ -1,5 +1,3 @@
-// js/html-injector.js (VERSÃO CORRIGIDA E FINAL)
-
 document.addEventListener("DOMContentLoaded", function() {
     const headerPlaceholder = document.getElementById('header-placeholder');
     const footerPlaceholder = document.getElementById('footer-placeholder');
@@ -8,42 +6,11 @@ document.addEventListener("DOMContentLoaded", function() {
         return; // Sai se não houver placeholders na página
     }
 
-    // --- LÓGICA DE DETEÇÃO DE IDIOMA CORRIGIDA ---
-    let lang = 'pt'; // Idioma padrão
-    const pathname = window.location.pathname;
+    // Caminhos atualizados para buscar os ficheiros a partir da pasta /html/
+    // Sobe um nível a partir da pasta do idioma (ex: /pt/) para a pasta /html/
+    const headerPath = `../cabecalho.html`;
+    const footerPath = `../rodape.html`;
 
-    if (pathname.includes('/en/')) {
-        lang = 'en';
-    } else if (pathname.includes('/es/')) {
-        lang = 'es';
-    }
-    // Se não for 'en' nem 'es', assume-se 'pt'.
-
-    // --- MAPEAMENTO DE FICHEIROS ---
-    const fileMap = {
-        pt: {
-            header: 'cabecalho.html',
-            footer: 'rodape.html'
-        },
-        en: {
-            header: 'header.html',
-            footer: 'footer.html'
-        },
-        es: {
-            // Assumindo que os ficheiros para espanhol se chamarão assim
-            header: 'cabecera.html', 
-            footer: 'pie-de-pagina.html'
-        }
-    };
-
-    const headerFile = fileMap[lang].header;
-    const footerFile = fileMap[lang].footer;
-
-    // Constrói os caminhos corretos
-    const headerPath = `../../includes/${headerFile}`;
-    const footerPath = `../../includes/${footerFile}`;
-
-    // Função para carregar e injetar o HTML
     const loadHTML = (filePath, placeholder) => {
         return new Promise((resolve, reject) => {
             if (!placeholder) {
@@ -53,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
             fetch(filePath)
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`Ficheiro não encontrado: ${filePath}. Verifique se o ficheiro existe no caminho correto.`);
+                        throw new Error(`Ficheiro não encontrado: ${filePath}. Verifique o caminho e o nome do ficheiro.`);
                     }
                     return response.text();
                 })
@@ -71,20 +38,10 @@ document.addEventListener("DOMContentLoaded", function() {
             .catch(error => console.error(`Erro ao carregar rodapé:`, error));
     }
 
-    // Carrega o cabeçalho e, DEPOIS, executa os scripts que dependem dele
+    // Carrega o cabeçalho e dispara um evento para notificar outros scripts
     if (headerPlaceholder) {
         loadHTML(headerPath, headerPlaceholder)
             .then(() => {
-                // O cabeçalho está 100% garantido no DOM neste ponto.
-                if (typeof window.initializeMenu === 'function') {
-                    window.initializeMenu();
-                }
-                if (typeof window.setupLanguageSwitcher === 'function') {
-                    window.setupLanguageSwitcher(lang);
-                }
-                
-                // !! ADICIONE ESTA LINHA !!
-                // Avisa outros scripts que o cabeçalho foi carregado
                 document.dispatchEvent(new CustomEvent('headerLoaded'));
             })
             .catch(error => console.error(`Erro ao carregar cabeçalho:`, error));

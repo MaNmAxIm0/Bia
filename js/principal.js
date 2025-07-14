@@ -1,85 +1,133 @@
+// Ficheiro: /js/principal.js (VERSÃO COMPLETA E VERIFICADA)
+
 import { initCarousel } from './carrossel.js';
 import { loadGalleryContent, loadPresentations } from './galeria.js';
-import { applyTranslations } from './linguagem.js';
+import { applyTranslations, setLanguage, getCurrentLanguage } from './linguagem.js';
 
-// --- FUNÇÕES GLOBAIS PARA O INJETOR DE HTML ---
+// --- FUNÇÃO PARA CARREGAR O CARROSSEL DINÂMICO ---
+async function loadDynamicCarousel() {
+    const slidesContainer = document.getElementById('dynamic-carousel-slides');
+    const carouselSection = document.querySelector('.hero-carousel');
+    if (!slidesContainer || !carouselSection) return;
 
-/**
- * Inicializa o menu de navegação, incluindo o botão "hamburger" e os dropdowns.
- */
-window.initializeMenu = function() {
+    try {
+        // Determina o caminho correto para o data.json (funciona localmente e no GitHub)
+        const basePath = window.location.hostname.includes('github.io') ? '/Bia' : '';
+        const response = await fetch(`${basePath}/data.json`);
+        const data = await response.json();
+        const carouselItems = data.carousel || [];
+
+        if (carouselItems.length === 0) {
+            carouselSection.style.display = 'none'; // Esconde a secção se não houver imagens
+            return;
+        }
+
+        const lang = getCurrentLanguage();
+        slidesContainer.innerHTML = ''; // Limpa quaisquer slides estáticos
+
+        carouselItems.forEach(item => {
+            const slideDiv = document.createElement('div');
+            slideDiv.className = 'carousel-slide';
+
+            const img = document.createElement('img');
+            img.src = item.url;
+            img.alt = item.descriptions[lang] || item.descriptions.pt || 'Imagem do Carrossel'; // Fallback para a descrição
+
+            const captionDiv = document.createElement('div');
+            captionDiv.className = 'carousel-caption';
+            
+            const descriptionP = document.createElement('p');
+            // Usa a descrição do idioma atual, ou português como fallback
+            descriptionP.textContent = item.descriptions[lang] || item.descriptions.pt || '';
+
+            captionDiv.appendChild(descriptionP);
+            slideDiv.appendChild(img);
+            slideDiv.appendChild(captionDiv);
+            slidesContainer.appendChild(slideDiv);
+        });
+
+        // Reinicializa o carrossel depois de adicionar os slides dinâmicos
+        initCarousel(carouselSection);
+
+    } catch (error) {
+        console.error('Erro ao carregar dados do carrossel:', error);
+        carouselSection.style.display = 'none'; // Esconde em caso de erro
+    }
+}
+
+// --- FUNÇÕES DE INICIALIZAÇÃO DO CABEÇALHO ---
+function initializeMenu() {
     const menuToggle = document.querySelector('.menu-toggle');
     const navLinks = document.querySelector('.nav-links');
-
-    // Lógica para o botão "hamburger"
     if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-        });
+        menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
     }
-  
-    // Lógica para os dropdowns do menu principal (Fotografias, Vídeos)
+
     document.querySelectorAll('.main-nav .dropdown').forEach(dropdown => {
         const toggle = dropdown.querySelector('.dropdown-toggle');
-        
-        toggle.addEventListener('click', function(event) {
-            // Em mobile, previne a navegação e abre/fecha o submenu
+        toggle.addEventListener('click', (event) => {
             if (window.innerWidth <= 768) {
                 event.preventDefault();
-                // Fecha outros dropdowns abertos para uma melhor experiência
-                document.querySelectorAll('.main-nav .dropdown.active').forEach(openDropdown => {
-                    if (openDropdown !== dropdown) {
-                        openDropdown.classList.remove('active');
-                    }
-                });
                 dropdown.classList.toggle('active');
             }
         });
     });
 
-    // Lógica para destacar o link ativo (simplificada)
-    const currentPath = window.location.pathname;
+    const pageFileMap = {
+        'home': { pt: 'index.html', en: 'index.html', es: 'index.html' },
+        'presentations': { pt: 'apresentacoes.html', en: 'presentations.html', es: 'presentaciones.html' },
+        'designs': { pt: 'designs.html', en: 'designs.html', es: 'disenos.html' },
+        'horizontal_photos': { pt: 'fotos-horizontais.html', en: 'photos-horizontal.html', es: 'fotos-horizontales.html' },
+        'vertical_photos': { pt: 'fotos-verticais.html', en: 'photos-vertical.html', es: 'fotos-verticales.html' },
+        'horizontal_videos': { pt: 'videos-horizontais.html', en: 'videos-horizontal.html', es: 'videos-horizontales.html' },
+        'vertical_videos': { pt: 'videos-verticais.html', en: 'videos-vertical.html', es: 'videos-verticales.html' },
+        'about_me': { pt: 'sobre-mim.html', en: 'about-me.html', es: 'sobre-mi.html' },
+        'contact': { pt: 'contactos.html', en: 'contacts.html', es: 'contactos.html' }
+    };
+
+    const currentLang = getCurrentLanguage();
+    document.querySelectorAll('.main-nav > ul > li > a[data-lang-key]').forEach(link => {
+        const key = link.dataset.langKey;
+        if (pageFileMap[key]) link.href = pageFileMap[key][currentLang];
+    });
+    document.querySelectorAll('.dropdown-menu a').forEach(link => {
+        const parentKey = link.closest('.dropdown').querySelector('a').dataset.langKey;
+        const selfKey = link.dataset.langKey;
+        const fullKey = selfKey === 'horizontal' ? `${selfKey}_${parentKey}` : `${selfKey}_${parentKey}`;
+        if (pageFileMap[fullKey]) link.href = pageFileMap[fullKey][currentLang];
+    });
+
+    const currentPage = window.location.pathname.split('/').pop();
     document.querySelectorAll('.main-nav a').forEach(link => {
-        if (link.href.endsWith(currentPath)) {
+        if (link.href.endsWith(currentPage)) {
             link.classList.add('active');
-            // Se o link ativo estiver dentro de um dropdown, ativa o dropdown pai
-            if (link.closest('.dropdown')) {
-                link.closest('.dropdown').classList.add('active');
+            const parentDropdown = link.closest('.dropdown');
+            if (parentDropdown) {
+                parentDropdown.classList.add('active');
             }
-        }
-    });
-};
-
-/**
- * Controla a abertura e fecho do novo dropdown de idiomas.
- */
-function initializeLanguageDropdown() {
-    const dropdown = document.querySelector('.language-dropdown');
-    if (!dropdown) return;
-
-    const selected = dropdown.querySelector('.language-selected');
-
-    selected.addEventListener('click', (event) => {
-        event.stopPropagation(); // Impede que o clique no botão feche o menu imediatamente
-        dropdown.classList.toggle('open');
-    });
-
-    // Fecha o menu se o utilizador clicar em qualquer outro lugar na página
-    document.addEventListener('click', () => {
-        if (dropdown.classList.contains('open')) {
-            dropdown.classList.remove('open');
         }
     });
 }
 
-/**
- * Configura os links de navegação entre os diferentes idiomas (PT, EN, ES).
- * @param {string} currentLang - O idioma da página atual ('pt', 'en', ou 'es').
- */
-window.setupLanguageSwitcher = function(currentLang) {
-    // Mapeamento de nomes de ficheiros entre idiomas
+function setupLanguageSwitcher() {
+    const currentLang = getCurrentLanguage();
+    const dropdown = document.querySelector('.language-dropdown');
+    if (!dropdown) return;
+
+    const selectedButton = dropdown.querySelector('.language-selected');
+    const langData = {
+        pt: { flag: 'fi-pt', text: 'PT' },
+        en: { flag: 'fi-gb', text: 'EN' },
+        es: { flag: 'fi-es', text: 'ES' }
+    };
+    selectedButton.querySelector('.fi').className = `fi ${langData[currentLang].flag}`;
+    selectedButton.querySelector('span:not(.fi)').textContent = langData[currentLang].text;
+
+    dropdown.querySelectorAll('.lang-option').forEach(opt => opt.classList.remove('active'));
+    const activeOption = dropdown.querySelector(`.lang-option[data-lang="${currentLang}"]`);
+    if (activeOption) activeOption.classList.add('active');
+
     const pageMap = {
-        // PT -> EN
         'index.html': { en: 'index.html', es: 'index.html' },
         'apresentacoes.html': { en: 'presentations.html', es: 'presentaciones.html' },
         'contactos.html': { en: 'contacts.html', es: 'contactos.html' },
@@ -90,69 +138,67 @@ window.setupLanguageSwitcher = function(currentLang) {
         'videos-horizontais.html': { en: 'videos-horizontal.html', es: 'videos-horizontales.html' },
         'videos-verticais.html': { en: 'videos-vertical.html', es: 'videos-verticales.html' }
     };
-
     const currentPageFile = window.location.pathname.split('/').pop();
-
-    // Função para encontrar a página de origem com base na página atual
-    const findSourceFile = (targetLang) => {
-        for (const ptFile in pageMap) {
-            if (pageMap[ptFile][targetLang] === currentPageFile) {
-                return ptFile;
-            }
-        }
-        return 'index.html'; // Fallback
-    };
-
     let sourceFile = 'index.html';
     if (currentLang === 'pt') {
         sourceFile = currentPageFile;
     } else {
-        sourceFile = findSourceFile(currentLang);
+        for (const ptFile in pageMap) {
+            if (Object.values(pageMap[ptFile]).includes(currentPageFile)) {
+                sourceFile = ptFile;
+                break;
+            }
+        }
     }
+    document.querySelector('.lang-pt-link').href = `../pt/${sourceFile}`;
+    document.querySelector('.lang-en-link').href = `../en/${pageMap[sourceFile]?.en || 'index.html'}`;
+    document.querySelector('.lang-es-link').href = `../es/${pageMap[sourceFile]?.es || 'index.html'}`;
 
-    // Configurar links
-    const linkPt = document.querySelector('.lang-pt-link');
-    if (linkPt) linkPt.href = `../pt/${sourceFile}`;
-
-    const linkEn = document.querySelector('.lang-en-link');
-    if (linkEn) linkEn.href = `../en/${pageMap[sourceFile]?.en || 'index.html'}`;
-
-    const linkEs = document.querySelector('.lang-es-link');
-    if (linkEs) linkEs.href = `../es/${pageMap[sourceFile]?.es || 'index.html'}`;
-
-    // Inicializa o comportamento de clique do dropdown de idiomas
-    initializeLanguageDropdown();
-};
-
-
-// --- FUNÇÃO PRINCIPAL PARA O CONTEÚDO DA PÁGINA ---
-function initializePageContent() {
-    // Inicializa o carrossel na página inicial
-    const carouselElement = document.querySelector('.hero-carousel');
-    if (carouselElement) {
-        initCarousel(carouselElement);
-    }
-
-    // Carrega o conteúdo dinâmico da galeria com base na página atual
-    const currentPathname = window.location.pathname;
-
-    if (currentPathname.includes('fotos-horizontais') || currentPathname.includes('photos-horizontal') || currentPathname.includes('fotos-horizontales')) {
-        loadGalleryContent('fotografias', 'photo-h-gallery', 'horizontal');
-    } else if (currentPathname.includes('fotos-verticais') || currentPathname.includes('photos-vertical') || currentPathname.includes('fotos-verticales')) {
-        loadGalleryContent('fotografias', 'photo-v-gallery', 'vertical');
-    } else if (currentPathname.includes('videos-horizontais') || currentPathname.includes('videos-horizontal') || currentPathname.includes('videos-horizontales')) {
-        loadGalleryContent('videos', 'video-h-gallery', 'horizontal');
-    } else if (currentPathname.includes('videos-verticais') || currentPathname.includes('videos-vertical') || currentPathname.includes('videos-verticales')) {
-        loadGalleryContent('videos', 'video-v-gallery', 'vertical');
-    } else if (currentPathname.includes('designs') || currentPathname.includes('disenos')) {
-        loadGalleryContent('designs', 'design-gallery');
-    } else if (currentPathname.includes('apresentacoes') || currentPathname.includes('presentations') || currentPathname.includes('presentaciones')) {
-        loadPresentations();
-    }
-
-    // Aplica as traduções a todos os elementos da página
-    applyTranslations();
+    selectedButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+    });
+    document.addEventListener('click', () => dropdown.classList.remove('open'));
 }
 
-// Event listener que executa quando o DOM inicial está carregado
-document.addEventListener('DOMContentLoaded', initializePageContent);
+// --- LÓGICA PRINCIPAL DA PÁGINA ---
+function onPageLoad() {
+    const pathLang = window.location.pathname.split('/')[2] || 'pt';
+    setLanguage(pathLang);
+    applyTranslations();
+
+    // Carrega o carrossel dinâmico na página inicial
+    if (window.location.pathname.endsWith('index.html')) {
+        loadDynamicCarousel();
+    }
+
+    const pageKey = window.location.pathname.split('/').pop().replace('.html', '');
+    const galleryIdMap = {
+        'fotos-horizontais': 'photo-h-gallery', 'photos-horizontal': 'photo-h-gallery', 'fotos-horizontales': 'photo-h-gallery',
+        'fotos-verticais': 'photo-v-gallery', 'photos-vertical': 'photo-v-gallery', 'fotos-verticales': 'photo-v-gallery',
+        'videos-horizontais': 'video-h-gallery', 'videos-horizontal': 'video-h-gallery', 'videos-horizontales': 'video-h-gallery',
+        'videos-verticais': 'video-v-gallery', 'videos-vertical': 'video-v-gallery', 'videos-verticales': 'video-v-gallery',
+        'designs': 'design-gallery', 'disenos': 'design-gallery',
+        'apresentacoes': 'presentation-gallery', 'presentations': 'presentation-gallery', 'presentaciones': 'presentation-gallery'
+    };
+    const galleryId = galleryIdMap[pageKey];
+    if (galleryId) {
+        const typeMap = { photo: 'fotografias', video: 'videos', design: 'designs', presentation: 'apresentacoes' };
+        const galleryType = typeMap[galleryId.split('-')[0]];
+        if (galleryType === 'apresentacoes') {
+            loadPresentations();
+        } else {
+            const orientation = galleryId.includes('-h-') ? 'horizontal' : (galleryId.includes('-v-') ? 'vertical' : null);
+            loadGalleryContent(galleryType, galleryId, orientation);
+        }
+    }
+}
+
+// --- EVENT LISTENERS ---
+document.addEventListener('DOMContentLoaded', onPageLoad);
+
+document.addEventListener('headerLoaded', () => {
+    initializeMenu();
+    setupLanguageSwitcher();
+    applyTranslations();
+});

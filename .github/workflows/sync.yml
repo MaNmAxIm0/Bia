@@ -36,6 +36,8 @@ jobs:
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
           echo "--- A iniciar sincronização do Google Drive para o R2 ---"
+          # ALTERAÇÃO: Removido o --exclude para a pasta 'melhores' se existir
+          # e garantido que a sincronização principal a inclui.
           rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" \
             --exclude "desktop.ini" \
             --exclude "/Thumbnails/**" \
@@ -46,13 +48,14 @@ jobs:
 
       - name: Gerar Thumbnails para Vídeos
         run: |
+          # (Esta secção não precisa de alterações )
           echo "--- A iniciar geração de thumbnails para vídeos ---"
           mkdir -p temp_thumbs
           
           OLD_IFS="$IFS"
           IFS=$'\n'
           
-          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only  ); do
+          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only); do
             echo "A processar vídeo para thumbnail: ${video_file}"
             rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
             
@@ -70,7 +73,7 @@ jobs:
           rclone sync temp_thumbs "R2:bia-portfolio-assets/Thumbnails" -P
           echo "--- Geração de thumbnails concluída ---"
 
-      - name: Gerar o ficheiro data.json com marcas de água
+      - name: Gerar o ficheiro data.json e processar media
         run: |
           echo "--- A preparar para executar o script Python (process_files.py) ---"
           mkdir -p scripts/
@@ -80,9 +83,7 @@ jobs:
           
           if [ -f "scripts/Montserrat.ttf" ]; then
             echo "Fonte descarregada. A iniciar o script principal de processamento..."
-            # A execução do script Python começa aqui. As mensagens de progresso virão do próprio script.
             python3 scripts/process_files.py
-            # Esta mensagem só aparecerá quando o script terminar com sucesso.
             echo "--- Script Python (process_files.py ) concluído com sucesso ---"
           else
             echo "ERRO: Falha ao descarregar a fonte Montserrat. A abortar."

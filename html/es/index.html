@@ -1,65 +1,23 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <!-- Google tag (gtag.js ) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(  ){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-ZW5DLGF7RF');
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-lang-key="home">Beatriz Rodrigues - Inicio</title>
-
-  <!-- Metatags para SEO y Open Graph/Twitter Cards -->
-  <meta name="description" content="Explora el porfolio de Beatriz Rodrigues, una creadora de contenido que presenta presentaciones, diseños, fotografías y vídeos.">
-  <meta property="og:title" content="Porfolio - Beatriz Rodrigues - Inicio">
-  <meta property="og:description" content="Explora el porfolio de Beatriz Rodrigues, una creadora de contenido que presenta presentaciones, diseños, fotografías y vídeos.">
-  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/es/index.html">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Porfolio - Beatriz Rodrigues - Inicio">
-  <meta name="twitter:description" content="Explora el porfolio de Beatriz Rodrigues, una creadora de contenido que presenta presentaciones, diseños, fotografías y vídeos.">
-  <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta name="robots" content="index, follow">
-
-  <!-- Links hreflang para SEO multilingüe -->
-  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/index.html" />
-  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/index.html" />
-  <link rel="alternate" hreflang="es" href="https://manmaxim0.github.io/Bia/html/es/index.html" />
-
-  <!-- Links para folhas de estilo CSS -->
+  <title data-lang-key="home">Beatriz Rodrigues - Home</title>
   <link rel="stylesheet" href="../../css/estilo.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
-  <!-- CSS para Ícones de Bandeiras (flag-icons ) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
-
-  <!-- Links para favicons -->
-  <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
-  <link rel="shortcut icon" href="../../favicons/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
   <link rel="manifest" href="../../favicons/site.webmanifest" />
-
-  <!-- Importmap para módulos JavaScript -->
   <script type="importmap">
     {
       "imports": {
         "carrossel": "../../js/carrossel.js",
         "gallery": "../../js/galeria.js",
-        "lightbox": "../../js/pop-up.js",
-        "ferramentas": "../../js/ferramentas.js",
-        "config": "../../js/configuracoes.js",
-        "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
-        "linguagem": "../../js/linguagem.js"
+        "linguagem": "../../js/linguagem.js",
+        "principal": "../../js/principal.js"
       }
     }
   </script>
@@ -70,83 +28,69 @@
   <main class="page-content">
     <section class="hero-carousel">
       <div class="carousel-container">
-        <div class="carousel-slides">
-          <div class="carousel-slide">
-            <img src="../../imagens/carousel_image_1.png" alt="Trabajo Destacado 1" />
-            <div class="carousel-caption">
-              <h2 data-lang-key="project_a_title">Proyecto A</h2>
-              <p data-lang-key="project_a_description">Un trabajo innovador que combina diseño y tecnología.</p>
-            </div>
-          </div>
-          <div class="carousel-slide">
-            <img src="../../imagens/carousel_image_2.png" alt="Trabajo Destacado 2" />
-            <div class="carousel-caption">
-              <h2 data-lang-key="short_film_title">Cortometraje "El Regreso"</h2>
-              <p data-lang-key="short_film_description">Una narrativa visual emocionante y cautivadora.</p>
-            </div>
-          </div>
-          <div class="carousel-slide">
-            <img src="../../imagens/carousel_image_3.png" alt="Trabajo Destacado 3" />
-            <div class="carousel-caption">
-              <h2 data-lang-key="corporate_presentation_title">Presentación Corporativa</h2>
-              <p data-lang-key="corporate_presentation_description">Estrategias de marketing para el futuro.</p>
-            </div>
-          </div>
+        <div class="carousel-slides" id="dynamic-carousel-slides">
+          <!-- Slides will be inserted here by JavaScript -->
         </div>
-        <button class="carousel-btn prev" aria-label="Diapositiva anterior"><i class="fas fa-chevron-left"></i></button>
-        <button class="carousel-btn next" aria-label="Siguiente diapositiva"><i class="fas fa-chevron-right"></i></button>
+        <button class="carousel-btn prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+        <button class="carousel-btn next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
         <div class="carousel-dots"></div>
       </div>
     </section>
 
     <section class="section-highlight container">
-      <h2 data-lang-key="best_works">Mejores Trabajos</h2>
+      <h2 data-lang-key="my_works">My Works</h2>
       <div class="best-works-grid">
         <div class="work-item">
-          <img src="../../imagens/work_thumb_video.png" alt="Mejor Vídeo" />
-          <h3 data-lang-key="videos">Vídeos</h3>
-          <p data-lang-key="videos_thumb_desc">Creaciones audiovisuales que cuentan historias.</p>
-          <a href="videos-horizontales.html" class="btn" data-lang-key="view_video">Ver Vídeo <i class="fas fa-arrow-right"></i></a>
+          <img src="../../imagens/work_thumb_photo_h.png" alt="Horizontal Photos" />
+          <h3 data-lang-key="horizontal_photos_title">Horizontal Photos</h3>
+          <p data-lang-key="horizontal_photos_desc">A collection of photos in landscape format.</p>
+          <a href="photos-horizontal.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
         </div>
         <div class="work-item">
-          <img src="../../imagens/work_thumb_photo.png" alt="Mejor Fotografía" />
-          <h3 data-lang-key="photos">Fotografías</h3>
-          <p data-lang-key="photos_thumb_desc">Galería de imágenes que capturan momentos únicos.</p>
-          <a href="fotos-horizontales.html" class="btn" data-lang-key="view_photos">Ver Fotografías <i class="fas fa-arrow-right"></i></a>
+          <img src="../../imagens/work_thumb_photo_v.png" alt="Vertical Photos" />
+          <h3 data-lang-key="vertical_photos_title">Vertical Photos</h3>
+          <p data-lang-key="vertical_photos_desc">A selection of photos in portrait format.</p>
+          <a href="photos-vertical.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
         </div>
         <div class="work-item">
-          <img src="../../imagens/work_thumb_presentation.png" alt="Mejor Presentación" />
-          <h3 data-lang-key="presentations">Presentaciones</h3>
-          <p data-lang-key="presentations_thumb_desc">Proyectos e ideas transformados en presentaciones impactantes.</p>
-          <a href="presentaciones.html" class="btn" data-lang-key="view_presentation">Ver Presentación <i class="fas fa-arrow-right"></i></a>
+          <img src="../../imagens/work_thumb_video_h.png" alt="Horizontal Videos" />
+          <h3 data-lang-key="horizontal_videos_title">Horizontal Videos</h3>
+          <p data-lang-key="horizontal_videos_desc">Audiovisual creations in landscape format.</p>
+          <a href="videos-horizontal.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
         </div>
         <div class="work-item">
-          <img src="../../imagens/asset_work_thumb_design.png" alt="Mejor Diseño" />
-          <h3 data-lang-key="designs">Diseños</h3>
-          <p data-lang-key="designs_thumb_desc">Elementos gráficos creativos y maquetaciones profesionales.</p>
-          <a href="disenos.html" class="btn" data-lang-key="view_designs">Ver Diseños <i class="fas fa-arrow-right"></i></a>
+          <img src="../../imagens/work_thumb_video_v.png" alt="Vertical Videos" />
+          <h3 data-lang-key="vertical_videos_title">Vertical Videos</h3>
+          <p data-lang-key="vertical_videos_desc">Dynamic videos optimized for vertical viewing.</p>
+          <a href="videos-vertical.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="work-item">
+          <img src="../../imagens/work_thumb_design.png" alt="Designs" />
+          <h3 data-lang-key="designs_title">Graphic Designs</h3>
+          <p data-lang-key="designs_desc">Design projects that showcase creativity and skill.</p>
+          <a href="designs.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="work-item">
+          <img src="../../imagens/work_thumb_presentation.png" alt="Presentations" />
+          <h3 data-lang-key="presentations_title">Presentations</h3>
+          <p data-lang-key="presentations_desc">Ideas and projects communicated in a clear and impactful way.</p>
+          <a href="presentations.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
     </section>
 
     <section class="section-previews container">
-      <h2 data-lang-key="discover_more">Descubrir Más</h2>
+      <h2 data-lang-key="discover_more">Discover More</h2>
       <div class="section-preview-grid">
-        <a href="videos-horizontales.html" class="preview-item">
-          <img src="../../imagens/work_thumb_video.png" alt="Vídeos" />
-          <h3 data-lang-key="videos">Vídeos</h3>
+        <a href="about-me.html" class="preview-item">
+          <img src="../../imagens/preview_about_me.png" alt="About Me" />
+          <h3 data-lang-key="about_me">About Me</h3>
+          <p data-lang-key="about_me_preview_desc">Learn about my story, passions, and skills.</p>
         </a>
-        <a href="fotos-horizontales.html" class="preview-item">
-          <img src="../../imagens/work_thumb_photo.png" alt="Fotografías" />
-          <h3 data-lang-key="photos">Fotografías</h3>
-        </a>
-        <a href="presentaciones.html" class="preview-item">
-          <img src="../../imagens/work_thumb_presentation.png" alt="Presentaciones" />
-          <h3 data-lang-key="presentations">Presentaciones</h3>
-        </a>
-        <a href="disenos.html" class="preview-item">
-          <img src="../../imagens/asset_work_thumb_design.png" alt="Diseños" />
-          <h3 data-lang-key="designs">Diseños</h3>
+        <a href="contacts.html" class="preview-item">
+          <img src="../../imagens/preview_contact.png" alt="Contact" />
+          <h3 data-lang-key="contact">Contact</h3>
+          <p data-lang-key="contact_preview_desc">Let's talk! Send a message or find me on social media.</p>
         </a>
       </div>
     </section>

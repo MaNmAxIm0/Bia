@@ -1,64 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZW5DLGF7RF"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag( ){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-ZW5DLGF7RF');
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-lang-key="home">Beatriz Rodrigues - Home</title>
-
-  <!-- Metatags para SEO e Open Graph/Twitter Cards -->
-  <meta name="description" content="Explore the portfolio of Beatriz Rodrigues, a content creator showcasing presentations, designs, photos, and videos.">
-  <meta property="og:title" content="Portfolio - Beatriz Rodrigues - Home">
-  <meta property="og:description" content="Explore the portfolio of Beatriz Rodrigues, a content creator showcasing presentations, designs, photos, and videos.">
-  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/en/index.html">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Portfolio - Beatriz Rodrigues - Home">
-  <meta name="twitter:description" content="Explore the portfolio of Beatriz Rodrigues, a content creator showcasing presentations, designs, photos, and videos.">
-  <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
-  <meta name="robots" content="index, follow">
-
-  <!-- Links hreflang para SEO multilingue -->
-  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/index.html" />
-  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/index.html" />
-
-  <!-- Links para folhas de estilo CSS -->
+  <title data-lang-key="home">Beatriz Rodrigues - Inicio</title>
   <link rel="stylesheet" href="../../css/estilo.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
-  <!-- CSS para Ícones de Bandeiras (flag-icons) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
-
-  <!-- Links para favicons -->
-  <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
-  <link rel="shortcut icon" href="../../favicons/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
   <link rel="manifest" href="../../favicons/site.webmanifest" />
-
-  <!-- Importmap para módulos JavaScript -->
   <script type="importmap">
     {
       "imports": {
         "carrossel": "../../js/carrossel.js",
         "gallery": "../../js/galeria.js",
-        "lightbox": "../../js/pop-up.js",
-        "ferramentas": "../../js/ferramentas.js",
-        "config": "../../js/configuracoes.js",
-        "gestor-de-linguagem": "../../js/gestor-de-linguagem.js",
-        "linguagem": "../../js/linguagem.js"
+        "linguagem": "../../js/linguagem.js",
+        "principal": "../../js/principal.js"
       }
     }
   </script>
@@ -69,87 +28,69 @@
   <main class="page-content">
     <section class="hero-carousel">
       <div class="carousel-container">
-        <div class="carousel-slides">
-          <div class="carousel-slide">
-            <img src="../../imagens/carousel_image_1.png" alt="Featured Work 1" />
-            <div class="carousel-caption">
-              <h2 data-lang-key="project_a_title">Project A</h2>
-              <p data-lang-key="project_a_description">An innovative work that combines design and technology.</p>
-            </div>
-          </div>
-          <div class="carousel-slide">
-            <img src="../../imagens/carousel_image_2.png" alt="Featured Work 2" />
-            <div class="carousel-caption">
-              <h2 data-lang-key="short_film_title">Short Film "The Return"</h2>
-              <p data-lang-key="short_film_description">An emotional and engaging visual narrative.</p>
-            </div>
-          </div>
-          <div class="carousel-slide">
-            <img src="../../imagens/carousel_image_3.png" alt="Featured Work 3" />
-            <div class="carousel-caption">
-              <h2 data-lang-key="corporate_presentation_title">Corporate Presentation</h2>
-              <p data-lang-key="corporate_presentation_description">Marketing strategies for the future.</p>
-            </div>
-          </div>
+        <div class="carousel-slides" id="dynamic-carousel-slides">
+          <!-- Las diapositivas se insertarán aquí con JavaScript -->
         </div>
-        <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
-        <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+        <button class="carousel-btn prev" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
+        <button class="carousel-btn next" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
         <div class="carousel-dots"></div>
       </div>
     </section>
 
     <section class="section-highlight container">
-      <h2 data-lang-key="best_works">Best Works</h2>
+      <h2 data-lang-key="my_works">Mis Trabajos</h2>
       <div class="best-works-grid">
         <div class="work-item">
-          <img src="../../imagens/work_thumb_video.png" alt="Best Video" />
-          <h3 data-lang-key="urban_documentary_title">Urban Documentary</h3>
-          <p data-lang-key="urban_documentary_description">A deep exploration of city life, with captivating interviews and footage.</p>
-          <a href="videos.html" class="btn" data-lang-key="view_video">View Video <i class="fas fa-arrow-right"></i></a>
+          <img src="../../imagens/work_thumb_photo_h.png" alt="Fotografías Horizontales" />
+          <h3 data-lang-key="horizontal_photos_title">Fotografías Horizontales</h3>
+          <p data-lang-key="horizontal_photos_desc">Una colección de fotografías en formato apaisado.</p>
+          <a href="fotos-horizontales.html" class="btn" data-lang-key="view_gallery">Ver Galería <i class="fas fa-arrow-right"></i></a>
         </div>
         <div class="work-item">
-          <img src="../../imagens/work_thumb_photo.png" alt="Best Photo" />
-          <h3 data-lang-key="natural_landscapes_title">Natural Landscapes</h3>
-          <p data-lang-key="natural_landscapes_description">A collection of photographs that capture the untouched beauty of nature.</p>
-          <a href="photos.html" class="btn" data-lang-key="view_photos">View Photos <i class="fas fa-arrow-right"></i></a>
+          <img src="../../imagens/work_thumb_photo_v.png" alt="Fotografías Verticales" />
+          <h3 data-lang-key="vertical_photos_title">Fotografías Verticales</h3>
+          <p data-lang-key="vertical_photos_desc">Una selección de fotografías en formato retrato.</p>
+          <a href="fotos-verticales.html" class="btn" data-lang-key="view_gallery">Ver Galería <i class="fas fa-arrow-right"></i></a>
         </div>
         <div class="work-item">
-          <img src="../../imagens/work_thumb_presentation.png" alt="Best Presentation" />
-          <h3 data-lang-key="innovation_workshop_title">Innovation Workshop</h3>
-          <p data-lang-key="innovation_workshop_description">An interactive presentation on the latest trends in technological innovation.</p>
-          <a href="presentations.html" class="btn" data-lang-key="view_presentation">View Presentation <i class="fas fa-arrow-right"></i></a>
+          <img src="../../imagens/work_thumb_video_h.png" alt="Vídeos Horizontales" />
+          <h3 data-lang-key="horizontal_videos_title">Vídeos Horizontales</h3>
+          <p data-lang-key="horizontal_videos_desc">Creaciones audiovisuales en formato apaisado.</p>
+          <a href="videos-horizontales.html" class="btn" data-lang-key="view_gallery">Ver Galería <i class="fas fa-arrow-right"></i></a>
         </div>
         <div class="work-item">
-          <img src="../../imagens/asset_work_thumb_design.png" alt="Best Design" />
-          <h3 data-lang-key="graphic_design_creations_title">Graphic Design Creations</h3>
-          <p data-lang-key="graphic_design_creations_description">Creative designs developed using various tools, including Canva.</p>
-          <a href="designs.html" class="btn" data-lang-key="view_designs">View Designs <i class="fas fa-arrow-right"></i></a>
+          <img src="../../imagens/work_thumb_video_v.png" alt="Vídeos Verticales" />
+          <h3 data-lang-key="vertical_videos_title">Vídeos Verticales</h3>
+          <p data-lang-key="vertical_videos_desc">Vídeos dinámicos optimizados para visualización vertical.</p>
+          <a href="videos-verticales.html" class="btn" data-lang-key="view_gallery">Ver Galería <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="work-item">
+          <img src="../../imagens/work_thumb_design.png" alt="Diseños" />
+          <h3 data-lang-key="designs_title">Diseños Gráficos</h3>
+          <p data-lang-key="designs_desc">Proyectos de diseño que demuestran creatividad y técnica.</p>
+          <a href="disenos.html" class="btn" data-lang-key="view_gallery">Ver Galería <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="work-item">
+          <img src="../../imagens/work_thumb_presentation.png" alt="Presentaciones" />
+          <h3 data-lang-key="presentations_title">Presentaciones</h3>
+          <p data-lang-key="presentations_desc">Ideas y proyectos comunicados de forma clara e impactante.</p>
+          <a href="presentaciones.html" class="btn" data-lang-key="view_gallery">Ver Galería <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
     </section>
 
     <section class="section-previews container">
-      <h2 data-lang-key="discover_more">Discover More</h2>
+      <h2 data-lang-key="discover_more">Descubrir Más</h2>
       <div class="section-preview-grid">
-        <a href="videos.html" class="preview-item">
-          <img src="../../imagens/work_thumb_video.png" alt="Videos" />
-          <h3 data-lang-key="videos">Videos</h3>
-          <p data-lang-key="videos_thumb_desc">Audiovisual creations that tell stories.</p>
+        <a href="sobre-mi.html" class="preview-item">
+          <img src="../../imagens/preview_about_me.png" alt="Sobre Mí" />
+          <h3 data-lang-key="about_me">Sobre Mí</h3>
+          <p data-lang-key="about_me_preview_desc">Conoce mi historia, pasiones y competencias.</p>
         </a>
-        <a href="photos.html" class="preview-item">
-          <img src="../../imagens/work_thumb_photo.png" alt="Photos" />
-          <h3 data-lang-key="photos">Photos</h3>
-          <p data-lang-key="photos_thumb_desc">A gallery of images capturing unique moments.</p>
-        </a>
-        <a href="presentations.html" class="preview-item">
-          <img src="../../imagens/work_thumb_presentation.png" alt="Presentations" />
-          <h3 data-lang-key="presentations">Presentations</h3>
-          <p data-lang-key="presentations_thumb_desc">Projects and ideas transformed into impactful presentations.</p>
-        </a>
-        <a href="designs.html" class="preview-item">
-          <img src="../../imagens/asset_work_thumb_design.png" alt="Designs" />
-          <h3 data-lang-key="designs">Designs</h3>
-          <p data-lang-key="designs_thumb_desc">Creative graphic elements and professional layouts.</p>
+        <a href="contactos.html" class="preview-item">
+          <img src="../../imagens/preview_contact.png" alt="Contactos" />
+          <h3 data-lang-key="contact">Contactos</h3>
+          <p data-lang-key="contact_preview_desc">¡Hablemos! Envía un mensaje o encuéntrame en las redes sociales.</p>
         </a>
       </div>
     </section>
