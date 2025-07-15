@@ -32,21 +32,29 @@ jobs:
       - name: Copiar ficheiros novos ou atualizados do Drive para o R2
         run: |
           echo "--- Copiando ficheiros do Drive para o R2 (não apaga nada ) ---"
-          # Usamos 'copy' para garantir que os ficheiros processados (wm_*) não são apagados.
-          # O script Python irá gerir os ficheiros que foram apagados no Drive.
           rclone copy "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -v
 
+      # --- SECÇÃO CORRIGIDA ---
       - name: Gerar Thumbnails para Vídeos
         run: |
           echo "--- Gerando thumbnails para os vídeos existentes ---"
           mkdir -p temp_thumbs
-          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only --exclude "wm_*" ); do
+          
+          # CORREÇÃO: Usar 'while read' para lidar corretamente com nomes de ficheiros com espaços
+          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only --exclude "wm_*" | while IFS= read -r video_file; do
+            # Ignora linhas em branco que possam surgir
+            [ -z "$video_file" ] && continue
+
             echo "A processar vídeo para thumbnail: ${video_file}"
+            # Usa aspas para garantir que o nome do ficheiro é tratado como uma única string
             rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
+            
             if [ -f "./${video_file}" ]; then
               thumb_name="${video_file%.*}.jpg"
               ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 -update 1 "temp_thumbs/${thumb_name}" > /dev/null 2>&1
               rm "./${video_file}"
+            else
+              echo "AVISO: Falha ao descarregar o vídeo '${video_file}'. A ignorar."
             fi
           done
           
