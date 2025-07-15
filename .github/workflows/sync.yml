@@ -29,24 +29,25 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
-      - name: Copiar ficheiros novos ou atualizados do Drive para o R2
+      # ETAPA 1: Sincronizar Drive -> R2 (Isto agora também apaga ficheiros )
+      - name: Sincronizar Google Drive para Cloudflare R2
         run: |
-          echo "--- Copiando ficheiros do Drive para o R2 (não apaga nada ) ---"
-          rclone copy "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -v
+          echo "--- Sincronizando Drive -> R2 (ficheiros apagados no Drive serão apagados aqui) ---"
+          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -v
 
-      # --- SECÇÃO CORRIGIDA ---
+      # ETAPA 2: Gerar Thumbnails (com a correção final)
       - name: Gerar Thumbnails para Vídeos
         run: |
           echo "--- Gerando thumbnails para os vídeos existentes ---"
           mkdir -p temp_thumbs
           
-          # CORREÇÃO: Usar 'while read' para lidar corretamente com nomes de ficheiros com espaços
-          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only --exclude "wm_*" | while IFS= read -r video_file; do
-            # Ignora linhas em branco que possam surgir
-            [ -z "$video_file" ] && continue
+          # Lista os ficheiros e passa para um ficheiro temporário
+          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only --exclude "wm_*" > video_list.txt
 
+          # Lê o ficheiro linha a linha, o que é 100% seguro para nomes com espaços
+          while IFS= read -r video_file; do
+            [ -z "$video_file" ] && continue
             echo "A processar vídeo para thumbnail: ${video_file}"
-            # Usa aspas para garantir que o nome do ficheiro é tratado como uma única string
             rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
             
             if [ -f "./${video_file}" ]; then
@@ -56,11 +57,12 @@ jobs:
             else
               echo "AVISO: Falha ao descarregar o vídeo '${video_file}'. A ignorar."
             fi
-          done
+          done < video_list.txt
           
           # Sincroniza as thumbnails para limpar as antigas
           rclone sync temp_thumbs "R2:bia-portfolio-assets/Thumbnails" -P
 
+      # ETAPA 3: Processar ficheiros e gerar data.json
       - name: Gerar data.json, aplicar Marcas de Água e Limpar Ficheiros
         run: |
           echo "--- Executando script Python para processar e limpar media ---"
@@ -68,6 +70,7 @@ jobs:
           curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
           python3 scripts/process_files.py
 
+      # ETAPA 4: Fazer commit do data.json
       - name: Fazer commit e push do data.json
         run: |
           git config --global user.name 'github-actions[bot]'
