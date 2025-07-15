@@ -9,11 +9,8 @@ RCLONE_REMOTE_NAME = "R2"
 BUCKET_NAME = "bia-portfolio-assets"
 PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
 CATEGORIES = {
-    "Fotografias": "fotografias",
-    "Vídeos": "videos",
-    "Designs": "designs",
-    "Apresentações": "apresentacoes",
-    "Melhores": "carousel"
+    "Fotografias": "fotografias", "Vídeos": "videos", "Designs": "designs",
+    "Apresentações": "apresentacoes", "Melhores": "carousel"
 }
 WATERMARK_TEXT = "© Beatriz Rodrigues"
 FONT_PATH = os.path.join(os.path.dirname(__file__ ), 'Montserrat.ttf')
@@ -25,7 +22,7 @@ JPEG_QUALITY = 85
 
 # --- Funções Auxiliares (sem alterações) ---
 def rclone_lsf_recursive(remote_path):
-    command = ["rclone", "lsf", remote_path, "--recursive", "--files-only", "--exclude", "wm_*"]
+    command = ["rclone", "lsf", remote_path, "--recursive", "--files-only"]
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
         return {line for line in result.stdout.strip().split('\n') if line}
@@ -33,7 +30,7 @@ def rclone_lsf_recursive(remote_path):
         return set()
 
 def parse_filename_for_titles(filename):
-    name_without_ext = os.path.splitext(filename)[0]
+    name_without_ext = os.path.splitext(filename)[0].replace('wm_', '')
     parts = name_without_ext.split('_')
     if len(parts) >= 3:
         return {'pt': parts[0].replace('-', ' '), 'en': parts[1].replace('-', ' '), 'es': parts[2].replace('-', ' ')}
@@ -43,6 +40,7 @@ def parse_filename_for_titles(filename):
         return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
 
 def get_media_dimensions(local_path, media_type):
+    # ... (função igual à anterior)
     width, height = 0, 0
     try:
         if media_type in ['fotografias', 'designs', 'carousel']:
@@ -59,6 +57,7 @@ def get_media_dimensions(local_path, media_type):
     return width, height
 
 def apply_watermark_and_optimize(input_path, output_path):
+    # ... (função igual à anterior)
     try:
         with Image.open(input_path) as img:
             img_corrected = ImageOps.exif_transpose(img)
@@ -70,7 +69,7 @@ def apply_watermark_and_optimize(input_path, output_path):
                 new_height = int(MAX_IMAGE_WIDTH * img_corrected.height / img_corrected.width)
                 img_corrected = img_corrected.resize((MAX_IMAGE_WIDTH, new_height), Image.Resampling.LANCZOS)
             draw = ImageDraw.Draw(img_corrected)
-            font_size = max(20, int(img_corrected.width * 0.035)) # Baseado na largura
+            font_size = max(20, int(img_corrected.width * 0.035))
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size)
                 font.set_variation_by_name('SemiBold')
@@ -87,26 +86,15 @@ def apply_watermark_and_optimize(input_path, output_path):
     except Exception as e:
         return f"PIL Error: {e}"
 
-# --- FUNÇÃO DE VÍDEO ATUALIZADA ---
 def apply_watermark_to_video(input_path, output_path, video_width):
-    """Aplica marca d'água a um vídeo com tamanho consistente e compressão mínima."""
+    # ... (função igual à anterior)
     escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
-    
-    # 1. CORREÇÃO DE TAMANHO: A base do cálculo é sempre a LARGURA do vídeo.
-    # Usamos uma percentagem menor (ex: 3.5%) porque a base (largura) é consistente.
     font_size = max(24, int(video_width * 0.035))
-    
     margin = int(video_width * 0.02)
-    
-    # 2. CORREÇÃO DE QUALIDADE: Usamos um CRF de 18 para compressão visualmente sem perdas.
     command = [
         "ffmpeg", "-i", input_path,
         "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2",
-        "-c:v", "libx264",
-        "-preset", "fast",  # 'fast' é um bom compromisso para não demorar demasiado
-        "-crf", "18",       # Qualidade muito alta, quase sem perdas visuais
-        "-c:a", "copy",
-        "-y", output_path
+        "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-c:a", "copy", "-y", output_path
     ]
     try:
         subprocess.run(command, check=True, capture_output=True, text=True, timeout=600)
@@ -116,10 +104,10 @@ def apply_watermark_to_video(input_path, output_path, video_width):
     except subprocess.TimeoutExpired:
         return "FFmpeg Error: O processamento demorou demasiado tempo (timeout)."
 
-# --- Lógica Principal (com chamada de função corrigida) ---
+# --- Lógica Principal (ATUALIZADA) ---
 def main():
     start_time = time.time()
-    print(">>> INICIANDO SCRIPT DE PROCESSAMENTO...")
+    print(">>> INICIANDO SCRIPT DE PROCESSAMENTO E LIMPEZA...")
     if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
     
     existing_carousel_data = {}
@@ -131,17 +119,17 @@ def main():
             except json.JSONDecodeError:
                 print("AVISO: Ficheiro data.json existente está corrompido.")
 
-    print("\n--- [FASE 1] Mapeando ficheiros de ORIGEM no R2 ---")
-    source_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
+    print("\n--- [FASE 1] Mapeando todos os ficheiros no R2 ---")
+    all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
+    
+    # Separar ficheiros de origem (sem 'wm_') e processados (com 'wm_')
+    source_files = {f for f in all_r2_files if not os.path.basename(f).startswith('wm_')}
+    processed_files = {f for f in all_r2_files if os.path.basename(f).startswith('wm_')}
     
     new_data = {cat_key: [] for cat_key in CATEGORIES.values()}
-    
-    # Adicionar primeiro os ficheiros já processados ao new_data
-    all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
-    for path in all_r2_files:
-        if path.split('/')[-1].startswith('wm_'):
-             pass
+    final_processed_files = set() # Guardará os nomes dos ficheiros processados que devem existir
 
+    # Processar ficheiros de origem
     for path in source_files:
         try:
             category_folder, filename = path.split('/', 1)
@@ -170,33 +158,32 @@ def main():
             
             if category_key in ["fotografias", "designs"]:
                 watermarked_filename = f"wm_{os.path.splitext(filename)[0]}.jpg"
-                local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
                 upload_path = f"{category_folder}/{watermarked_filename}"
+                final_processed_files.add(upload_path)
                 
-                result = apply_watermark_and_optimize(local_original_path, local_processed_path)
-                if result is not True: raise Exception(f"Falha na otimização: {result}")
+                if upload_path not in processed_files:
+                    print(f"  -> Gerando nova marca d'água para {watermarked_filename}")
+                    local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
+                    result = apply_watermark_and_optimize(local_original_path, local_processed_path)
+                    if result is not True: raise Exception(f"Falha na otimização: {result}")
+                    subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
                 
-                subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
                 file_data["url"] = f"{PUBLIC_URL}/{upload_path.replace(' ', '%20')}"
                 
-                subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"], check=True, capture_output=True)
-                print(f"  -> Ficheiro original '{path}' apagado do R2.")
-
             elif category_key == "videos":
                 watermarked_filename = f"wm_{filename}"
-                local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
                 upload_path = f"{category_folder}/{watermarked_filename}"
+                final_processed_files.add(upload_path)
 
-                # ** CHAMADA DE FUNÇÃO CORRIGIDA **
-                result = apply_watermark_to_video(local_original_path, local_processed_path, width)
-                if result is not True: raise Exception(f"Falha no watermarking de vídeo: {result}")
+                if upload_path not in processed_files:
+                    print(f"  -> Gerando nova marca d'água para {watermarked_filename}")
+                    local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
+                    result = apply_watermark_to_video(local_original_path, local_processed_path, width)
+                    if result is not True: raise Exception(f"Falha no watermarking de vídeo: {result}")
+                    subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
 
-                subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
                 file_data["url"] = f"{PUBLIC_URL}/{upload_path.replace(' ', '%20')}"
                 file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
-
-                subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"], check=True, capture_output=True)
-                print(f"  -> Ficheiro de vídeo original '{path}' apagado do R2.")
 
             elif category_key == "apresentacoes":
                 file_data["url"] = f"{PUBLIC_URL}/{path.replace(' ', '%20')}"
@@ -208,6 +195,20 @@ def main():
         finally:
             if 'local_original_path' in locals() and os.path.exists(local_original_path): os.remove(local_original_path)
             if 'local_processed_path' in locals() and os.path.exists(local_processed_path): os.remove(local_processed_path)
+
+    # --- [FASE 2] Limpeza de Ficheiros Órfãos ---
+    print("\n--- [FASE 2] Limpando ficheiros órfãos no R2 ---")
+    # Apagar ficheiros de origem que já foram processados
+    for path in source_files:
+        if not path.startswith("Apresentações/") and not path.startswith("Melhores/"):
+            print(f"  -> Apagando ficheiro de origem processado: {path}")
+            subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"], check=True)
+
+    # Apagar ficheiros processados (wm_*) que já não têm uma origem
+    for path in processed_files:
+        if path not in final_processed_files:
+            print(f"  -> Apagando ficheiro processado órfão: {path}")
+            subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"], check=True)
 
     print("\nGerando ficheiro data.json final...")
     with open(DATA_FILE, "w", encoding="utf-8") as f:

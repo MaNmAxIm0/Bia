@@ -29,17 +29,17 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
-      - name: Sincronizar Google Drive para Cloudflare R2
+      - name: Copiar ficheiros novos ou atualizados do Drive para o R2
         run: |
-          echo "--- Sincronizando ficheiros de origem do Drive para o R2 ---"
-          # Este passo agora APAGA os ficheiros processados (wm_* ) que já não têm origem no Drive
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -v
+          echo "--- Copiando ficheiros do Drive para o R2 (não apaga nada ) ---"
+          # Usamos 'copy' para garantir que os ficheiros processados (wm_*) não são apagados.
+          # O script Python irá gerir os ficheiros que foram apagados no Drive.
+          rclone copy "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -v
 
       - name: Gerar Thumbnails para Vídeos
         run: |
           echo "--- Gerando thumbnails para os vídeos existentes ---"
           mkdir -p temp_thumbs
-          # Gera thumbnails APENAS para os vídeos que existem ATUALMENTE no R2
           for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only --exclude "wm_*" ); do
             echo "A processar vídeo para thumbnail: ${video_file}"
             rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
@@ -50,17 +50,12 @@ jobs:
             fi
           done
           
-          # ** INÍCIO DA ALTERAÇÃO CRÍTICA **
-          echo "--- Sincronizando pasta de thumbnails para limpar as antigas ---"
-          # Este comando garante que a pasta Thumbnails no R2 tem EXATAMENTE as mesmas
-          # thumbnails que acabámos de gerar na pasta local temp_thumbs.
-          # Se uma thumbnail existir no R2 mas não em temp_thumbs, será APAGADA.
+          # Sincroniza as thumbnails para limpar as antigas
           rclone sync temp_thumbs "R2:bia-portfolio-assets/Thumbnails" -P
-          # ** FIM DA ALTERAÇÃO CRÍTICA **
 
-      - name: Gerar data.json e aplicar Marcas de Água
+      - name: Gerar data.json, aplicar Marcas de Água e Limpar Ficheiros
         run: |
-          echo "--- Executando script Python para processar media e gerar data.json ---"
+          echo "--- Executando script Python para processar e limpar media ---"
           mkdir -p scripts/
           curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
           python3 scripts/process_files.py
