@@ -4,13 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-lang-key="home">Beatriz Rodrigues - Início</title>
+  
+  <!-- Meta Tags, Favicons, etc. -->
+  <meta name="description" content="Explore o portfólio de Beatriz Rodrigues, uma criadora de conteúdo que apresenta apresentações, designs, fotografias e vídeos.">
+  <meta property="og:title" content="Portfólio - Beatriz Rodrigues - Início">
+  <meta property="og:description" content="Explore o portfólio de Beatriz Rodrigues, uma criadora de conteúdo que apresenta apresentações, designs, fotografias e vídeos.">
+  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/pt/index.html">
+  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/index.html" />
+  <link rel="alternate" hreflang="es" href="https://manmaxim0.github.io/Bia/html/es/index.html" />
+  
+  <!-- Estilos e Fontes -->
   <link rel="stylesheet" href="../../css/estilo.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
+  
+  <!-- Favicons -->
   <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
   <link rel="manifest" href="../../favicons/site.webmanifest" />
+
+  <!-- Importmap para Módulos JS -->
   <script type="importmap">
     {
       "imports": {
@@ -39,43 +54,9 @@
 
     <section class="section-highlight container">
       <h2 data-lang-key="my_works">Meus Trabalhos</h2>
-      <div class="best-works-grid">
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_photo_h.png" alt="Fotografias Horizontais" />
-          <h3 data-lang-key="horizontal_photos_title">Fotografias Horizontais</h3>
-          <p data-lang-key="horizontal_photos_desc">Uma coleção de fotografias em formato paisagem.</p>
-          <a href="fotos-horizontais.html" class="btn" data-lang-key="view_gallery">Ver Galeria <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_photo_v.png" alt="Fotografias Verticais" />
-          <h3 data-lang-key="vertical_photos_title">Fotografias Verticais</h3>
-          <p data-lang-key="vertical_photos_desc">Uma seleção de fotografias em formato retrato.</p>
-          <a href="fotos-verticais.html" class="btn" data-lang-key="view_gallery">Ver Galeria <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_video_h.png" alt="Vídeos Horizontais" />
-          <h3 data-lang-key="horizontal_videos_title">Vídeos Horizontais</h3>
-          <p data-lang-key="horizontal_videos_desc">Criações audiovisuais em formato paisagem.</p>
-          <a href="videos-horizontais.html" class="btn" data-lang-key="view_gallery">Ver Galeria <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_video_v.png" alt="Vídeos Verticais" />
-          <h3 data-lang-key="vertical_videos_title">Vídeos Verticais</h3>
-          <p data-lang-key="vertical_videos_desc">Vídeos dinâmicos otimizados para visualização vertical.</p>
-          <a href="videos-verticais.html" class="btn" data-lang-key="view_gallery">Ver Galeria <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_design.png" alt="Designs" />
-          <h3 data-lang-key="designs_title">Designs Gráficos</h3>
-          <p data-lang-key="designs_desc">Projetos de design que demonstram criatividade e técnica.</p>
-          <a href="designs.html" class="btn" data-lang-key="view_gallery">Ver Galeria <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_presentation.png" alt="Apresentações" />
-          <h3 data-lang-key="presentations_title">Apresentações</h3>
-          <p data-lang-key="presentations_desc">Ideias e projetos comunicados de forma clara e impactante.</p>
-          <a href="apresentacoes.html" class="btn" data-lang-key="view_gallery">Ver Galeria <i class="fas fa-arrow-right"></i></a>
-        </div>
+      <div class="best-works-grid" id="my-works-grid">
+        <!-- Os cartões de trabalho serão inseridos aqui pelo JavaScript -->
+        <p style="text-align: center;" data-lang-key="loading_content">A carregar conteúdo...</p>
       </div>
     </section>
 

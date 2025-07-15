@@ -1,16 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-lang-key="home">Beatriz Rodrigues - Home</title>
+  <title data-lang-key="home">Beatriz Rodrigues - Inicio</title>
+  
+  <!-- Meta Tags, Favicons, etc. -->
+  <meta name="description" content="Explora el porfolio de Beatriz Rodrigues, una creadora de contenido que presenta presentaciones, diseños, fotografías y vídeos.">
+  <meta property="og:title" content="Porfolio - Beatriz Rodrigues - Inicio">
+  <meta property="og:description" content="Explora el porfolio de Beatriz Rodrigues, una creadora de contenido que presenta presentaciones, diseños, fotografías y vídeos.">
+  <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
+  <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/es/index.html">
+  <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/index.html" />
+  <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/index.html" />
+
+  <!-- Estilos y Fuentes -->
   <link rel="stylesheet" href="../../css/estilo.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
+  
+  <!-- Favicons -->
   <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
   <link rel="manifest" href="../../favicons/site.webmanifest" />
+
+  <!-- Importmap para Módulos JS -->
   <script type="importmap">
     {
       "imports": {
@@ -29,68 +44,34 @@
     <section class="hero-carousel">
       <div class="carousel-container">
         <div class="carousel-slides" id="dynamic-carousel-slides">
-          <!-- Slides will be inserted here by JavaScript -->
+          <!-- Las diapositivas se insertarán aquí con JavaScript -->
         </div>
-        <button class="carousel-btn prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
-        <button class="carousel-btn next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+        <button class="carousel-btn prev" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
+        <button class="carousel-btn next" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
         <div class="carousel-dots"></div>
       </div>
     </section>
 
     <section class="section-highlight container">
-      <h2 data-lang-key="my_works">My Works</h2>
-      <div class="best-works-grid">
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_photo_h.png" alt="Horizontal Photos" />
-          <h3 data-lang-key="horizontal_photos_title">Horizontal Photos</h3>
-          <p data-lang-key="horizontal_photos_desc">A collection of photos in landscape format.</p>
-          <a href="photos-horizontal.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_photo_v.png" alt="Vertical Photos" />
-          <h3 data-lang-key="vertical_photos_title">Vertical Photos</h3>
-          <p data-lang-key="vertical_photos_desc">A selection of photos in portrait format.</p>
-          <a href="photos-vertical.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_video_h.png" alt="Horizontal Videos" />
-          <h3 data-lang-key="horizontal_videos_title">Horizontal Videos</h3>
-          <p data-lang-key="horizontal_videos_desc">Audiovisual creations in landscape format.</p>
-          <a href="videos-horizontal.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_video_v.png" alt="Vertical Videos" />
-          <h3 data-lang-key="vertical_videos_title">Vertical Videos</h3>
-          <p data-lang-key="vertical_videos_desc">Dynamic videos optimized for vertical viewing.</p>
-          <a href="videos-vertical.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_design.png" alt="Designs" />
-          <h3 data-lang-key="designs_title">Graphic Designs</h3>
-          <p data-lang-key="designs_desc">Design projects that showcase creativity and skill.</p>
-          <a href="designs.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="work-item">
-          <img src="../../imagens/work_thumb_presentation.png" alt="Presentations" />
-          <h3 data-lang-key="presentations_title">Presentations</h3>
-          <p data-lang-key="presentations_desc">Ideas and projects communicated in a clear and impactful way.</p>
-          <a href="presentations.html" class="btn" data-lang-key="view_gallery">View Gallery <i class="fas fa-arrow-right"></i></a>
-        </div>
+      <h2 data-lang-key="my_works">Mis Trabajos</h2>
+      <div class="best-works-grid" id="my-works-grid">
+        <!-- Las tarjetas de trabajo se insertarán aquí con JavaScript -->
+        <p style="text-align: center;" data-lang-key="loading_content">Cargando contenido...</p>
       </div>
     </section>
 
     <section class="section-previews container">
-      <h2 data-lang-key="discover_more">Discover More</h2>
+      <h2 data-lang-key="discover_more">Descubrir Más</h2>
       <div class="section-preview-grid">
-        <a href="about-me.html" class="preview-item">
-          <img src="../../imagens/preview_about_me.png" alt="About Me" />
-          <h3 data-lang-key="about_me">About Me</h3>
-          <p data-lang-key="about_me_preview_desc">Learn about my story, passions, and skills.</p>
+        <a href="sobre-mi.html" class="preview-item">
+          <img src="../../imagens/preview_about_me.png" alt="Sobre Mí" />
+          <h3 data-lang-key="about_me">Sobre Mí</h3>
+          <p data-lang-key="about_me_preview_desc">Conoce mi historia, pasiones y competencias.</p>
         </a>
-        <a href="contacts.html" class="preview-item">
-          <img src="../../imagens/preview_contact.png" alt="Contact" />
-          <h3 data-lang-key="contact">Contact</h3>
-          <p data-lang-key="contact_preview_desc">Let's talk! Send a message or find me on social media.</p>
+        <a href="contactos.html" class="preview-item">
+          <img src="../../imagens/preview_contact.png" alt="Contactos" />
+          <h3 data-lang-key="contact">Contactos</h3>
+          <p data-lang-key="contact_preview_desc">¡Hablemos! Envía un mensaje o encuéntrame en las redes sociales.</p>
         </a>
       </div>
     </section>
