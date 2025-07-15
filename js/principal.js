@@ -1,29 +1,27 @@
-// Ficheiro: /js/principal.js (VERSÃO COMPLETA E VERIFICADA)
+// Ficheiro: /js/principal.js
 
 import { initCarousel } from './carrossel.js';
 import { loadGalleryContent, loadPresentations } from './galeria.js';
 import { applyTranslations, setLanguage, getCurrentLanguage } from './linguagem.js';
 
-// --- FUNÇÃO PARA CARREGAR O CARROSSEL DINÂMICO ---
 async function loadDynamicCarousel() {
     const slidesContainer = document.getElementById('dynamic-carousel-slides');
     const carouselSection = document.querySelector('.hero-carousel');
     if (!slidesContainer || !carouselSection) return;
 
     try {
-        // Determina o caminho correto para o data.json (funciona localmente e no GitHub)
         const basePath = window.location.hostname.includes('github.io') ? '/Bia' : '';
         const response = await fetch(`${basePath}/data.json`);
         const data = await response.json();
         const carouselItems = data.carousel || [];
 
         if (carouselItems.length === 0) {
-            carouselSection.style.display = 'none'; // Esconde a secção se não houver imagens
+            carouselSection.style.display = 'none';
             return;
         }
 
         const lang = getCurrentLanguage();
-        slidesContainer.innerHTML = ''; // Limpa quaisquer slides estáticos
+        slidesContainer.innerHTML = '';
 
         carouselItems.forEach(item => {
             const slideDiv = document.createElement('div');
@@ -31,21 +29,24 @@ async function loadDynamicCarousel() {
 
             const img = document.createElement('img');
             img.src = item.url;
-            img.alt = item.descriptions[lang] || item.descriptions.pt || 'Imagem do Carrossel';
+            img.alt = item.titles[lang] || item.titles.pt;
 
             const captionDiv = document.createElement('div');
             captionDiv.className = 'carousel-caption';
             
+            const titleH2 = document.createElement('h2');
+            titleH2.textContent = item.titles[lang] || item.titles.pt;
+            captionDiv.appendChild(titleH2);
+
             const descriptionP = document.createElement('p');
             descriptionP.textContent = item.descriptions[lang] || item.descriptions.pt || '';
-
             captionDiv.appendChild(descriptionP);
+
             slideDiv.appendChild(img);
             slideDiv.appendChild(captionDiv);
             slidesContainer.appendChild(slideDiv);
         });
 
-        // Inicializa o carrossel DEPOIS de adicionar os slides dinâmicos
         initCarousel(carouselSection);
 
     } catch (error) {
@@ -54,8 +55,8 @@ async function loadDynamicCarousel() {
     }
 }
 
-// --- FUNÇÕES DE INICIALIZAÇÃO DO CABEÇALHO ---
 function initializeMenu() {
+    // ... (função igual à anterior)
     const menuToggle = document.querySelector('.menu-toggle');
     const navLinks = document.querySelector('.nav-links');
     if (menuToggle && navLinks) {
@@ -109,6 +110,7 @@ function initializeMenu() {
 }
 
 function setupLanguageSwitcher() {
+    // ... (função igual à anterior)
     const currentLang = getCurrentLanguage();
     const dropdown = document.querySelector('.language-dropdown');
     if (!dropdown) return;
@@ -160,13 +162,12 @@ function setupLanguageSwitcher() {
     document.addEventListener('click', () => dropdown.classList.remove('open'));
 }
 
-// --- LÓGICA PRINCIPAL DA PÁGINA ---
 function onPageLoad() {
+    // ... (função igual à anterior)
     const pathLang = window.location.pathname.split('/')[2] || 'pt';
     setLanguage(pathLang);
     applyTranslations();
 
-    // Carrega o carrossel dinâmico APENAS na página inicial
     if (window.location.pathname.endsWith('index.html')) {
         loadDynamicCarousel();
     }
@@ -193,9 +194,7 @@ function onPageLoad() {
     }
 }
 
-// --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', onPageLoad);
-
 document.addEventListener('headerLoaded', () => {
     initializeMenu();
     setupLanguageSwitcher();

@@ -1,20 +1,22 @@
-// js/galeria.js (Versão Final com Infinite Scroll Corrigido)
+// Ficheiro: /js/galeria.js (Versão Final e Corrigida)
 
-import { getTranslation, getCurrentLanguage } from './gestor-de-linguagem.js';
-import { createWatermarkElement } from './ferramentas.js';
+import { getTranslation, getCurrentLanguage } from './linguagem.js';
 import { openLightbox } from './pop-up.js';
 
-// Objeto para guardar o estado de cada galeria individualmente
 const galleryStates = {};
 
 /**
- * Renderiza o próximo lote de itens para uma galeria específica.
- * @param {string} containerId - O ID do contentor da galeria.
+ * Determina o caminho base para os recursos, dependendo do ambiente.
+ * @returns {string} O caminho base (ex: '/Bia' no GitHub Pages, '' localmente).
  */
+function getBasePath() {
+    return window.location.hostname.includes('github.io') ? '/Bia' : '';
+}
+
 function renderNextBatch(containerId) {
     const state = galleryStates[containerId];
     if (!state || state.currentIndex >= state.allItems.length) {
-        if (state.observer) state.observer.disconnect(); // Para de observar se não há mais itens
+        if (state.observer) state.observer.disconnect();
         return;
     }
 
@@ -27,20 +29,25 @@ function renderNextBatch(containerId) {
     itemsToRender.forEach(item => {
         const itemDiv = document.createElement('div');
         const classMap = { 'fotografias': 'photo', 'designs': 'design', 'videos': 'video' };
-        itemDiv.classList.add(`${classMap[state.type]}-item`);
+        const itemClassName = classMap[state.type] || 'gallery';
+        itemDiv.classList.add(`${itemClassName}-item`);
 
-        const mediaUrl = item.url;
-        const title = item.titles[lang] || item.titles['pt'];
+        const title = item.titles[lang] || item.titles.pt;
         const isVideo = state.type === 'videos';
+
+        // ** CORREÇÃO: Usa a thumbnail_url para vídeos, e a url principal para os outros. **
+        const previewImageUrl = isVideo ? item.thumbnail_url : item.url;
 
         const imageContainer = document.createElement('div');
         imageContainer.classList.add('image-container');
 
         const mediaElement = document.createElement('img');
-        mediaElement.src = isVideo ? item.thumbnail_url : mediaUrl;
+        mediaElement.src = previewImageUrl;
         mediaElement.alt = title;
         mediaElement.loading = "lazy";
-        mediaElement.oncontextmenu = () => false;
+        mediaElement.onerror = () => {
+            mediaElement.src = `${getBasePath()}/imagens/placeholder.png`; // Caminho corrigido para o placeholder
+        };
         
         imageContainer.appendChild(mediaElement);
 
@@ -51,7 +58,7 @@ function renderNextBatch(containerId) {
         }
 
         const overlayDiv = document.createElement('div');
-        overlayDiv.classList.add(`${classMap[state.type]}-overlay`);
+        overlayDiv.classList.add(`${itemClassName}-overlay`);
         const titleElement = document.createElement('h3');
         titleElement.textContent = title;
         overlayDiv.appendChild(titleElement);
@@ -60,7 +67,7 @@ function renderNextBatch(containerId) {
         itemDiv.appendChild(overlayDiv);
 
         itemDiv.addEventListener('click', () => {
-            openLightbox(mediaUrl, isVideo ? 'video' : 'image', title);
+            openLightbox(item.url, isVideo ? 'video' : 'image', title);
         });
 
         galleryContainer.appendChild(itemDiv);
@@ -68,40 +75,35 @@ function renderNextBatch(containerId) {
 
     state.currentIndex += itemsToRender.length;
 
-    // Se ainda houver itens, observa o novo último elemento
     if (state.currentIndex < state.allItems.length) {
         const lastElement = galleryContainer.lastElementChild;
         if (lastElement) {
             state.observer.observe(lastElement);
         }
     } else {
-        state.observer.disconnect(); // Fim da lista
+        state.observer.disconnect();
     }
 }
 
-/**
- * Função principal que inicia o carregamento da galeria.
- */
 export async function loadGalleryContent(type, containerId, orientationFilter = null) {
     const galleryContainer = document.getElementById(containerId);
     if (!galleryContainer) return;
 
-    // Limpa o estado anterior para esta galeria, se existir
     if (galleryStates[containerId] && galleryStates[containerId].observer) {
         galleryStates[containerId].observer.disconnect();
     }
 
-    // Adiciona a classe para o estilo 16:9 se a orientação for horizontal
     if (orientationFilter === 'horizontal') {
         galleryContainer.classList.add('horizontal-gallery');
     } else {
-        galleryContainer.classList.remove('horizontal-gallery'); // Garante que não fica em outras páginas
+        galleryContainer.classList.remove('horizontal-gallery');
     }
 
     galleryContainer.innerHTML = `<p style="text-align: center;">${getTranslation('loading_content')}</p>`;
     
     try {
-        const response = await fetch(`../../data.json`);
+        // ** CORREÇÃO: Usa o caminho base para o fetch. **
+        const response = await fetch(`${getBasePath()}/data.json`);
         const data = await response.json();
         
         let allFilteredItems = data[type] || [];
@@ -112,11 +114,10 @@ export async function loadGalleryContent(type, containerId, orientationFilter = 
         galleryContainer.innerHTML = '';
 
         if (allFilteredItems.length === 0) {
-            galleryContainer.innerHTML = `<p>${getTranslation('no_content_found', { type: getTranslation(type) })}</p>`;
+            galleryContainer.innerHTML = `<p>${getTranslation('no_content_found').replace('{type}', getTranslation(type))}</p>`;
             return;
         }
 
-        // Cria um novo observador para esta galeria
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -127,35 +128,31 @@ export async function loadGalleryContent(type, containerId, orientationFilter = 
                     }
                 }
             });
-        }, { rootMargin: "500px" }); // Carrega 500px antes de o elemento ser visível
+        }, { rootMargin: "500px" });
 
-        // Inicializa o estado para esta galeria específica
         galleryStates[containerId] = {
             allItems: allFilteredItems,
             currentIndex: 0,
-            itemsPerLoad: 12, // Pode ajustar este número
+            itemsPerLoad: 12,
             type: type,
             observer: observer
         };
 
-        // Inicia o processo renderizando o primeiro lote
         renderNextBatch(containerId);
 
     } catch (error) {
         console.error(`Erro ao carregar ${type}:`, error);
-        galleryContainer.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content', { type: getTranslation(type) })}</p>`;
+        galleryContainer.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', getTranslation(type))}</p>`;
     }
 }
 
-/**
- * Carrega e exibe as apresentações (sem carregamento progressivo).
- */
 export async function loadPresentations() {
   const gallery = document.getElementById("presentation-gallery");
   if (!gallery) return;
   gallery.innerHTML = `<p style="text-align: center;">${getTranslation('loading_presentations')}</p>`;
   try {
-    const response = await fetch(`../../data.json`);
+    // ** CORREÇÃO: Usa o caminho base para o fetch. **
+    const response = await fetch(`${getBasePath()}/data.json`);
     const data = await response.json();
     const presentations = data['apresentacoes'] || [];
     const lang = getCurrentLanguage();
@@ -181,6 +178,6 @@ export async function loadPresentations() {
     });
   } catch (err) {
     console.error("Erro ao carregar apresentações:", err);
-    gallery.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content', { type: getTranslation('presentations') })}</p>`;
+    gallery.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', getTranslation('presentations'))}</p>`;
   }
 }

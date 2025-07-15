@@ -1,3 +1,5 @@
+# Ficheiro: /scripts/process_files.py
+
 import subprocess
 import json
 import os
@@ -22,7 +24,7 @@ JPEG_QUALITY = 85
 
 # --- Funções Auxiliares (sem alterações) ---
 def rclone_lsf_recursive(remote_path):
-    command = ["rclone", "lsf", remote_path, "--recursive", "--files-only"]
+    command = ["rclone", "lsf", remote_path, "--recursive", "--files-only", "--exclude", "wm_*"]
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
         return {line for line in result.stdout.strip().split('\n') if line}
@@ -40,7 +42,6 @@ def parse_filename_for_titles(filename):
         return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
 
 def get_media_dimensions(local_path, media_type):
-    # ... (função igual à anterior)
     width, height = 0, 0
     try:
         if media_type in ['fotografias', 'designs', 'carousel']:
@@ -57,7 +58,6 @@ def get_media_dimensions(local_path, media_type):
     return width, height
 
 def apply_watermark_and_optimize(input_path, output_path):
-    # ... (função igual à anterior)
     try:
         with Image.open(input_path) as img:
             img_corrected = ImageOps.exif_transpose(img)
@@ -69,7 +69,7 @@ def apply_watermark_and_optimize(input_path, output_path):
                 new_height = int(MAX_IMAGE_WIDTH * img_corrected.height / img_corrected.width)
                 img_corrected = img_corrected.resize((MAX_IMAGE_WIDTH, new_height), Image.Resampling.LANCZOS)
             draw = ImageDraw.Draw(img_corrected)
-            font_size = max(20, int(img_corrected.width * 0.035))
+            font_size = max(20, int(img_corrected.height * 0.04))
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size)
                 font.set_variation_by_name('SemiBold')
@@ -86,14 +86,20 @@ def apply_watermark_and_optimize(input_path, output_path):
     except Exception as e:
         return f"PIL Error: {e}"
 
-def apply_watermark_to_video(input_path, output_path, video_width):
-    # ... (função igual à anterior)
+# --- FUNÇÃO DE VÍDEO ATUALIZADA ---
+def apply_watermark_to_video(input_path, output_path, video_width, video_height):
+    """Aplica marca d'água a um vídeo com tamanho consistente e compressão mínima."""
     escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
-    font_size = max(24, int(video_width * 0.035))
+    
+    # ** 1. CORREÇÃO DE TAMANHO: A base do cálculo é sempre a LARGURA do vídeo. **
+    font_size = max(24, int(video_width * 0.045))
+    
     margin = int(video_width * 0.02)
+    
+    # ** 2. CORREÇÃO DE ESPESSURA PARA VÍDEOS **
     command = [
         "ffmpeg", "-i", input_path,
-        "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2",
+        "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2:borderw=1:bordercolor=white@0.8",
         "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-c:a", "copy", "-y", output_path
     ]
     try:
@@ -104,7 +110,7 @@ def apply_watermark_to_video(input_path, output_path, video_width):
     except subprocess.TimeoutExpired:
         return "FFmpeg Error: O processamento demorou demasiado tempo (timeout)."
 
-# --- Lógica Principal (ATUALIZADA) ---
+# --- Lógica Principal (com chamada de função corrigida) ---
 def main():
     start_time = time.time()
     print(">>> INICIANDO SCRIPT DE PROCESSAMENTO E LIMPEZA...")
@@ -122,14 +128,12 @@ def main():
     print("\n--- [FASE 1] Mapeando todos os ficheiros no R2 ---")
     all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     
-    # Separar ficheiros de origem (sem 'wm_') e processados (com 'wm_')
     source_files = {f for f in all_r2_files if not os.path.basename(f).startswith('wm_')}
     processed_files = {f for f in all_r2_files if os.path.basename(f).startswith('wm_')}
     
     new_data = {cat_key: [] for cat_key in CATEGORIES.values()}
-    final_processed_files = set() # Guardará os nomes dos ficheiros processados que devem existir
+    final_processed_files = set()
 
-    # Processar ficheiros de origem
     for path in source_files:
         try:
             category_folder, filename = path.split('/', 1)
@@ -178,7 +182,7 @@ def main():
                 if upload_path not in processed_files:
                     print(f"  -> Gerando nova marca d'água para {watermarked_filename}")
                     local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
-                    result = apply_watermark_to_video(local_original_path, local_processed_path, width)
+                    result = apply_watermark_to_video(local_original_path, local_processed_path, width, height)
                     if result is not True: raise Exception(f"Falha no watermarking de vídeo: {result}")
                     subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
 
@@ -198,13 +202,11 @@ def main():
 
     # --- [FASE 2] Limpeza de Ficheiros Órfãos ---
     print("\n--- [FASE 2] Limpando ficheiros órfãos no R2 ---")
-    # Apagar ficheiros de origem que já foram processados
     for path in source_files:
         if not path.startswith("Apresentações/") and not path.startswith("Melhores/"):
             print(f"  -> Apagando ficheiro de origem processado: {path}")
             subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"], check=True)
 
-    # Apagar ficheiros processados (wm_*) que já não têm uma origem
     for path in processed_files:
         if path not in final_processed_files:
             print(f"  -> Apagando ficheiro processado órfão: {path}")
