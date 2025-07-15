@@ -4,7 +4,7 @@ import os
 import time
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-# --- Configuração ---
+# --- Configuração (sem alterações) ---
 RCLONE_REMOTE_NAME = "R2"
 BUCKET_NAME = "bia-portfolio-assets"
 PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
@@ -20,13 +20,10 @@ FONT_PATH = os.path.join(os.path.dirname(__file__ ), 'Montserrat.ttf')
 TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
 THUMBNAILS_DIR = "Thumbnails"
-
-# Configuração de Otimização
 MAX_IMAGE_WIDTH = 1920
 JPEG_QUALITY = 85
 
-# --- Funções Auxiliares ---
-
+# --- Funções Auxiliares (sem alterações) ---
 def rclone_lsf_recursive(remote_path):
     command = ["rclone", "lsf", remote_path, "--recursive", "--files-only", "--exclude", "wm_*"]
     try:
@@ -65,23 +62,24 @@ def apply_watermark_and_optimize(input_path, output_path):
     try:
         with Image.open(input_path) as img:
             img_corrected = ImageOps.exif_transpose(img)
+            if img_corrected.mode == 'RGBA':
+                background = Image.new("RGB", img_corrected.size, (255, 255, 255))
+                background.paste(img_corrected, mask=img_corrected.split()[3])
+                img_corrected = background
             if img_corrected.width > MAX_IMAGE_WIDTH:
                 new_height = int(MAX_IMAGE_WIDTH * img_corrected.height / img_corrected.width)
                 img_corrected = img_corrected.resize((MAX_IMAGE_WIDTH, new_height), Image.Resampling.LANCZOS)
-            
             draw = ImageDraw.Draw(img_corrected)
-            font_size = max(20, int(min(img_corrected.width, img_corrected.height) * 0.035))
+            font_size = max(20, int(img_corrected.width * 0.035)) # Baseado na largura
             try:
                 font = ImageFont.truetype(FONT_PATH, font_size)
                 font.set_variation_by_name('SemiBold')
             except (IOError, AttributeError):
                 font = ImageFont.load_default()
-            
             bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
             text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
             margin = int(img_corrected.width * 0.02)
             x, y = img_corrected.width - text_width - margin, img_corrected.height - text_height - margin
-            
             draw.text((x + 1, y + 1), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
             draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 200))
             img_corrected.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True, subsampling=0)
@@ -89,32 +87,36 @@ def apply_watermark_and_optimize(input_path, output_path):
     except Exception as e:
         return f"PIL Error: {e}"
 
-# --- NOVA FUNÇÃO PARA APLICAR MARCA D'ÁGUA EM VÍDEOS ---
-def apply_watermark_to_video(input_path, output_path, video_width, video_height):
-    """Aplica marca d'água a um vídeo usando FFmpeg."""
+# --- FUNÇÃO DE VÍDEO ATUALIZADA ---
+def apply_watermark_to_video(input_path, output_path, video_width):
+    """Aplica marca d'água a um vídeo com tamanho consistente e compressão mínima."""
     escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
-    font_size = max(24, int(min(video_width, video_height) * 0.035))
+    
+    # 1. CORREÇÃO DE TAMANHO: A base do cálculo é sempre a LARGURA do vídeo.
+    # Usamos uma percentagem menor (ex: 3.5%) porque a base (largura) é consistente.
+    font_size = max(24, int(video_width * 0.035))
+    
     margin = int(video_width * 0.02)
     
-    # Comando FFmpeg para desenhar o texto no canto inferior direito
+    # 2. CORREÇÃO DE QUALIDADE: Usamos um CRF de 18 para compressão visualmente sem perdas.
     command = [
         "ffmpeg", "-i", input_path,
         "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2",
-        "-c:v", "libx264", # Recodifica o vídeo para garantir que a marca d'água é aplicada
-        "-preset", "fast",  # Um bom equilíbrio entre velocidade e tamanho
-        "-crf", "23",       # Controlo de qualidade (valores mais baixos = melhor qualidade)
-        "-c:a", "copy",     # Copia o áudio sem o recodificar
+        "-c:v", "libx264",
+        "-preset", "fast",  # 'fast' é um bom compromisso para não demorar demasiado
+        "-crf", "18",       # Qualidade muito alta, quase sem perdas visuais
+        "-c:a", "copy",
         "-y", output_path
     ]
     try:
-        subprocess.run(command, check=True, capture_output=True, text=True, timeout=600) # Timeout de 10 minutos
+        subprocess.run(command, check=True, capture_output=True, text=True, timeout=600)
         return True
     except subprocess.CalledProcessError as e:
         return f"FFmpeg Error: {e.stderr}"
     except subprocess.TimeoutExpired:
         return "FFmpeg Error: O processamento demorou demasiado tempo (timeout)."
 
-# --- Lógica Principal ---
+# --- Lógica Principal (com chamada de função corrigida) ---
 def main():
     start_time = time.time()
     print(">>> INICIANDO SCRIPT DE PROCESSAMENTO...")
@@ -181,12 +183,12 @@ def main():
                 print(f"  -> Ficheiro original '{path}' apagado do R2.")
 
             elif category_key == "videos":
-                # LÓGICA DE VÍDEO CORRIGIDA
                 watermarked_filename = f"wm_{filename}"
                 local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
                 upload_path = f"{category_folder}/{watermarked_filename}"
 
-                result = apply_watermark_to_video(local_original_path, local_processed_path, width, height)
+                # ** CHAMADA DE FUNÇÃO CORRIGIDA **
+                result = apply_watermark_to_video(local_original_path, local_processed_path, width)
                 if result is not True: raise Exception(f"Falha no watermarking de vídeo: {result}")
 
                 subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
