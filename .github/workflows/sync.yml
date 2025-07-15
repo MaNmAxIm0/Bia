@@ -6,7 +6,7 @@ on:
     - cron: '0 20 * * *'
 
 permissions:
-  contents: write # Dá permissão para escrever (fazer commits) no repositório
+  contents: write
 
 jobs:
   sync-and-build:
@@ -17,93 +17,63 @@ jobs:
 
       - name: Instalar ferramentas e dependências
         run: |
-          echo "--- A iniciar instalação de dependências ---"
           sudo apt-get update
-          sudo apt-get install -y ffmpeg jq unzip python3-pip
+          sudo apt-get install -y ffmpeg jq
           pip3 install Pillow
           curl https://rclone.org/install.sh | sudo bash
-          echo "--- Dependências instaladas com sucesso ---"
 
       - name: Configurar rclone
         env:
           RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
         run: |
-          echo "--- A configurar o rclone ---"
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
-          echo "--- Rclone configurado ---"
 
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
-          echo "--- A iniciar sincronização do Google Drive para o R2 ---"
-          # ALTERAÇÃO: Removido o --exclude para a pasta 'melhores' se existir
-          # e garantido que a sincronização principal a inclui.
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" \
-            --exclude "desktop.ini" \
-            --exclude "/Thumbnails/**" \
-            --exclude "/WatermarkedImages/**" \
-            --exclude "/WatermarkedVideos/**" \
-            -v
-          echo "--- Sincronização Drive -> R2 concluída ---"
+          echo "--- Sincronizando ficheiros de origem do Drive para o R2 ---"
+          # Este passo agora APAGA os ficheiros processados (wm_* ) que já não têm origem no Drive
+          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -v
 
       - name: Gerar Thumbnails para Vídeos
         run: |
-          # (Esta secção não precisa de alterações )
-          echo "--- A iniciar geração de thumbnails para vídeos ---"
+          echo "--- Gerando thumbnails para os vídeos existentes ---"
           mkdir -p temp_thumbs
-          
-          OLD_IFS="$IFS"
-          IFS=$'\n'
-          
-          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only); do
+          # Gera thumbnails APENAS para os vídeos que existem ATUALMENTE no R2
+          for video_file in $(rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only --exclude "wm_*" ); do
             echo "A processar vídeo para thumbnail: ${video_file}"
             rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
-            
             if [ -f "./${video_file}" ]; then
               thumb_name="${video_file%.*}.jpg"
               ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 -update 1 "temp_thumbs/${thumb_name}" > /dev/null 2>&1
               rm "./${video_file}"
-            else
-              echo "AVISO: Falha ao descarregar o vídeo '${video_file}'. A ignorar."
             fi
           done
           
-          IFS="$OLD_IFS"
-          
+          # ** INÍCIO DA ALTERAÇÃO CRÍTICA **
+          echo "--- Sincronizando pasta de thumbnails para limpar as antigas ---"
+          # Este comando garante que a pasta Thumbnails no R2 tem EXATAMENTE as mesmas
+          # thumbnails que acabámos de gerar na pasta local temp_thumbs.
+          # Se uma thumbnail existir no R2 mas não em temp_thumbs, será APAGADA.
           rclone sync temp_thumbs "R2:bia-portfolio-assets/Thumbnails" -P
-          echo "--- Geração de thumbnails concluída ---"
+          # ** FIM DA ALTERAÇÃO CRÍTICA **
 
-      - name: Gerar o ficheiro data.json e processar media
+      - name: Gerar data.json e aplicar Marcas de Água
         run: |
-          echo "--- A preparar para executar o script Python (process_files.py) ---"
+          echo "--- Executando script Python para processar media e gerar data.json ---"
           mkdir -p scripts/
-          
-          echo "A descarregar a fonte Montserrat..."
           curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
-          
-          if [ -f "scripts/Montserrat.ttf" ]; then
-            echo "Fonte descarregada. A iniciar o script principal de processamento..."
-            python3 scripts/process_files.py
-            echo "--- Script Python (process_files.py ) concluído com sucesso ---"
-          else
-            echo "ERRO: Falha ao descarregar a fonte Montserrat. A abortar."
-            exit 1
-          fi
+          python3 scripts/process_files.py
 
       - name: Fazer commit e push do data.json
         run: |
-          echo "--- A iniciar o processo de commit e push para o data.json ---"
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add data.json
-          
           if ! git diff --quiet --exit-code --cached; then
-            echo "Alterações detectadas no data.json. A fazer commit..."
             git commit -m "Atualiza data.json e media [skip ci]"
             git pull --rebase
             git push
-            echo "--- Commit e push concluídos ---"
           else
             echo "Nenhuma alteração no data.json para fazer commit."
-            echo "--- Processo de commit finalizado sem alterações ---"
           fi
