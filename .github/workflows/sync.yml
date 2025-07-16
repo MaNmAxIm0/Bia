@@ -1,9 +1,9 @@
-name: Sincronizar Media, Gerar Manifesto, Thumbs e Dados
+name: Sincronizar Drive, Gerar Thumbs, Dados e Manifesto
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 19,20 * * *' # 20:00 em Lisboa (hora de verão/inverno)
+    - cron: '0 20 * * *'
 
 permissions:
   contents: write
@@ -20,51 +20,50 @@ jobs:
       - name: Instalar ferramentas e dependências
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg jq python3-pip
+          sudo apt-get install -y ffmpeg jq
           pip3 install Pillow
           curl https://rclone.org/install.sh | sudo bash
 
       - name: Configurar rclone
+        env:
+          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
         run: |
           mkdir -p ~/.config/rclone
-          echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
+          echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
-      - name: Sincronizar Drive -> R2
+      - name: Sincronizar Google Drive para Cloudflare R2
         run: |
           echo "--- Sincronizando Drive -> R2 ---"
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --update --use-server-modtime --exclude "desktop.ini" -v
+          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -v
 
       - name: Criar script de geração de thumbnails
         run: |
           mkdir -p scripts
           cat << 'EOF' > scripts/thumbnail.py
-import subprocess
-import os
-import sys
+import subprocess, os, sys
 
 def run_command(cmd, check=True):
-    print(f"Executando: {' '.join(cmd)}", flush=True)
+    print(f"Executando: {{' '.join(cmd)}}", flush=True)
     result = subprocess.run(cmd, capture_output=True, text=True)
     if check and result.returncode != 0:
-        print(f"ERRO ao executar comando: {' '.join(cmd)}", file=sys.stderr)
-        print(f"Stderr: {result.stderr}", file=sys.stderr)
+        print(f"ERRO ao executar comando: {{' '.join(cmd)}}", file=sys.stderr)
+        print(f"Stderr: {{result.stderr}}", file=sys.stderr)
         sys.exit(1)
-    return result.stdout.strip().split("\n")
+    return result.stdout.strip().split("\\n")
 
 def get_file_list(path):
-    print(f"A listar ficheiros em: {path}")
-    return {line for line in run_command(["rclone", "lsf", path, "--files-only"], check=False) if line and not line.startswith("wm_")}
+    print(f"A listar ficheiros em: {{path}}")
+    return {{line for line in run_command(["rclone", "lsf", path, "--files-only"], check=False) if line and not line.startswith("wm_")}}
 
 RCLONE_REMOTE = "R2:bia-portfolio-assets"
-VIDEO_FOLDER = f"{RCLONE_REMOTE}/Vídeos"
-THUMB_FOLDER = f"{RCLONE_REMOTE}/Thumbnails"
+VIDEO_FOLDER = f"{{RCLONE_REMOTE}}/Vídeos"
+THUMB_FOLDER = f"{{RCLONE_REMOTE}}/Thumbnails"
 TEMP_DIR = "temp_download"
-
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 videos = get_file_list(VIDEO_FOLDER)
 thumbnails = get_file_list(THUMB_FOLDER)
-thumb_basenames = {os.path.splitext(t)[0] for t in thumbnails}
+thumb_basenames = {{os.path.splitext(t)[0] for t in thumbnails}}
 
 videos_to_process = [v for v in videos if os.path.splitext(v)[0] not in thumb_basenames]
 
@@ -72,63 +71,56 @@ if not videos_to_process:
     print("Nenhuma thumbnail nova para gerar.")
     sys.exit(0)
 
-print(f"\nThumbnails a serem geradas para: {videos_to_process}\n")
+print(f"\\nThumbnails a serem geradas para: {{videos_to_process}}\\n")
 
 for video_filename in videos_to_process:
     try:
         local_video_path = os.path.join(TEMP_DIR, video_filename)
-        thumb_name = f"{os.path.splitext(video_filename)[0]}.jpg"
+        thumb_name = f"{{os.path.splitext(video_filename)[0]}}.jpg"
         local_thumb_path = os.path.join(TEMP_DIR, thumb_name)
 
-        run_command(["rclone", "copyto", f"{VIDEO_FOLDER}/{video_filename}", local_video_path])
+        run_command(["rclone", "copyto", f"{{VIDEO_FOLDER}}/{{video_filename}}", local_video_path])
         run_command(["ffmpeg", "-nostdin", "-i", local_video_path, "-vframes", "1", "-q:v", "2", local_thumb_path])
-        run_command(["rclone", "copyto", local_thumb_path, f"{THUMB_FOLDER}/{thumb_name}"])
+        run_command(["rclone", "copyto", local_thumb_path, f"{{THUMB_FOLDER}}/{{thumb_name}}"])
 
         os.remove(local_video_path)
         os.remove(local_thumb_path)
-        print(f"Thumbnail para {video_filename} gerada com sucesso.")
+        print(f"Thumbnail para {{video_filename}} gerada com sucesso.")
 
     except Exception as e:
-        print(f"ERRO ao processar {video_filename}: {e}", file=sys.stderr)
+        print(f"ERRO ao processar {{video_filename}}: {{e}}", file=sys.stderr)
 
-print("\nGeração de thumbnails concluída!")
+print("\\nGeração de thumbnails concluída!")
 EOF
 
-
-      - name: Executar geração de thumbnails
+      - name: Executar script de thumbnails incrementais
         run: python3 scripts/thumbnail.py
 
-      - name: Gerar data.json e aplicar Marcas de Água
+      - name: Gerar data.json, aplicar Marcas de Água
         run: |
-          echo "--- Executando script Python para processar media ---"
+          echo "--- Processar media com marca de água ---"
           mkdir -p scripts/
           curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
           python3 scripts/process_files.py
 
       - name: Gerar Manifesto de Ficheiros do R2
         run: |
-          echo "--- Gerando a lista de todos os ficheiros no R2 ---"
+          echo "--- Gerando manifesto do R2 ---"
           MANIFEST_FILE="r2_file_manifest.txt"
-
           echo "Manifesto de Ficheiros do Bucket 'bia-portfolio-assets'" > "$MANIFEST_FILE"
           echo "Gerado em: $(date)" >> "$MANIFEST_FILE"
           echo "----------------------------------------------------" >> "$MANIFEST_FILE"
-
           JQ_FILTER='.[] | "\(.ModTime | fromdate | strflocaltime("%Y-%m-%d %H:%M:%S %Z"))\t\(.Size | tostring | rpad(10))\t\(.Path)"'
+          rclone lsl --json "R2:bia-portfolio-assets" --recursive | jq -r "$JQ_FILTER" | sort >> "$MANIFEST_FILE"
 
-          rclone lsjson "R2:bia-portfolio-assets" --recursive | jq -r "$JQ_FILTER" | sort >> "$MANIFEST_FILE"
-
-          echo "Manifesto gerado em ${MANIFEST_FILE}"
-
-      - name: Fazer commit e push dos ficheiros gerados
+      - name: Fazer commit e push de alterações
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add data.json r2_file_manifest.txt
-
           if ! git diff --quiet --exit-code --cached; then
             git commit -m "Atualiza data.json e manifesto [skip ci]"
             git pull --rebase
             git push
           else
-            echo "Nenhuma alteração nos ficheiros para fazer commit."
+            echo "Nenhuma alteração para fazer commit."
