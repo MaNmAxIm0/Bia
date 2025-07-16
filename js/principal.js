@@ -1,16 +1,33 @@
-// Ficheiro: /js/principal.js (VERSÃO COMPLETA E VERIFICADA)
+// Ficheiro: /js/principal.js (VERSÃO CORRIGIDA E COMPLETA)
 
 import { initCarousel } from './carrossel.js';
 import { loadGalleryContent, loadPresentations } from './galeria.js';
-import { applyTranslations, setLanguage, getCurrentLanguage } from './linguagem.js';
+import { applyTranslations, setLanguage, getCurrentLanguage, getTranslation } from './linguagem.js';
 
 /**
  * Retorna o caminho base do repositório para funcionar no GitHub Pages.
- * @returns {string} '/Bia' ou uma string vazia.
+ * @returns {string} O caminho base.
  */
 function getBasePath() {
-    return window.location.hostname.includes('github.io') ? '/Bia' : '';
+    // A verificação 'Bia' torna o site funcional tanto localmente como no GitHub Pages.
+    return window.location.pathname.startsWith('/Bia/') ? '/Bia' : '';
 }
+
+/**
+ * Mapeamento central de todas as páginas para navegação multilingue.
+ * A chave é o nome do ficheiro em português.
+ */
+const pageMap = {
+    'index.html': { en: 'index.html', es: 'index.html' },
+    'apresentacoes.html': { en: 'presentations.html', es: 'presentaciones.html' },
+    'contactos.html': { en: 'contacts.html', es: 'contactos.html' },
+    'designs.html': { en: 'designs.html', es: 'disenos.html' },
+    'fotos-horizontais.html': { en: 'photos-horizontal.html', es: 'fotos-horizontales.html' },
+    'fotos-verticais.html': { en: 'photos-vertical.html', es: 'fotos-verticales.html' },
+    'sobre-mim.html': { en: 'about-me.html', es: 'sobre-mi.html' },
+    'videos-horizontais.html': { en: 'videos-horizontal.html', es: 'videos-horizontales.html' },
+    'videos-verticais.html': { en: 'videos-vertical.html', es: 'videos-verticales.html' }
+};
 
 /**
  * Carrega e constrói o carrossel dinâmico a partir do data.json.
@@ -84,43 +101,31 @@ async function loadWorkCards() {
             coverUrls[coverKey] = cover.url;
         });
 
-        const workCards = [
-            { key: 'horizontal_photos', coverKey: 'fotografias', link: 'fotos-horizontais.html' },
-            { key: 'vertical_photos', coverKey: 'fotografias', link: 'fotos-verticais.html' },
-            { key: 'horizontal_videos', coverKey: 'videos', link: 'videos-horizontais.html' },
-            { key: 'vertical_videos', coverKey: 'videos', link: 'videos-verticais.html' },
-            { key: 'designs', coverKey: 'designs', link: 'designs.html' },
-            { key: 'presentations', coverKey: 'apresentacoes', link: 'apresentacoes.html' }
+        const workCardsData = [
+            { ptFile: 'fotos-horizontais.html', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'fotografias' },
+            { ptFile: 'fotos-verticais.html', titleKey: 'vertical_photos_title', descKey: 'vertical_photos_desc', coverKey: 'fotografias' },
+            { ptFile: 'videos-horizontais.html', titleKey: 'horizontal_videos_title', descKey: 'horizontal_videos_desc', coverKey: 'videos' },
+            { ptFile: 'videos-verticais.html', titleKey: 'vertical_videos_title', descKey: 'vertical_videos_desc', coverKey: 'videos' },
+            { ptFile: 'designs.html', titleKey: 'designs_title', descKey: 'designs_desc', coverKey: 'designs' },
+            { ptFile: 'apresentacoes.html', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentacoes' }
         ];
 
         gridContainer.innerHTML = '';
 
-        workCards.forEach(card => {
+        workCardsData.forEach(cardData => {
             const cardDiv = document.createElement('div');
             cardDiv.className = 'work-item';
+            
+            const targetFile = pageMap[cardData.ptFile]?.[lang] || cardData.ptFile;
 
-            const img = document.createElement('img');
-            img.src = coverUrls[card.coverKey] || `${getBasePath()}/imagens/placeholder.png`;
-            img.alt = getTranslation(`${card.key}_title`);
-
-            const title = document.createElement('h3');
-            title.dataset.langKey = `${card.key}_title`;
-            title.textContent = getTranslation(`${card.key}_title`);
-
-            const description = document.createElement('p');
-            description.dataset.langKey = `${card.key}_desc`;
-            description.textContent = getTranslation(`${card.key}_desc`);
-
-            const link = document.createElement('a');
-            link.href = card.link;
-            link.className = 'btn';
-            link.dataset.langKey = 'view_gallery';
-            link.innerHTML = `${getTranslation('view_gallery')} <i class="fas fa-arrow-right"></i>`;
-
-            cardDiv.appendChild(img);
-            cardDiv.appendChild(title);
-            cardDiv.appendChild(description);
-            cardDiv.appendChild(link);
+            cardDiv.innerHTML = `
+                <img src="${coverUrls[cardData.coverKey] || `${getBasePath()}/imagens/placeholder.png`}" alt="${getTranslation(cardData.titleKey)}">
+                <h3 data-lang-key="${cardData.titleKey}">${getTranslation(cardData.titleKey)}</h3>
+                <p data-lang-key="${cardData.descKey}">${getTranslation(cardData.descKey)}</p>
+                <a href="${targetFile}" class="btn" data-lang-key="view_gallery">
+                    ${getTranslation('view_gallery')} <i class="fas fa-arrow-right"></i>
+                </a>
+            `;
             gridContainer.appendChild(cardDiv);
         });
 
@@ -129,6 +134,62 @@ async function loadWorkCards() {
         gridContainer.innerHTML = `<p style="color: red;">Erro ao carregar secção.</p>`;
     }
 }
+
+
+/**
+ * Encontra o nome do ficheiro base em português, independentemente da página atual.
+ * @returns {string} O nome do ficheiro em português (ex: "fotos-horizontais.html").
+ */
+function getSourcePageFile() {
+    const currentPageFile = window.location.pathname.split('/').pop();
+    // Se já estamos numa página 'pt', o nome do ficheiro é a fonte
+    if (window.location.pathname.includes('/pt/')) {
+        return currentPageFile;
+    }
+    // Caso contrário, procura no pageMap para encontrar a chave (ficheiro 'pt')
+    for (const ptFile in pageMap) {
+        if (Object.values(pageMap[ptFile]).includes(currentPageFile)) {
+            return ptFile;
+        }
+    }
+    return 'index.html'; // Fallback seguro
+}
+
+
+/**
+ * Atualiza todos os links de navegação para o idioma atual.
+ */
+function updateAllNavLinks() {
+    const lang = getCurrentLanguage();
+    const basePath = `..`; // Navega para a raiz de /html/ a partir de /pt/, /en/, etc.
+
+    document.querySelectorAll('.main-nav a[href]').forEach(link => {
+        // Encontra o ficheiro de destino original em português
+        const originalHref = link.getAttribute('href').split('/').pop();
+        const sourceFile = getSourcePageFileFromLink(originalHref);
+        
+        // Encontra o nome do ficheiro traduzido
+        const targetFile = pageMap[sourceFile]?.[lang] || sourceFile;
+        
+        // Constrói o novo URL completo e atualiza o link
+        link.href = `${basePath}/${lang}/${targetFile}`;
+    });
+}
+
+/**
+ * Função auxiliar para encontrar o ficheiro PT de um link.
+ * @param {string} linkFile - O nome do ficheiro do link (e.g., "photos-horizontal.html")
+ * @returns {string} - O nome do ficheiro base em PT.
+ */
+function getSourcePageFileFromLink(linkFile) {
+    for (const ptFile in pageMap) {
+        if (ptFile === linkFile || Object.values(pageMap[ptFile]).includes(linkFile)) {
+            return ptFile;
+        }
+    }
+    return linkFile; // Retorna o original se não encontrar
+}
+
 
 /**
  * Inicializa a navegação, incluindo menus e links ativos.
@@ -145,14 +206,22 @@ function initializeMenu() {
         toggle.addEventListener('click', (event) => {
             if (window.innerWidth <= 768) {
                 event.preventDefault();
+                // Fecha outros dropdowns abertos para uma melhor experiência mobile
+                document.querySelectorAll('.main-nav .dropdown.active').forEach(openDropdown => {
+                    if (openDropdown !== dropdown) {
+                        openDropdown.classList.remove('active');
+                    }
+                });
                 dropdown.classList.toggle('active');
             }
         });
     });
 
-    const currentPage = window.location.pathname.split('/').pop();
+    // Destaca o link da página atual
+    const sourcePageFile = getSourcePageFile();
     document.querySelectorAll('.main-nav a').forEach(link => {
-        if (link.href.endsWith(currentPage)) {
+        const linkSourceFile = getSourcePageFileFromLink(link.href.split('/').pop());
+        if (linkSourceFile === sourcePageFile) {
             link.classList.add('active');
             const parentDropdown = link.closest('.dropdown');
             if (parentDropdown) {
@@ -162,6 +231,7 @@ function initializeMenu() {
     });
 }
 
+
 /**
  * Configura o seletor de idiomas, atualizando links e a bandeira/texto visível.
  */
@@ -170,6 +240,7 @@ function setupLanguageSwitcher() {
     const dropdown = document.querySelector('.language-dropdown');
     if (!dropdown) return;
 
+    // Atualiza o botão do seletor
     const selectedButton = dropdown.querySelector('.language-selected');
     const langData = {
         pt: { flag: 'fi-pt', text: 'PT' },
@@ -179,37 +250,20 @@ function setupLanguageSwitcher() {
     selectedButton.querySelector('.fi').className = `fi ${langData[currentLang].flag}`;
     selectedButton.querySelector('span:not(.fi)').textContent = langData[currentLang].text;
 
+    // Marca a opção ativa no menu dropdown
     dropdown.querySelectorAll('.lang-option').forEach(opt => opt.classList.remove('active'));
     const activeOption = dropdown.querySelector(`.lang-option[data-lang="${currentLang}"]`);
     if (activeOption) activeOption.classList.add('active');
 
-    const pageMap = {
-        'index.html': { en: 'index.html', es: 'index.html' },
-        'apresentacoes.html': { en: 'presentations.html', es: 'presentaciones.html' },
-        'contactos.html': { en: 'contacts.html', es: 'contactos.html' },
-        'designs.html': { en: 'designs.html', es: 'disenos.html' },
-        'fotos-horizontais.html': { en: 'photos-horizontal.html', es: 'fotos-horizontales.html' },
-        'fotos-verticais.html': { en: 'photos-vertical.html', es: 'fotos-verticales.html' },
-        'sobre-mim.html': { en: 'about-me.html', es: 'sobre-mi.html' },
-        'videos-horizontais.html': { en: 'videos-horizontal.html', es: 'videos-horizontales.html' },
-        'videos-verticais.html': { en: 'videos-vertical.html', es: 'videos-verticales.html' }
-    };
-    const currentPageFile = window.location.pathname.split('/').pop();
-    let sourceFile = 'index.html';
-    if (currentLang === 'pt') {
-        sourceFile = currentPageFile;
-    } else {
-        for (const ptFile in pageMap) {
-            if (Object.values(pageMap[ptFile]).includes(currentPageFile)) {
-                sourceFile = ptFile;
-                break;
-            }
-        }
-    }
-    document.querySelector('.lang-pt-link').href = `../pt/${sourceFile}`;
-    document.querySelector('.lang-en-link').href = `../en/${pageMap[sourceFile]?.en || 'index.html'}`;
-    document.querySelector('.lang-es-link').href = `../es/${pageMap[sourceFile]?.es || 'index.html'}`;
+    // ** LÓGICA CORRIGIDA PARA OS LINKS DO SELETOR **
+    const sourceFile = getSourcePageFile();
+    const basePath = `..`; // Caminho relativo para a pasta /html/
 
+    document.querySelector('.lang-pt-link').href = `${basePath}/pt/${sourceFile}`;
+    document.querySelector('.lang-en-link').href = `${basePath}/en/${pageMap[sourceFile]?.en || 'index.html'}`;
+    document.querySelector('.lang-es-link').href = `${basePath}/es/${pageMap[sourceFile]?.es || 'index.html'}`;
+
+    // Lógica para abrir/fechar o dropdown
     selectedButton.addEventListener('click', (e) => {
         e.stopPropagation();
         dropdown.classList.toggle('open');
@@ -217,46 +271,54 @@ function setupLanguageSwitcher() {
     document.addEventListener('click', () => dropdown.classList.remove('open'));
 }
 
+
 /**
  * Função principal que orquestra o carregamento da página.
  */
 function onPageLoad() {
+    // Determina o idioma com base no URL
     const pathLang = window.location.pathname.split('/')[2] || 'pt';
     setLanguage(pathLang);
+    
+    // Aplica as traduções a todo o texto estático
     applyTranslations();
 
+    // Carrega conteúdo dinâmico específico da página
     if (window.location.pathname.endsWith('index.html')) {
         loadDynamicCarousel();
         loadWorkCards();
     }
-
-    const pageKey = window.location.pathname.split('/').pop().replace('.html', '');
+    
+    // Mapeamento de ficheiros para galerias
+    const pageKey = getSourcePageFile().replace('.html', '');
     const galleryIdMap = {
-        'fotos-horizontais': 'photo-h-gallery', 'photos-horizontal': 'photo-h-gallery', 'fotos-horizontales': 'photo-h-gallery',
-        'fotos-verticais': 'photo-v-gallery', 'photos-vertical': 'photo-v-gallery', 'fotos-verticales': 'photo-v-gallery',
-        'videos-horizontais': 'video-h-gallery', 'videos-horizontal': 'video-h-gallery', 'videos-horizontales': 'video-h-gallery',
-        'videos-verticais': 'video-v-gallery', 'videos-vertical': 'video-v-gallery', 'videos-verticales': 'video-v-gallery',
-        'designs': 'design-gallery', 'disenos': 'design-gallery',
-        'apresentacoes': 'presentation-gallery', 'presentations': 'presentation-gallery', 'presentaciones': 'presentation-gallery'
+        'fotos-horizontais': { id: 'photo-h-gallery', type: 'fotografias', orientation: 'horizontal' },
+        'fotos-verticais':   { id: 'photo-v-gallery', type: 'fotografias', orientation: 'vertical' },
+        'videos-horizontais': { id: 'video-h-gallery', type: 'videos', orientation: 'horizontal' },
+        'videos-verticais':   { id: 'video-v-gallery', type: 'videos', orientation: 'vertical' },
+        'designs':           { id: 'design-gallery', type: 'designs' },
+        'apresentacoes':     { id: 'presentation-gallery', type: 'apresentacoes' }
     };
-    const galleryId = galleryIdMap[pageKey];
-    if (galleryId) {
-        const typeMap = { photo: 'fotografias', video: 'videos', design: 'designs', presentation: 'apresentacoes' };
-        const galleryType = typeMap[galleryId.split('-')[0]];
-        if (galleryType === 'apresentacoes') {
+
+    const galleryInfo = galleryIdMap[pageKey];
+    if (galleryInfo) {
+        if (galleryInfo.type === 'apresentacoes') {
             loadPresentations();
         } else {
-            const orientation = galleryId.includes('-h-') ? 'horizontal' : (galleryId.includes('-v-') ? 'vertical' : null);
-            loadGalleryContent(galleryType, galleryId, orientation);
+            loadGalleryContent(galleryInfo.type, galleryInfo.id, galleryInfo.orientation || null);
         }
     }
 }
 
 // --- EVENT LISTENERS ---
+
+// Corre quando o DOM inicial está pronto
 document.addEventListener('DOMContentLoaded', onPageLoad);
 
+// Corre APENAS depois de o cabecalho.html ser injetado na página
 document.addEventListener('headerLoaded', () => {
+    updateAllNavLinks(); // **NOVO: Atualiza os links da navegação principal**
     initializeMenu();
     setupLanguageSwitcher();
-    applyTranslations();
+    applyTranslations(); // Aplica traduções ao cabeçalho/rodapé carregados
 });

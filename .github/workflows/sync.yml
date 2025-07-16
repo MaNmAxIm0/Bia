@@ -30,27 +30,30 @@ jobs:
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
       # ETAPA 1: Sincronizar Drive -> R2 (Isto agora também apaga ficheiros )
-      - name: Sincronizar Google Drive para Cloudflare R2
+      - name: Sincronizar Drive -> R2 (Apenas ficheiros novos ou alterados)
         run: |
           echo "--- Sincronizando Drive -> R2 (ficheiros apagados no Drive serão apagados aqui) ---"
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -v
-
-      # ETAPA 2: Gerar Thumbnails (com a correção final)
+          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" \
+            --update \
+            --use-server-modtime \
+            --exclude "desktop.ini" \
+            -v
       - name: Gerar Thumbnails para Vídeos
         run: |
           echo "--- Gerando thumbnails para os vídeos existentes ---"
           mkdir -p temp_thumbs
           
-          # Lista os ficheiros e passa para um ficheiro temporário
+          # Lista os ficheiros e guarda num ficheiro temporário
           rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only --exclude "wm_*" > video_list.txt
 
-          # Lê o ficheiro linha a linha, o que é 100% seguro para nomes com espaços
+          # Lê o ficheiro linha a linha de forma segura
           while IFS= read -r video_file; do
+            # Ignora linhas vazias
             [ -z "$video_file" ] && continue
+
             echo "A processar vídeo para thumbnail: ${video_file}"
-            rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"
-            
-            if [ -f "./${video_file}" ]; then
+            # Usa aspas para proteger o nome do ficheiro
+            if rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"; then
               thumb_name="${video_file%.*}.jpg"
               ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 -update 1 "temp_thumbs/${thumb_name}" > /dev/null 2>&1
               rm "./${video_file}"
@@ -61,7 +64,6 @@ jobs:
           
           # Sincroniza as thumbnails para limpar as antigas
           rclone sync temp_thumbs "R2:bia-portfolio-assets/Thumbnails" -P
-
       # ETAPA 3: Processar ficheiros e gerar data.json
       - name: Gerar data.json, aplicar Marcas de Água e Limpar Ficheiros
         run: |

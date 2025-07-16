@@ -22,7 +22,7 @@ THUMBNAILS_DIR = "Thumbnails"
 MAX_IMAGE_WIDTH = 1920
 JPEG_QUALITY = 85
 
-# --- Funções Auxiliares (sem alterações) ---
+# --- Funções Auxiliares ---
 def rclone_lsf_recursive(remote_path):
     command = ["rclone", "lsf", remote_path, "--recursive", "--files-only"]
     try:
@@ -122,9 +122,7 @@ def main():
     all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     
     source_files = {f for f in all_r2_files if not os.path.basename(f).startswith('wm_')}
-    processed_files_map = {f"wm_{os.path.splitext(os.path.basename(f))[0]}.jpg": f for f in source_files if f.lower().endswith(('.png', '.jpg', '.jpeg'))}
-    processed_files_map.update({f"wm_{os.path.basename(f)}": f for f in source_files if f.lower().endswith(('.mp4', '.mov'))})
-
+    
     new_data = {cat_key: [] for cat_key in CATEGORIES.values()}
     
     for path in source_files:
@@ -134,7 +132,6 @@ def main():
 
             category_key = CATEGORIES[category_folder]
             
-            # Lógica para Capas e Carrossel (não são processados)
             if category_key in ['carousel', 'covers', 'apresentacoes']:
                 file_data = {"name": filename, "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
                 if category_key == 'carousel':
@@ -144,18 +141,15 @@ def main():
                 new_data[category_key].append(file_data)
                 continue
 
-            # Lógica para Ficheiros Processáveis (Fotos, Vídeos, Designs)
             print(f"A verificar: {path}...")
             
-            # Define o nome do ficheiro processado esperado
             if category_key in ["fotografias", "designs"]:
                 watermarked_filename = f"wm_{os.path.splitext(filename)[0]}.jpg"
-            else: # videos
+            else:
                 watermarked_filename = f"wm_{filename}"
             
             upload_path = f"{category_folder}/{watermarked_filename}"
 
-            # ** A LÓGICA DE EFICIÊNCIA **
             if upload_path not in all_r2_files:
                 print(f"  -> Processamento necessário. A gerar {watermarked_filename}")
                 local_original_path = os.path.join(TEMP_DIR, filename)
@@ -179,7 +173,6 @@ def main():
             else:
                 print("  -> Versão processada já existe. A ignorar.")
 
-            # Adiciona a entrada ao data.json
             file_data = {
                 "name": filename,
                 "titles": parse_filename_for_titles(filename),
@@ -200,11 +193,15 @@ def main():
     print("\n--- [FASE 2] Limpando ficheiros órfãos no R2 ---")
     all_r2_files_after = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     
-    # Apaga ficheiros originais que já foram processados
+    valid_processed_bases = {os.path.splitext(os.path.basename(item['url']))[0].replace('wm_', '') for cat in ['fotografias', 'designs', 'videos'] for item in new_data[cat]}
+
     for path in all_r2_files_after:
         if not path.startswith(('Apresentacoes', 'Melhores', 'Capas', 'Thumbnails')) and not os.path.basename(path).startswith('wm_'):
-            print(f"  -> Apagando ficheiro de origem processado: {path}")
-            subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"], check=True)
+            base_name = os.path.splitext(os.path.basename(path))[0]
+            if base_name in valid_processed_bases:
+                print(f"  -> Apagando ficheiro de origem processado: {path}")
+                # Remove check=True para não falhar se o ficheiro já não existir
+                subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"])
 
     print("\nGerando ficheiro data.json final...")
     with open(DATA_FILE, "w", encoding="utf-8") as f:
