@@ -36,26 +36,25 @@ jobs:
           echo "--- Sincronizando Drive -> R2 (protegendo a pasta Thumbnails) ---"
           rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "/Thumbnails/**" --exclude "desktop.ini" -v
 
-      - name: Gerar Thumbnails Incrementais
+      - name: Gerar Thumbnails Incrementais para Vídeos Novos
         run: python3 scripts/thumbnail_generator.py
 
-      - name: Aplicar Marcas de Água e Gerar data.json
+      - name: Aplicar Marcas de Água e Otimizar Imagens
         run: |
-          echo "--- A executar o script principal de processamento ---"
+          echo "--- Processando Imagens (Fotografias e Designs) ---"
           mkdir -p scripts/
           curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
-          python3 scripts/process_files.py
+          python3 scripts/process_images.py
 
-      - name: Gerar Manifesto de Ficheiros do R2
+      - name: Aplicar Marcas de Água a Vídeos
         run: |
-          echo "--- Gerando manifesto final do R2 ---"
-          MANIFEST_FILE="r2_file_manifest.txt"
-          echo "Manifesto de Ficheiros do Bucket 'bia-portfolio-assets'" > "$MANIFEST_FILE"
-          echo "Gerado em: $(date)" >> "$MANIFEST_FILE"
-          echo "----------------------------------------------------" >> "$MANIFEST_FILE"
-          # Ordena por data, do mais recente para o mais antigo
-          JQ_FILTER='.[] | "\(.ModTime | fromdate | strflocaltime("%Y-%m-%d %H:%M:%S %Z"))\t\(.Size | tostring | rpad(10))\t\(.Path)"'
-          rclone lsl --json "R2:bia-portfolio-assets" --recursive | jq -r "$JQ_FILTER" | sort -r >> "$MANIFEST_FILE"
+          echo "--- Processando Vídeos ---"
+          python3 scripts/process_videos.py
+      
+      - name: Gerar data.json e Manifesto de Ficheiros
+        run: |
+          echo "--- Gerando data.json e manifesto final do R2 ---"
+          python3 scripts/generate_final_data.py
 
       - name: Fazer commit e push de alterações
         run: |
