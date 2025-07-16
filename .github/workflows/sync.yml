@@ -31,7 +31,6 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
-      # ETAPA CORRIGIDA: Adicionado --exclude para proteger a pasta Thumbnails
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
           echo "--- Sincronizando Drive -> R2 (protegendo a pasta Thumbnails) ---"
@@ -44,7 +43,8 @@ jobs:
         run: |
           echo "--- Processar media com marca de água ---"
           mkdir -p scripts/
-          curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
+          # **ALTERADO: Descarrega a fonte SemiBold**
+          curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
           python3 scripts/process_files.py
 
       - name: Gerar Manifesto de Ficheiros do R2
@@ -61,6 +61,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          # Adiciona o ficheiro de manifesto ao commit
           git add data.json r2_file_manifest.txt
           if ! git diff --quiet --exit-code --cached; then
             git commit -m "Atualiza data.json e manifesto [skip ci]"
