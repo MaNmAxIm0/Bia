@@ -22,7 +22,7 @@ THUMBNAILS_DIR = "Thumbnails"
 MAX_IMAGE_WIDTH = 1920
 JPEG_QUALITY = 85
 
-# --- Funções Auxiliares ---
+# --- Funções Auxiliares (sem alterações) ---
 def rclone_lsf_recursive(remote_path):
     command = ["rclone", "lsf", remote_path, "--recursive", "--files-only"]
     try:
@@ -110,6 +110,7 @@ def main():
     if not os.path.exists(TEMP_DIR):
         os.makedirs(TEMP_DIR)
     
+    # Carrega dados do carrossel para manter as descrições
     existing_carousel_data = {}
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
@@ -123,52 +124,48 @@ def main():
     print("\n--- [FASE 1] Mapeando todos os ficheiros no R2 ---")
     all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
 
-    source_file_map = {}
-    processed_basenames = set()
-
-    for path in all_r2_files:
-        filename = os.path.basename(path)
-        basename, ext = os.path.splitext(filename)
-        
-        if filename.startswith('wm_'):
-            processed_basenames.add(basename.replace('wm_', '', 1))
-        else:
-            source_file_map[basename] = path
-
-    print(f"Encontrados {len(source_file_map)} ficheiros de origem e {len(processed_basenames)} processados.")
+    # ** LÓGICA DE VERIFICAÇÃO CORRIGIDA **
+    source_files = {f for f in all_r2_files if not os.path.basename(f).startswith('wm_')}
+    processed_basenames = {os.path.splitext(os.path.basename(f))[0].replace('wm_', '', 1) for f in all_r2_files if os.path.basename(f).startswith('wm_')}
+    
+    print(f"Encontrados {len(source_files)} ficheiros de origem e {len(processed_basenames)} processados.")
 
     new_data = {cat_key: [] for cat_key in CATEGORIES.values()}
     
-    for basename, path in source_file_map.items():
+    # Itera sobre todos os ficheiros de origem encontrados
+    for path in source_files:
         try:
             category_folder = os.path.dirname(path)
             filename = os.path.basename(path)
+            basename = os.path.splitext(filename)[0]
 
             if not category_folder or category_folder not in CATEGORIES:
                 continue
             
             category_key = CATEGORIES[category_folder]
 
-            # Esta lógica agora só se aplica a ficheiros que serão processados
+            # Processa apenas as categorias que precisam de marca de água
             if category_key in ["fotografias", "designs", "videos"]:
+                
+                # Gera a entrada para o data.json
                 if category_key in ["fotografias", "designs"]:
                     watermarked_filename = f"wm_{basename}.jpg"
                 else:
                     watermarked_filename = f"wm_{filename}"
-                
                 upload_path = f"{category_folder}/{watermarked_filename}"
-
+                
                 file_data = {
                     "name": filename,
                     "titles": parse_filename_for_titles(filename),
-                    "orientation": "horizontal", 
+                    "orientation": "horizontal", # Default
                     "url": f"{PUBLIC_URL}/{upload_path.replace(' ', '%20')}"
                 }
                 if category_key == "videos":
                     file_data["thumbnail_url"] = f"{PUBLIC_URL}/{THUMBNAILS_DIR}/{basename}.jpg".replace(' ', '%20')
-                
                 new_data[category_key].append(file_data)
 
+                # ** A CONDIÇÃO CHAVE **
+                # Se o nome base do ficheiro original não estiver na lista de processados, executa o processo.
                 if basename not in processed_basenames:
                     print(f"-> Processamento necessário para: {path}")
                     
@@ -194,20 +191,19 @@ def main():
         except Exception as e:
             print(f"  -> ERRO ao processar {path}: {e}")
 
-    # Adicionar ficheiros não processáveis (Capas, etc.) ao data.json
-    for category_name_drive, category_key_json in CATEGORIES.items():
-        if category_key_json in ['carousel', 'covers', 'apresentacoes']:
-            path = f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{category_name_drive}"
-            files_in_cat = rclone_lsf_recursive(path)
-            for file_path in files_in_cat:
-                filename = os.path.basename(file_path)
-                file_data = {"name": filename, "url": f"{PUBLIC_URL}/{file_path.replace(' ', '%20')}"}
-                if category_key_json == 'carousel':
-                    existing_entry = existing_carousel_data.get(filename, {})
-                    file_data["titles"] = parse_filename_for_titles(filename)
-                    file_data["descriptions"] = existing_entry.get('descriptions', {"pt": "", "en": "", "es": ""})
-                new_data[category_key_json].append(file_data)
-
+    # Adiciona ficheiros que não são processados (Capas, Apresentações, etc.)
+    for cat_name, cat_key in CATEGORIES.items():
+        if cat_key in ['carousel', 'covers', 'apresentacoes']:
+            for path in source_files:
+                if os.path.dirname(path) == cat_name:
+                    filename = os.path.basename(path)
+                    file_data = {"name": filename, "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
+                    if cat_key == 'carousel':
+                        existing = existing_carousel_data.get(filename, {})
+                        file_data["titles"] = parse_filename_for_titles(filename)
+                        file_data["descriptions"] = existing.get('descriptions', {"pt": "", "en": "", "es": ""})
+                    new_data[cat_key].append(file_data)
+                    
     print("\nGerando ficheiro data.json final...")
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
