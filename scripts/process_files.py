@@ -1,4 +1,4 @@
-# Ficheiro: /scripts/process_files.py (VERSÃO FINAL E CORRIGIDA)
+# Ficheiro: /scripts/process_files.py (VERSÃO FINAL E DEFINITIVA)
 
 import subprocess
 import json
@@ -32,33 +32,24 @@ def get_rclone_lsl_json(path):
         return []
 
 def get_last_manifest_time():
-    """
-    Lê o ficheiro de manifesto, procura a linha 'Gerado em:' e extrai a data.
-    É mais robusto e à prova de falhas.
-    """
     try:
         with open(MANIFEST_FILE, 'r', encoding='utf-8') as f:
             for line in f:
                 if line.startswith("Gerado em:"):
-                    # Extrai a data e converte para um objeto datetime
-                    # Ex: "Gerado em: Wed Jul 16 21:36:00 WEST 2025" -> "Wed Jul 16 21:36:00 2025"
                     parts = line.split()
                     date_str = " ".join(parts[2:5] + [parts[6]])
+                    # Exemplo de formato: "Jul 16 21:50:52 2025" -> %b %d %H:%M:%S %Y
                     return datetime.strptime(date_str, "%b %d %H:%M:%S %Y").replace(tzinfo=timezone.utc)
     except (FileNotFoundError, IndexError, ValueError) as e:
         print(f"AVISO: Não foi possível ler a data do manifesto ({e}). A processar todos os ficheiros.")
-        # Se o ficheiro não existe ou a data está mal formatada, retorna o início dos tempos.
-        return datetime.fromtimestamp(0, tz=timezone.utc)
+    return datetime.fromtimestamp(0, tz=timezone.utc)
 
 def parse_filename_for_titles(filename):
     name_without_ext = os.path.splitext(filename)[0]
     parts = name_without_ext.split('_')
-    if len(parts) >= 3:
-        return {'pt': parts[0].replace('-', ' '), 'en': parts[1].replace('-', ' '), 'es': parts[2].replace('-', ' ')}
-    elif len(parts) == 2:
-        return {'pt': parts[0].replace('-', ' '), 'en': parts[1].replace('-', ' '), 'es': parts[1].replace('-', ' ')}
-    else:
-        return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
+    if len(parts) >= 3: return {'pt': parts[0].replace('-', ' '), 'en': parts[1].replace('-', ' '), 'es': parts[2].replace('-', ' ')}
+    elif len(parts) == 2: return {'pt': parts[0].replace('-', ' '), 'en': parts[1].replace('-', ' '), 'es': parts[1].replace('-', ' ')}
+    else: return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
 
 def get_media_dimensions(local_path, media_type):
     from PIL import Image, ImageOps
@@ -90,22 +81,17 @@ def apply_watermark_and_optimize(input_path, output_path):
                 new_height = int(MAX_IMAGE_WIDTH * img_corrected.height / img_corrected.width)
                 img_corrected = img_corrected.resize((MAX_IMAGE_WIDTH, new_height), Image.Resampling.LANCZOS)
             draw = ImageDraw.Draw(img_corrected)
-            
             font_size = max(24, int(img_corrected.height * 0.05))
             font = ImageFont.truetype(FONT_PATH, font_size)
-            
             bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
             text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
             margin = int(img_corrected.width * 0.025)
             x, y = img_corrected.width - text_width - margin, img_corrected.height - text_height - margin
-            
             draw.text((x + 2, y + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
             draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220))
-            
             img_corrected.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True, subsampling=0)
         return True
-    except Exception as e:
-        return f"PIL Error: {e}"
+    except Exception as e: return f"PIL Error: {e}"
 
 def apply_watermark_to_video(input_path, output_path, video_width, video_height):
     escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
@@ -115,21 +101,17 @@ def apply_watermark_to_video(input_path, output_path, video_width, video_height)
     try:
         subprocess.run(command, check=True, capture_output=True, text=True, timeout=600)
         return True
-    except Exception as e:
-        return f"FFmpeg Error: {e}"
+    except Exception as e: return f"FFmpeg Error: {e}"
 
-# --- Lógica Principal ---
 def main():
     start_time = time.time()
     print(">>> INICIANDO SCRIPT DE PROCESSAMENTO E GERAÇÃO DE DADOS...")
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-    print("\n--- [FASE 1] Lendo o estado atual do R2 ---")
+    print("\n--- [FASE 1] Lendo o estado atual do R2 e o último manifesto ---")
     all_r2_files_data = get_rclone_lsl_json(RCLONE_REMOTE)
     last_run_time = get_last_manifest_time()
 
-    new_data = {key: [] for key in CATEGORIES.values()}
-    
     files_to_process = []
     for item in all_r2_files_data:
         mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
@@ -139,10 +121,8 @@ def main():
             if category_folder in CATEGORIES and CATEGORIES[category_folder] in ["fotografias", "designs", "videos"]:
                 files_to_process.append(item)
 
-    if not files_to_process:
-        print("Nenhum ficheiro novo ou modificado para processar.")
-    else:
-        print(f"Encontrados {len(files_to_process)} ficheiros novos ou modificados para processar.")
+    if not files_to_process: print("Nenhum ficheiro novo ou modificado para processar.")
+    else: print(f"Encontrados {len(files_to_process)} ficheiros novos ou modificados para processar.")
 
     for item in files_to_process:
         try:
@@ -178,11 +158,11 @@ def main():
             os.remove(local_original_path)
             os.remove(local_processed_path)
 
-        except Exception as e:
-            print(f"  -> ERRO ao processar {item['Path']}: {e}")
+        except Exception as e: print(f"  -> ERRO ao processar {item['Path']}: {e}")
     
     print("\n--- [FASE 2] Gerando o ficheiro data.json final ---")
     final_r2_files_data = get_rclone_lsl_json(RCLONE_REMOTE)
+    new_data = {key: [] for key in CATEGORIES.values()}
     for item in final_r2_files_data:
         path = item["Path"]
         category_folder = os.path.dirname(path)
@@ -191,9 +171,10 @@ def main():
             category_key = CATEGORIES[category_folder]
             file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
             if category_key == 'videos': file_data["thumbnail_url"] = f"{PUBLIC_URL}/Thumbnails/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
-            # A orientação será determinada durante o processamento para ficheiros novos
-            if category_key in ["fotografias", "designs"]:
-                 pass # A orientação pode ser adicionada aqui se necessário
+            if category_key in ["fotografias", "designs", "videos"]:
+                # A orientação será determinada durante o processamento para ficheiros novos,
+                # para os antigos podemos tentar obter ou deixar um default
+                file_data['orientation'] = 'horizontal' # Default
             new_data[category_key].append(file_data)
 
     with open(DATA_FILE, "w", encoding="utf-8") as f:
