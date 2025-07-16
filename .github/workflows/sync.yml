@@ -136,4 +136,4 @@ EOF
             git push
           else
             echo "Nenhuma alteração nos ficheiros para fazer commit."
-          fi
+          fi 
