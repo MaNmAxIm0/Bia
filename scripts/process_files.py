@@ -4,8 +4,7 @@ import subprocess
 import json
 import os
 import time
-from datetime import datetime, timezone, timedelta # <--- LINHA CORRIGIDA
-from PIL import Image, ImageDraw, ImageFont, ImageOps # <--- LINHA ADICIONADA
+from datetime import datetime, timezone
 
 # --- Configuração ---
 RCLONE_REMOTE = "R2:bia-portfolio-assets"
@@ -29,23 +28,27 @@ def get_rclone_lsl_json(path):
         result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
         return json.loads(result.stdout)
     except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
-        print(f"Erro ao obter lista de ficheiros de {path}: {e}")
+        print(f"AVISO: Não foi possível obter lista de ficheiros de {path}: {e}")
         return []
 
 def get_last_manifest_time():
+    """
+    Lê o ficheiro de manifesto, procura a linha 'Gerado em:' e extrai a data.
+    É mais robusto e à prova de falhas.
+    """
     try:
-        # Lê a data da última linha do manifesto para ser mais preciso
         with open(MANIFEST_FILE, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            if len(lines) > 2: # Garante que o ficheiro tem conteúdo
-                # Exemplo de linha: 2025-07-16 21:36:00 WEST       123456 Fotografias/foto.jpg
-                last_line = lines[-1]
-                date_str = " ".join(last_line.split("\t")[0].split()[:2])
-                return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-    except (FileNotFoundError, IndexError):
-        # Se o ficheiro não existe ou está vazio, retorna o início dos tempos
-        pass
-    return datetime.fromtimestamp(0, tz=timezone.utc)
+            for line in f:
+                if line.startswith("Gerado em:"):
+                    # Extrai a data e converte para um objeto datetime
+                    # Ex: "Gerado em: Wed Jul 16 21:36:00 WEST 2025" -> "Wed Jul 16 21:36:00 2025"
+                    parts = line.split()
+                    date_str = " ".join(parts[2:5] + [parts[6]])
+                    return datetime.strptime(date_str, "%b %d %H:%M:%S %Y").replace(tzinfo=timezone.utc)
+    except (FileNotFoundError, IndexError, ValueError) as e:
+        print(f"AVISO: Não foi possível ler a data do manifesto ({e}). A processar todos os ficheiros.")
+        # Se o ficheiro não existe ou a data está mal formatada, retorna o início dos tempos.
+        return datetime.fromtimestamp(0, tz=timezone.utc)
 
 def parse_filename_for_titles(filename):
     name_without_ext = os.path.splitext(filename)[0]
@@ -58,6 +61,7 @@ def parse_filename_for_titles(filename):
         return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
 
 def get_media_dimensions(local_path, media_type):
+    from PIL import Image, ImageOps
     width, height = 0, 0
     try:
         if media_type in ['fotografias', 'designs']:
@@ -74,6 +78,7 @@ def get_media_dimensions(local_path, media_type):
     return width, height
 
 def apply_watermark_and_optimize(input_path, output_path):
+    from PIL import Image, ImageDraw, ImageFont, ImageOps
     try:
         with Image.open(input_path) as img:
             img_corrected = ImageOps.exif_transpose(img)
@@ -126,7 +131,6 @@ def main():
     new_data = {key: [] for key in CATEGORIES.values()}
     
     files_to_process = []
-    # Converte a data de modificação do ficheiro para um objeto ciente do fuso horário
     for item in all_r2_files_data:
         mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
         if mod_time > last_run_time:
@@ -177,7 +181,6 @@ def main():
         except Exception as e:
             print(f"  -> ERRO ao processar {item['Path']}: {e}")
     
-    # Reconstrói o data.json com todos os ficheiros do R2 (estado final)
     print("\n--- [FASE 2] Gerando o ficheiro data.json final ---")
     final_r2_files_data = get_rclone_lsl_json(RCLONE_REMOTE)
     for item in final_r2_files_data:
@@ -188,10 +191,9 @@ def main():
             category_key = CATEGORIES[category_folder]
             file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
             if category_key == 'videos': file_data["thumbnail_url"] = f"{PUBLIC_URL}/Thumbnails/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
+            # A orientação será determinada durante o processamento para ficheiros novos
             if category_key in ["fotografias", "designs"]:
-                 # A orientação precisa de ser determinada ou assumida
-                 # Para simplificar, podemos omiti-la por agora ou necessitar de uma lógica mais complexa
-                 pass
+                 pass # A orientação pode ser adicionada aqui se necessário
             new_data[category_key].append(file_data)
 
     with open(DATA_FILE, "w", encoding="utf-8") as f:
