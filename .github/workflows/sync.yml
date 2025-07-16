@@ -1,10 +1,9 @@
 name: Sincronizar Media, Gerar Manifesto, Thumbs e Dados
 
 on:
-  workflow_dispatch: # Permite execução manual
+  workflow_dispatch:
   schedule:
-    # ATUALIZADO: Executa todos os dias às 19:00 e 20:00 UTC.
-    # Isto cobre as 20:00 em Lisboa, tanto no horário de verão (UTC+1) como no de inverno (UTC+0).
+    # Executa todos os dias às 19:00 e 20:00 UTC para cobrir as 20:00 em Lisboa (verão/inverno).
     - cron: '0 19,20 * * *'
 
 permissions:
@@ -13,6 +12,8 @@ permissions:
 jobs:
   sync-and-build:
     runs-on: ubuntu-latest
+    env: # <- ALTERAÇÃO PRINCIPAL AQUI
+      TZ: 'Europe/Lisbon'
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
@@ -31,38 +32,73 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
-      - name: Sincronizar Drive -> R2 (Apenas ficheiros novos ou alterados)
+      - name: Sincronizar Drive -> R2
         run: |
           echo "--- Sincronizando Drive -> R2 ---"
+          # O rclone agora irá mostrar os logs com a hora de Lisboa
           rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --update --use-server-modtime --exclude "desktop.ini" -v
 
-      - name: Gerar Thumbnails Apenas para Vídeos Novos
+      - name: Gerar Thumbnails Apenas para Vídeos Novos (Método Robusto)
+        id: thumb_generator
         run: |
-          echo "--- Verificando e gerando thumbnails para vídeos novos ---"
-          mkdir -p temp_thumbs_download temp_thumbs_generate
-          rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only --exclude "wm_*" > video_list.txt
-          rclone lsf "R2:bia-portfolio-assets/Thumbnails" --files-only > thumb_list.txt
+          echo "--- Gerando script para identificar vídeos que precisam de thumbnails ---"
+          mkdir -p temp_download
           
-          # Compara e processa apenas os vídeos que não têm thumbnail
-          grep -vFf <(sed 's/\.jpg$//' thumb_list.txt) video_list.txt | while IFS= read -r video_file; do
-            [ -z "$video_file" ] && continue
-            echo "-> Thumbnail necessária para: ${video_file}"
-            local_video_path="temp_thumbs_download/${video_file}"
-            if rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "${local_video_path}"; then
-              thumb_name="${video_file%.*}.jpg"
-              generated_thumb_path="temp_thumbs_generate/${thumb_name}"
-              ffmpeg -i "${local_video_path}" -ss 00:00:01.00 -vframes 1 "${generated_thumb_path}" > /dev/null 2>&1
-              rm "${local_video_path}"
-            else
-              echo "AVISO: Falha ao descarregar o vídeo '${video_file}'. A ignorar."
-            fi
-          done
+          cat << 'EOF' > generate_thumb_commands.py
+import subprocess
+import os
+
+RCLONE_REMOTE = "R2:bia-portfolio-assets"
+VIDEO_FOLDER = "Vídeos"
+THUMB_FOLDER = "Thumbnails"
+TEMP_DOWNLOAD_DIR = "temp_download"
+
+def get_file_list(path):
+    result = subprocess.run(['rclone', 'lsf', f'{RCLONE_REMOTE}/{path}', '--files-only'], capture_output=True, text=True, encoding='utf-8')
+    if result.returncode != 0:
+        print(f"Erro ao listar ficheiros em {path}: {result.stderr}")
+        return set()
+    return {line for line in result.stdout.strip().split('\n') if line and not line.startswith('wm_')}
+
+print("Obtendo lista de vídeos e thumbnails existentes...")
+videos = get_file_list(VIDEO_FOLDER)
+thumbnails = get_file_list(THUMB_FOLDER)
+thumb_basenames = {os.path.splitext(t)[0] for t in thumbnails}
+
+commands = []
+for video in videos:
+    video_basename = os.path.splitext(video)[0]
+    if video_basename not in thumb_basenames:
+        print(f"-> Thumbnail necessária para: {video}")
+        local_video_path = os.path.join(TEMP_DOWNLOAD_DIR, video)
+        thumb_name = f"{video_basename}.jpg"
+        
+        commands.append(f'rclone copyto "{RCLONE_REMOTE}/{VIDEO_FOLDER}/{video}" "{local_video_path}"')
+        commands.append(f'ffmpeg -nostdin -i "{local_video_path}" -ss 00:00:01.00 -vframes 1 "temp_download/{thumb_name}"')
+        commands.append(f'rclone copyto "temp_download/{thumb_name}" "{RCLONE_REMOTE}/{THUMB_FOLDER}/{thumb_name}"')
+        commands.append(f'rm "{local_video_path}" "temp_download/{thumb_name}"')
+
+if commands:
+    print("\n--- Comandos a serem executados ---")
+    with open("run_thumb_commands.sh", "w") as f:
+        f.write("#!/bin/bash\nset -e\n")
+        for cmd in commands:
+            print(cmd)
+            f.write(f"{cmd}\n")
+else:
+    print("Nenhuma thumbnail nova para gerar.")
+EOF
           
-          if [ -n "$(ls -A temp_thumbs_generate)" ]; then
-            echo "--- A fazer upload de novas thumbnails ---"
-            rclone copy temp_thumbs_generate "R2:bia-portfolio-assets/Thumbnails" -P
+          python3 generate_thumb_commands.py
+
+      - name: Executar Comandos de Geração de Thumbnail
+        run: |
+          if [ -f run_thumb_commands.sh ]; then
+            echo "--- Executando a geração de thumbnails ---"
+            chmod +x run_thumb_commands.sh
+            ./run_thumb_commands.sh
           else
-            echo "--- Nenhuma thumbnail nova para fazer upload ---"
+            echo "--- Nenhum comando de thumbnail para executar ---"
           fi
 
       - name: Gerar data.json e aplicar Marcas de Água
@@ -72,28 +108,27 @@ jobs:
           curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
           python3 scripts/process_files.py
 
-      # NOVA ETAPA: Gerar o manifesto de ficheiros
       - name: Gerar Manifesto de Ficheiros do R2
-        id: generate_manifest
         run: |
           echo "--- Gerando a lista de todos os ficheiros no R2 ---"
           MANIFEST_FILE="r2_file_manifest.txt"
-          # Gera um cabeçalho com a data e hora de Lisboa
+          
+          # Já não precisa do TZ='Europe/Lisbon' aqui, pois foi definido para todo o job
           echo "Manifesto de Ficheiros do Bucket 'bia-portfolio-assets'" > $MANIFEST_FILE
-          echo "Gerado em: $(TZ='Europe/Lisbon' date)" >> $MANIFEST_FILE
+          echo "Gerado em: $(date)" >> $MANIFEST_FILE
           echo "----------------------------------------------------" >> $MANIFEST_FILE
-          # Usa rclone lsl para obter detalhes e formata com jq
+          
           rclone lsl --json "R2:bia-portfolio-assets" --recursive | \
           jq -r '.[] | "\(.ModTime | fromdate | strflocaltime("%Y-%m-%d %H:%M:%S %Z")) \t \(.Size | tostring | rpad(10)) \(.Path)"' | \
           sort >> $MANIFEST_FILE
+          
           echo "Manifesto gerado em ${MANIFEST_FILE}"
 
-      # ETAPA ATUALIZADA: Fazer commit dos ficheiros gerados
       - name: Fazer commit e push dos ficheiros gerados
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data.json r2_file_manifest.txt # Adiciona o novo ficheiro
+          git add data.json r2_file_manifest.txt
           
           if ! git diff --quiet --exit-code --cached; then
             git commit -m "Atualiza data.json e manifesto [skip ci]"
