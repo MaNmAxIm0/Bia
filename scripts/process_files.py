@@ -1,4 +1,4 @@
-# Ficheiro: /scripts/process_files.py (VERSÃO FINAL COM REGISTO DE PROCESSAMENTO)
+# Ficheiro: /scripts/process_files.py (VERSÃO FINAL E CONSISTENTE)
 
 import subprocess
 import json
@@ -18,13 +18,13 @@ WATERMARK_TEXT = "© Beatriz Rodrigues"
 FONT_PATH = os.path.join(os.path.dirname(__file__), 'Montserrat.ttf')
 TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
-LOG_FILE_NAME = "processed_log.txt" # O nosso novo ficheiro de registo
+LOG_FILE_NAME = "processed_log.txt"
 LOG_FILE_PATH_LOCAL = os.path.join(TEMP_DIR, LOG_FILE_NAME)
 LOG_FILE_PATH_REMOTE = f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{LOG_FILE_NAME}"
 MAX_IMAGE_WIDTH = 1920
 JPEG_QUALITY = 85
 
-# --- Funções Auxiliares (sem alterações) ---
+# --- Funções Auxiliares ---
 def rclone_lsf_recursive(remote_path):
     command = ["rclone", "lsf", remote_path, "--recursive", "--files-only"]
     try:
@@ -60,7 +60,6 @@ def get_media_dimensions(local_path, media_type):
     return width, height
 
 def apply_watermark_and_optimize(input_path, output_path):
-    # Converte para JPG e aplica marca de água
     try:
         with Image.open(input_path) as img:
             img_corrected = ImageOps.exif_transpose(img)
@@ -73,11 +72,7 @@ def apply_watermark_and_optimize(input_path, output_path):
                 img_corrected = img_corrected.resize((MAX_IMAGE_WIDTH, new_height), Image.Resampling.LANCZOS)
             draw = ImageDraw.Draw(img_corrected)
             font_size = max(20, int(img_corrected.height * 0.04))
-            try:
-                font = ImageFont.truetype(FONT_PATH, font_size)
-                font.set_variation_by_name('SemiBold')
-            except (IOError, AttributeError):
-                font = ImageFont.load_default()
+            font = ImageFont.truetype(FONT_PATH, font_size)
             bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
             text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
             margin = int(img_corrected.width * 0.02)
@@ -90,7 +85,6 @@ def apply_watermark_and_optimize(input_path, output_path):
         return f"PIL Error: {e}"
 
 def apply_watermark_to_video(input_path, output_path, video_width, video_height):
-    # (Esta função permanece igual)
     escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
     font_size = max(24, int(video_width * 0.045))
     margin = int(video_width * 0.02)
@@ -121,7 +115,7 @@ def main():
     new_data = {key: [] for key in CATEGORIES.values()}
 
     for path in all_source_files:
-        if LOG_FILE_NAME in path: continue # Ignora o próprio ficheiro de registo
+        if LOG_FILE_NAME in path: continue
 
         try:
             category_folder = os.path.dirname(path)
@@ -130,57 +124,51 @@ def main():
             filename = os.path.basename(path)
             category_key = CATEGORIES[category_folder]
 
-            # Adiciona sempre ao data.json, pois ele representa o estado final
+            # ** LÓGICA DE GERAÇÃO DE URL FINAL **
             if category_key in ['fotografias', 'designs']:
-                # O URL final será sempre .jpg
-                final_url = f"{PUBLIC_URL}/{os.path.splitext(path)[0]}.jpg".replace(' ', '%20')
+                final_path = f"{os.path.splitext(path)[0]}.jpg"
             else:
-                final_url = f"{PUBLIC_URL}/{path.replace(' ', '%20')}"
-
+                final_path = path
+            
+            final_url = f"{PUBLIC_URL}/{final_path.replace(' ', '%20')}"
             file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": final_url}
             
             if category_key == 'videos':
                 file_data["thumbnail_url"] = f"{PUBLIC_URL}/Thumbnails/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
             
-            # Adiciona ao new_data
             new_data[category_key].append(file_data)
             
             # ** A VERIFICAÇÃO PRINCIPAL **
-            # Se o ficheiro já está no registo, ignora-o.
             if path in processed_files_log:
                 continue
 
-            # Se chegámos aqui, o ficheiro precisa de ser processado
-            print(f"-> Processamento necessário para: {path}")
+            # Processamento necessário
+            if category_key in ["fotografias", "designs", "videos"]:
+                print(f"-> Processamento necessário para: {path}")
 
-            local_original_path = os.path.join(TEMP_DIR, filename)
-            subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_original_path], check=True)
+                local_original_path = os.path.join(TEMP_DIR, filename)
+                subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_original_path], check=True)
 
-            width, height = get_media_dimensions(local_original_path, category_key)
-            # Adiciona orientação ao data.json se for relevante
-            if 'orientation' in file_data:
+                width, height = get_media_dimensions(local_original_path, category_key)
                 file_data['orientation'] = "vertical" if height > width else "horizontal"
 
-            if category_key in ["fotografias", "designs"]:
-                processed_filename = f"{os.path.splitext(filename)[0]}.jpg"
-                local_processed_path = os.path.join(TEMP_DIR, processed_filename)
-                apply_watermark_and_optimize(local_original_path, local_processed_path)
-                # O caminho de upload é o mesmo que o original, mas com .jpg
-                upload_path = f"{os.path.splitext(path)[0]}.jpg"
-            elif category_key == "videos":
-                local_processed_path = os.path.join(TEMP_DIR, f"wm_{filename}")
-                apply_watermark_to_video(local_original_path, local_processed_path, width, height)
-                # O caminho de upload é o mesmo que o original
-                upload_path = path
-            
-            # Sobrescreve o ficheiro no R2
-            print(f"  -> A fazer upload e a sobrescrever: {upload_path}")
-            subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True)
-
-            # Adiciona ao registo e limpa ficheiros temporários
-            processed_files_log.add(path)
-            os.remove(local_original_path)
-            os.remove(local_processed_path)
+                if category_key in ["fotografias", "designs"]:
+                    processed_filename = f"{os.path.splitext(filename)[0]}.jpg"
+                    local_processed_path = os.path.join(TEMP_DIR, processed_filename)
+                    apply_watermark_and_optimize(local_original_path, local_processed_path)
+                    upload_path = f"{os.path.splitext(path)[0]}.jpg"
+                else: # videos
+                    # Para vídeos, o nome do ficheiro temporário e de upload é o mesmo do original
+                    local_processed_path = os.path.join(TEMP_DIR, f"processed_{filename}")
+                    apply_watermark_to_video(local_original_path, local_processed_path, width, height)
+                    upload_path = path
+                
+                print(f"  -> A fazer upload e a sobrescrever: {upload_path}")
+                subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True)
+                
+                processed_files_log.add(path)
+                os.remove(local_original_path)
+                os.remove(local_processed_path)
 
         except Exception as e:
             print(f"  -> ERRO ao processar {path}: {e}")
