@@ -1,4 +1,4 @@
-# Ficheiro: /scripts/process_files.py (VERSÃO FINAL E OTIMIZADA)
+# Ficheiro: /scripts/process_files.py (VERSÃO MAIS SEGURA)
 
 import subprocess
 import json
@@ -15,7 +15,7 @@ CATEGORIES = {
     "Apresentações": "apresentacoes", "Melhores": "carousel", "Capas": "covers"
 }
 WATERMARK_TEXT = "© Beatriz Rodrigues"
-FONT_PATH = os.path.join(os.path.dirname(__file__ ), 'Montserrat.ttf')
+FONT_PATH = os.path.join(os.path.dirname(__file__), 'Montserrat.ttf')
 TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
 THUMBNAILS_DIR = "Thumbnails"
@@ -106,7 +106,7 @@ def apply_watermark_to_video(input_path, output_path, video_width, video_height)
 # --- Lógica Principal ---
 def main():
     start_time = time.time()
-    print(">>> INICIANDO SCRIPT DE PROCESSAMENTO E LIMPEZA...")
+    print(">>> INICIANDO SCRIPT DE PROCESSAMENTO E GERAÇÃO DE DADOS...")
     if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
     
     existing_carousel_data = {}
@@ -118,18 +118,21 @@ def main():
             except json.JSONDecodeError:
                 print("AVISO: Ficheiro data.json existente está corrompido.")
 
-    print("\n--- [FASE 1] Mapeando todos os ficheiros no R2 ---")
+    print("\n--- [FASE 1] Mapeando e processando ficheiros no R2 ---")
     all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     
     source_files = {f for f in all_r2_files if not os.path.basename(f).startswith('wm_')}
     
     new_data = {cat_key: [] for cat_key in CATEGORIES.values()}
-    
+    processed_files_map = {} # Mapeia ficheiro original -> processado
+
     for path in source_files:
         try:
-            category_folder, filename = path.split('/', 1)
+            # Ignora ficheiros em pastas não mapeadas
+            category_folder = path.split('/')[0]
             if category_folder not in CATEGORIES: continue
-
+            
+            filename = os.path.basename(path)
             category_key = CATEGORIES[category_folder]
             
             if category_key in ['carousel', 'covers', 'apresentacoes']:
@@ -145,10 +148,11 @@ def main():
             
             if category_key in ["fotografias", "designs"]:
                 watermarked_filename = f"wm_{os.path.splitext(filename)[0]}.jpg"
-            else:
+            else: # videos
                 watermarked_filename = f"wm_{filename}"
             
             upload_path = f"{category_folder}/{watermarked_filename}"
+            processed_files_map[path] = upload_path # Guarda o mapeamento
 
             if upload_path not in all_r2_files:
                 print(f"  -> Processamento necessário. A gerar {watermarked_filename}")
@@ -156,7 +160,7 @@ def main():
                 subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_original_path], check=True, capture_output=True)
 
                 width, height = get_media_dimensions(local_original_path, category_key)
-                if width == 0: raise ValueError("Dimensões inválidas.")
+                if width == 0 and height == 0: raise ValueError("Dimensões inválidas, não foi possível processar.")
 
                 local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
                 result = True
@@ -167,12 +171,14 @@ def main():
                 
                 if result is not True: raise Exception(f"Falha no processamento: {result}")
                 
+                print(f"  -> A fazer upload de {local_processed_path} para {upload_path}")
                 subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
                 os.remove(local_original_path)
                 os.remove(local_processed_path)
             else:
                 print("  -> Versão processada já existe. A ignorar.")
 
+            # Adiciona sempre a entrada ao data.json se o ficheiro original existir
             file_data = {
                 "name": filename,
                 "titles": parse_filename_for_titles(filename),
@@ -189,23 +195,18 @@ def main():
             if 'local_original_path' in locals() and os.path.exists(local_original_path): os.remove(local_original_path)
             if 'local_processed_path' in locals() and os.path.exists(local_processed_path): os.remove(local_processed_path)
 
-    # --- [FASE 2] Limpeza de Ficheiros Órfãos ---
-    print("\n--- [FASE 2] Limpando ficheiros órfãos no R2 ---")
-    all_r2_files_after = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
-    
-    valid_processed_bases = {os.path.splitext(os.path.basename(item['url']))[0].replace('wm_', '') for cat in ['fotografias', 'designs', 'videos'] for item in new_data[cat]}
-
-    for path in all_r2_files_after:
-        if not path.startswith(('Apresentacoes', 'Melhores', 'Capas', 'Thumbnails')) and not os.path.basename(path).startswith('wm_'):
-            base_name = os.path.splitext(os.path.basename(path))[0]
-            if base_name in valid_processed_bases:
-                print(f"  -> Apagando ficheiro de origem processado: {path}")
-                # Remove check=True para não falhar se o ficheiro já não existir
-                subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}"])
-
     print("\nGerando ficheiro data.json final...")
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
+        
+    # --- [FASE 2] Limpeza de Ficheiros Órfãos (Lógica mais segura) ---
+    print("\n--- [FASE 2] Limpando ficheiros de origem que já foram processados ---")
+    all_r2_files_after_processing = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
+    
+    for original_path, processed_path in processed_files_map.items():
+        if processed_path in all_r2_files_after_processing:
+            print(f"  -> Processado existe. A apagar ficheiro de origem: {original_path}")
+            subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{original_path}"])
 
     print(f"\n>>> SCRIPT CONCLUÍDO em {time.time() - start_time:.2f} segundos.")
 

@@ -1,9 +1,11 @@
-name: Sincronizar Drive, Gerar Thumbs e Dados
+name: Sincronizar Media, Gerar Manifesto, Thumbs e Dados
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Permite execução manual
   schedule:
-    - cron: '0 20 * * *'
+    # ATUALIZADO: Executa todos os dias às 19:00 e 20:00 UTC.
+    # Isto cobre as 20:00 em Lisboa, tanto no horário de verão (UTC+1) como no de inverno (UTC+0).
+    - cron: '0 19,20 * * *'
 
 permissions:
   contents: write
@@ -29,59 +31,74 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
-      # ETAPA 1: Sincronizar Drive -> R2 (Isto agora também apaga ficheiros )
       - name: Sincronizar Drive -> R2 (Apenas ficheiros novos ou alterados)
         run: |
-          echo "--- Sincronizando Drive -> R2 (ficheiros apagados no Drive serão apagados aqui) ---"
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" \
-            --update \
-            --use-server-modtime \
-            --exclude "desktop.ini" \
-            -v
-      - name: Gerar Thumbnails para Vídeos
+          echo "--- Sincronizando Drive -> R2 ---"
+          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --update --use-server-modtime --exclude "desktop.ini" -v
+
+      - name: Gerar Thumbnails Apenas para Vídeos Novos
         run: |
-          echo "--- Gerando thumbnails para os vídeos existentes ---"
-          mkdir -p temp_thumbs
-          
-          # Lista os ficheiros e guarda num ficheiro temporário
+          echo "--- Verificando e gerando thumbnails para vídeos novos ---"
+          mkdir -p temp_thumbs_download temp_thumbs_generate
           rclone lsf "R2:bia-portfolio-assets/Vídeos" --files-only --exclude "wm_*" > video_list.txt
-
-          # Lê o ficheiro linha a linha de forma segura
-          while IFS= read -r video_file; do
-            # Ignora linhas vazias
+          rclone lsf "R2:bia-portfolio-assets/Thumbnails" --files-only > thumb_list.txt
+          
+          # Compara e processa apenas os vídeos que não têm thumbnail
+          grep -vFf <(sed 's/\.jpg$//' thumb_list.txt) video_list.txt | while IFS= read -r video_file; do
             [ -z "$video_file" ] && continue
-
-            echo "A processar vídeo para thumbnail: ${video_file}"
-            # Usa aspas para proteger o nome do ficheiro
-            if rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "./${video_file}"; then
+            echo "-> Thumbnail necessária para: ${video_file}"
+            local_video_path="temp_thumbs_download/${video_file}"
+            if rclone copyto "R2:bia-portfolio-assets/Vídeos/${video_file}" "${local_video_path}"; then
               thumb_name="${video_file%.*}.jpg"
-              ffmpeg -i "./${video_file}" -ss 00:00:01.00 -frames:v 1 -update 1 "temp_thumbs/${thumb_name}" > /dev/null 2>&1
-              rm "./${video_file}"
+              generated_thumb_path="temp_thumbs_generate/${thumb_name}"
+              ffmpeg -i "${local_video_path}" -ss 00:00:01.00 -vframes 1 "${generated_thumb_path}" > /dev/null 2>&1
+              rm "${local_video_path}"
             else
               echo "AVISO: Falha ao descarregar o vídeo '${video_file}'. A ignorar."
             fi
-          done < video_list.txt
+          done
           
-          # Sincroniza as thumbnails para limpar as antigas
-          rclone sync temp_thumbs "R2:bia-portfolio-assets/Thumbnails" -P
-      # ETAPA 3: Processar ficheiros e gerar data.json
-      - name: Gerar data.json, aplicar Marcas de Água e Limpar Ficheiros
+          if [ -n "$(ls -A temp_thumbs_generate)" ]; then
+            echo "--- A fazer upload de novas thumbnails ---"
+            rclone copy temp_thumbs_generate "R2:bia-portfolio-assets/Thumbnails" -P
+          else
+            echo "--- Nenhuma thumbnail nova para fazer upload ---"
+          fi
+
+      - name: Gerar data.json e aplicar Marcas de Água
         run: |
-          echo "--- Executando script Python para processar e limpar media ---"
+          echo "--- Executando script Python para processar media ---"
           mkdir -p scripts/
           curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
           python3 scripts/process_files.py
 
-      # ETAPA 4: Fazer commit do data.json
-      - name: Fazer commit e push do data.json
+      # NOVA ETAPA: Gerar o manifesto de ficheiros
+      - name: Gerar Manifesto de Ficheiros do R2
+        id: generate_manifest
+        run: |
+          echo "--- Gerando a lista de todos os ficheiros no R2 ---"
+          MANIFEST_FILE="r2_file_manifest.txt"
+          # Gera um cabeçalho com a data e hora de Lisboa
+          echo "Manifesto de Ficheiros do Bucket 'bia-portfolio-assets'" > $MANIFEST_FILE
+          echo "Gerado em: $(TZ='Europe/Lisbon' date)" >> $MANIFEST_FILE
+          echo "----------------------------------------------------" >> $MANIFEST_FILE
+          # Usa rclone lsl para obter detalhes e formata com jq
+          rclone lsl --json "R2:bia-portfolio-assets" --recursive | \
+          jq -r '.[] | "\(.ModTime | fromdate | strflocaltime("%Y-%m-%d %H:%M:%S %Z")) \t \(.Size | tostring | rpad(10)) \(.Path)"' | \
+          sort >> $MANIFEST_FILE
+          echo "Manifesto gerado em ${MANIFEST_FILE}"
+
+      # ETAPA ATUALIZADA: Fazer commit dos ficheiros gerados
+      - name: Fazer commit e push dos ficheiros gerados
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data.json
+          git add data.json r2_file_manifest.txt # Adiciona o novo ficheiro
+          
           if ! git diff --quiet --exit-code --cached; then
-            git commit -m "Atualiza data.json e media [skip ci]"
+            git commit -m "Atualiza data.json e manifesto [skip ci]"
             git pull --rebase
             git push
           else
-            echo "Nenhuma alteração no data.json para fazer commit."
+            echo "Nenhuma alteração nos ficheiros para fazer commit."
           fi
