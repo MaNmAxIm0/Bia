@@ -39,11 +39,10 @@ jobs:
       - name: Gerar Thumbnails Incrementais
         run: python3 scripts/thumbnail_generator.py
 
-      - name: Gerar data.json e aplicar Marcas de Água
+      - name: Gerar data.json e Aplicar Marcas de Água
         run: |
           echo "--- Processar media com marca de água ---"
           mkdir -p scripts/
-          # **ALTERADO: Descarrega a fonte SemiBold**
           curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
           python3 scripts/process_files.py
 
@@ -61,7 +60,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          # Adiciona o ficheiro de manifesto ao commit
+          # Adiciona apenas os ficheiros relevantes
           git add data.json r2_file_manifest.txt
           if ! git diff --quiet --exit-code --cached; then
             git commit -m "Atualiza data.json e manifesto [skip ci]"
