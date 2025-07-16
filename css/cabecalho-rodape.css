@@ -120,8 +120,9 @@
 }
 
 .main-nav .dropdown .dropdown-toggle i {
-    font-size: 0.7em;
-    transition: transform 0.3s ease;
+    font-size: 0.7em; /* Ajuste o tamanho conforme necessário */
+    margin-left: 5px; /* Espaçamento entre o texto e a seta */
+    transition: transform 0.3s ease; /* Animação suave */
 }
 
 .main-nav .dropdown .dropdown-menu {
@@ -167,6 +168,7 @@
         margin-top: 5px;
     }
 
+    /* A seta roda quando o rato passa por cima do item do menu */
     .main-nav .dropdown:hover .dropdown-toggle i {
         transform: rotate(180deg);
     }

@@ -1,4 +1,4 @@
-// Ficheiro: /js/principal.js (VERSÃO CORRIGIDA E COMPLETA)
+// Ficheiro: /js/principal.js (VERSÃO FINAL COMBINADA E ROBUSTA)
 
 import { initCarousel } from './carrossel.js';
 import { loadGalleryContent, loadPresentations } from './galeria.js';
@@ -9,8 +9,7 @@ import { applyTranslations, setLanguage, getCurrentLanguage, getTranslation } fr
  * @returns {string} O caminho base.
  */
 function getBasePath() {
-    // A verificação 'Bia' torna o site funcional tanto localmente como no GitHub Pages.
-    return window.location.pathname.startsWith('/Bia/') ? '/Bia' : '';
+    return window.location.hostname.includes('github.io') ? '/Bia' : '';
 }
 
 /**
@@ -53,24 +52,15 @@ async function loadDynamicCarousel() {
         carouselItems.forEach(item => {
             const slideDiv = document.createElement('div');
             slideDiv.className = 'carousel-slide';
-
-            const img = document.createElement('img');
-            img.src = item.url;
-            img.alt = item.titles[lang] || item.titles.pt;
-
-            const captionDiv = document.createElement('div');
-            captionDiv.className = 'carousel-caption';
-            
-            const titleH2 = document.createElement('h2');
-            titleH2.textContent = item.titles[lang] || item.titles.pt;
-            captionDiv.appendChild(titleH2);
-
-            const descriptionP = document.createElement('p');
-            descriptionP.textContent = item.descriptions[lang] || item.descriptions.pt || '';
-            captionDiv.appendChild(descriptionP);
-
-            slideDiv.appendChild(img);
-            slideDiv.appendChild(captionDiv);
+            const title = item.titles[lang] || item.titles.pt;
+            const description = item.descriptions[lang] || item.descriptions.pt || '';
+            slideDiv.innerHTML = `
+                <img src="${item.url}" alt="${title}">
+                <div class="carousel-caption">
+                    <h2>${title}</h2>
+                    <p>${description}</p>
+                </div>
+            `;
             slidesContainer.appendChild(slideDiv);
         });
 
@@ -97,17 +87,17 @@ async function loadWorkCards() {
 
         const coverUrls = {};
         covers.forEach(cover => {
-            const coverKey = cover.name.split('.')[0].toLowerCase();
+            const coverKey = cover.name.split('.')[0].toLowerCase().replace('ç', 'c').replace('õ', 'o');
             coverUrls[coverKey] = cover.url;
         });
 
         const workCardsData = [
-            { ptFile: 'fotos-horizontais.html', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'fotografias' },
-            { ptFile: 'fotos-verticais.html', titleKey: 'vertical_photos_title', descKey: 'vertical_photos_desc', coverKey: 'fotografias' },
-            { ptFile: 'videos-horizontais.html', titleKey: 'horizontal_videos_title', descKey: 'horizontal_videos_desc', coverKey: 'videos' },
-            { ptFile: 'videos-verticais.html', titleKey: 'vertical_videos_title', descKey: 'vertical_videos_desc', coverKey: 'videos' },
-            { ptFile: 'designs.html', titleKey: 'designs_title', descKey: 'designs_desc', coverKey: 'designs' },
-            { ptFile: 'apresentacoes.html', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentacoes' }
+            { pageKey: 'fotos-horizontais.html', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'fotografias' },
+            { pageKey: 'fotos-verticais.html', titleKey: 'vertical_photos_title', descKey: 'vertical_photos_desc', coverKey: 'fotografias' },
+            { pageKey: 'videos-horizontais.html', titleKey: 'horizontal_videos_title', descKey: 'horizontal_videos_desc', coverKey: 'videos' },
+            { pageKey: 'videos-verticais.html', titleKey: 'vertical_videos_title', descKey: 'vertical_videos_desc', coverKey: 'videos' },
+            { pageKey: 'designs.html', titleKey: 'designs_title', descKey: 'designs_desc', coverKey: 'designs' },
+            { pageKey: 'apresentacoes.html', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentacoes' }
         ];
 
         gridContainer.innerHTML = '';
@@ -116,8 +106,10 @@ async function loadWorkCards() {
             const cardDiv = document.createElement('div');
             cardDiv.className = 'work-item';
             
-            const targetFile = pageMap[cardData.ptFile]?.[lang] || cardData.ptFile;
-
+            // Determina o ficheiro de destino correto com base no idioma
+            const targetFile = pageMap[cardData.pageKey]?.[lang] || cardData.pageKey;
+            
+            // Constrói o link do cartão com o href correto
             cardDiv.innerHTML = `
                 <img src="${coverUrls[cardData.coverKey] || `${getBasePath()}/imagens/placeholder.png`}" alt="${getTranslation(cardData.titleKey)}">
                 <h3 data-lang-key="${cardData.titleKey}">${getTranslation(cardData.titleKey)}</h3>
@@ -142,11 +134,9 @@ async function loadWorkCards() {
  */
 function getSourcePageFile() {
     const currentPageFile = window.location.pathname.split('/').pop();
-    // Se já estamos numa página 'pt', o nome do ficheiro é a fonte
     if (window.location.pathname.includes('/pt/')) {
         return currentPageFile;
     }
-    // Caso contrário, procura no pageMap para encontrar a chave (ficheiro 'pt')
     for (const ptFile in pageMap) {
         if (Object.values(pageMap[ptFile]).includes(currentPageFile)) {
             return ptFile;
@@ -155,41 +145,30 @@ function getSourcePageFile() {
     return 'index.html'; // Fallback seguro
 }
 
-
 /**
- * Atualiza todos os links de navegação para o idioma atual.
+ * Atualiza todos os links (navegação e seletor de idioma) para o idioma atual.
  */
-function updateAllNavLinks() {
+function updateAllLinks() {
     const lang = getCurrentLanguage();
-    const basePath = `..`; // Navega para a raiz de /html/ a partir de /pt/, /en/, etc.
+    const sourceFile = getSourcePageFile();
+    const basePath = '..'; // Caminho relativo para a pasta /html/
 
-    document.querySelectorAll('.main-nav a[href]').forEach(link => {
-        // Encontra o ficheiro de destino original em português
-        const originalHref = link.getAttribute('href').split('/').pop();
-        const sourceFile = getSourcePageFileFromLink(originalHref);
-        
-        // Encontra o nome do ficheiro traduzido
-        const targetFile = pageMap[sourceFile]?.[lang] || sourceFile;
-        
-        // Constrói o novo URL completo e atualiza o link
+    // Atualiza links da navegação principal que usam data-page-key
+    document.querySelectorAll('a[data-page-key]').forEach(link => {
+        const pageKey = link.dataset.pageKey;
+        const targetFile = pageMap[pageKey]?.[lang] || pageKey;
         link.href = `${basePath}/${lang}/${targetFile}`;
     });
-}
 
-/**
- * Função auxiliar para encontrar o ficheiro PT de um link.
- * @param {string} linkFile - O nome do ficheiro do link (e.g., "photos-horizontal.html")
- * @returns {string} - O nome do ficheiro base em PT.
- */
-function getSourcePageFileFromLink(linkFile) {
-    for (const ptFile in pageMap) {
-        if (ptFile === linkFile || Object.values(pageMap[ptFile]).includes(linkFile)) {
-            return ptFile;
-        }
-    }
-    return linkFile; // Retorna o original se não encontrar
-}
+    // Atualiza links do seletor de idiomas
+    const ptLink = document.querySelector('.lang-pt-link');
+    const enLink = document.querySelector('.lang-en-link');
+    const esLink = document.querySelector('.lang-es-link');
 
+    if (ptLink) ptLink.href = `${basePath}/pt/${sourceFile}`;
+    if (enLink) enLink.href = `${basePath}/en/${pageMap[sourceFile]?.en || 'index.html'}`;
+    if (esLink) esLink.href = `${basePath}/es/${pageMap[sourceFile]?.es || 'index.html'}`;
+}
 
 /**
  * Inicializa a navegação, incluindo menus e links ativos.
@@ -206,22 +185,17 @@ function initializeMenu() {
         toggle.addEventListener('click', (event) => {
             if (window.innerWidth <= 768) {
                 event.preventDefault();
-                // Fecha outros dropdowns abertos para uma melhor experiência mobile
                 document.querySelectorAll('.main-nav .dropdown.active').forEach(openDropdown => {
-                    if (openDropdown !== dropdown) {
-                        openDropdown.classList.remove('active');
-                    }
+                    if (openDropdown !== dropdown) openDropdown.classList.remove('active');
                 });
                 dropdown.classList.toggle('active');
             }
         });
     });
 
-    // Destaca o link da página atual
     const sourcePageFile = getSourcePageFile();
-    document.querySelectorAll('.main-nav a').forEach(link => {
-        const linkSourceFile = getSourcePageFileFromLink(link.href.split('/').pop());
-        if (linkSourceFile === sourcePageFile) {
+    document.querySelectorAll('a[data-page-key]').forEach(link => {
+        if (link.dataset.pageKey === sourcePageFile) {
             link.classList.add('active');
             const parentDropdown = link.closest('.dropdown');
             if (parentDropdown) {
@@ -231,7 +205,6 @@ function initializeMenu() {
     });
 }
 
-
 /**
  * Configura o seletor de idiomas, atualizando links e a bandeira/texto visível.
  */
@@ -240,7 +213,6 @@ function setupLanguageSwitcher() {
     const dropdown = document.querySelector('.language-dropdown');
     if (!dropdown) return;
 
-    // Atualiza o botão do seletor
     const selectedButton = dropdown.querySelector('.language-selected');
     const langData = {
         pt: { flag: 'fi-pt', text: 'PT' },
@@ -250,20 +222,9 @@ function setupLanguageSwitcher() {
     selectedButton.querySelector('.fi').className = `fi ${langData[currentLang].flag}`;
     selectedButton.querySelector('span:not(.fi)').textContent = langData[currentLang].text;
 
-    // Marca a opção ativa no menu dropdown
     dropdown.querySelectorAll('.lang-option').forEach(opt => opt.classList.remove('active'));
-    const activeOption = dropdown.querySelector(`.lang-option[data-lang="${currentLang}"]`);
-    if (activeOption) activeOption.classList.add('active');
+    dropdown.querySelector(`.lang-option[data-lang="${currentLang}"]`)?.classList.add('active');
 
-    // ** LÓGICA CORRIGIDA PARA OS LINKS DO SELETOR **
-    const sourceFile = getSourcePageFile();
-    const basePath = `..`; // Caminho relativo para a pasta /html/
-
-    document.querySelector('.lang-pt-link').href = `${basePath}/pt/${sourceFile}`;
-    document.querySelector('.lang-en-link').href = `${basePath}/en/${pageMap[sourceFile]?.en || 'index.html'}`;
-    document.querySelector('.lang-es-link').href = `${basePath}/es/${pageMap[sourceFile]?.es || 'index.html'}`;
-
-    // Lógica para abrir/fechar o dropdown
     selectedButton.addEventListener('click', (e) => {
         e.stopPropagation();
         dropdown.classList.toggle('open');
@@ -271,25 +232,19 @@ function setupLanguageSwitcher() {
     document.addEventListener('click', () => dropdown.classList.remove('open'));
 }
 
-
 /**
  * Função principal que orquestra o carregamento da página.
  */
 function onPageLoad() {
-    // Determina o idioma com base no URL
     const pathLang = window.location.pathname.split('/')[2] || 'pt';
     setLanguage(pathLang);
-    
-    // Aplica as traduções a todo o texto estático
     applyTranslations();
 
-    // Carrega conteúdo dinâmico específico da página
     if (window.location.pathname.endsWith('index.html')) {
         loadDynamicCarousel();
         loadWorkCards();
     }
     
-    // Mapeamento de ficheiros para galerias
     const pageKey = getSourcePageFile().replace('.html', '');
     const galleryIdMap = {
         'fotos-horizontais': { id: 'photo-h-gallery', type: 'fotografias', orientation: 'horizontal' },
@@ -311,14 +266,12 @@ function onPageLoad() {
 }
 
 // --- EVENT LISTENERS ---
-
-// Corre quando o DOM inicial está pronto
 document.addEventListener('DOMContentLoaded', onPageLoad);
 
 // Corre APENAS depois de o cabecalho.html ser injetado na página
 document.addEventListener('headerLoaded', () => {
-    updateAllNavLinks(); // **NOVO: Atualiza os links da navegação principal**
     initializeMenu();
     setupLanguageSwitcher();
-    applyTranslations(); // Aplica traduções ao cabeçalho/rodapé carregados
+    updateAllLinks(); // Agora esta função reescreve todos os links para serem corretos.
+    applyTranslations(); // Aplica traduções ao cabeçalho/rodapé carregados.
 });
