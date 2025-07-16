@@ -31,19 +31,18 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
+      # ETAPA CORRIGIDA: Adicionado --exclude para proteger a pasta Thumbnails
       - name: Sincronizar Google Drive para Cloudflare R2
         run: |
-          echo "--- Sincronizando Drive -> R2 ---"
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "desktop.ini" -v
+          echo "--- Sincronizando Drive -> R2 (protegendo a pasta Thumbnails) ---"
+          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "/Thumbnails/**" --exclude "desktop.ini" -v
 
-      # ETAPA SIMPLIFICADA: Executa o ficheiro Python externo
       - name: Gerar Thumbnails Incrementais
         run: python3 scripts/thumbnail_generator.py
 
       - name: Gerar data.json e aplicar Marcas de Água
         run: |
           echo "--- Processar media com marca de água ---"
-          # Garante que a fonte está no sítio certo para o script
           mkdir -p scripts/
           curl -L -o scripts/Montserrat.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
           python3 scripts/process_files.py
@@ -62,7 +61,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data.json r2_file_manifest.txt scripts/thumbnail_generator.py # Adiciona o novo script ao commit
+          git add data.json r2_file_manifest.txt
           if ! git diff --quiet --exit-code --cached; then
             git commit -m "Atualiza data.json e manifesto [skip ci]"
             git pull --rebase
