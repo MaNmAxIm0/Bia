@@ -4,9 +4,6 @@ import subprocess
 import json
 import os
 import time
-from datetime import datetime, timezone
-
-# --- Importação movida para o topo para clareza ---
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 # --- Configuração ---
@@ -25,23 +22,23 @@ JPEG_QUALITY = 85
 
 # --- Funções Auxiliares ---
 def run_command(cmd, check=True):
-    """Executa um comando de terminal de forma segura."""
     try:
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, check=check, encoding='utf-8'
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, check=check, encoding='utf-8')
         return result
     except subprocess.CalledProcessError as e:
         print(f"ERRO ao executar: {' '.join(cmd)}\n{e.stderr}")
         return None
 
-def get_rclone_files(path):
-    """Obtém a lista de ficheiros de um caminho no R2."""
+def get_rclone_files(path, extension_filter=None):
+    """Obtém a lista de ficheiros, opcionalmente filtrando por extensão."""
     print(f"A obter lista de ficheiros de: {path}")
     result = run_command(["rclone", "lsf", path, "--recursive", "--files-only"])
-    if result:
-        return {line.strip() for line in result.stdout.split('\n') if line.strip()}
-    return set()
+    if not result: return set()
+    
+    files = {line.strip() for line in result.stdout.split('\n') if line.strip()}
+    if extension_filter:
+        return {f for f in files if f.lower().endswith(extension_filter)}
+    return files
 
 def parse_filename_for_titles(filename):
     name_without_ext = os.path.splitext(filename)[0]
@@ -50,18 +47,7 @@ def parse_filename_for_titles(filename):
     elif len(parts) == 2: return {'pt': parts[0].replace('-', ' '), 'en': parts[1].replace('-', ' '), 'es': parts[1].replace('-', ' ')}
     else: return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
 
-def get_media_dimensions(local_path):
-    """Obtém as dimensões de uma imagem local."""
-    try:
-        with Image.open(local_path) as img:
-            img_corrected = ImageOps.exif_transpose(img)
-            return img_corrected.size
-    except Exception as e:
-        print(f"  AVISO: Não foi possível obter dimensões para '{local_path}'. Erro: {e}")
-        return 0, 0
-
 def apply_watermark_and_compress(input_path, output_path):
-    """Aplica marca de água e comprime a imagem, salvando como JPG."""
     try:
         with Image.open(input_path) as img:
             img = ImageOps.exif_transpose(img)
@@ -75,7 +61,7 @@ def apply_watermark_and_compress(input_path, output_path):
                 img = img.resize((MAX_IMAGE_WIDTH, h), Image.Resampling.LANCZOS)
             
             draw = ImageDraw.Draw(img)
-            font_size = max(24, int(img.height * 0.05)) # Tamanho aumentado
+            font_size = max(24, int(img.height * 0.05))
             font = ImageFont.truetype(FONT_PATH, font_size)
             
             bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
@@ -89,7 +75,7 @@ def apply_watermark_and_compress(input_path, output_path):
             img.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True)
         return True
     except Exception as e:
-        print(f"  ERRO ao aplicar marca de água na imagem: {e}")
+        print(f"  ERRO ao aplicar marca de água: {e}")
         return False
 
 # --- Lógica Principal ---
@@ -98,24 +84,23 @@ def main():
     print(">>> INICIANDO SCRIPT DE PROCESSAMENTO E GERAÇÃO DE DADOS...")
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-    print("\n--- [FASE 1] Mapeando ficheiros no R2 ---")
+    print("\n--- [FASE 1] Mapeando ficheiros existentes no R2 ---")
     all_r2_files = get_rclone_files(RCLONE_REMOTE)
     
-    files_to_process = []
-    
-    # Cria um mapa de nomes base para verificação de existência (ex: 'foto1' -> 'foto1.jpg')
-    existing_jpg_basenames = {os.path.splitext(f)[0] for f in all_r2_files if f.lower().endswith('.jpg')}
+    # Cria um conjunto de nomes base de ficheiros já processados (JPGs)
+    processed_jpg_basenames = {os.path.splitext(f)[0] for f in all_r2_files if f.lower().endswith('.jpg')}
 
+    files_to_process = []
     for path in all_r2_files:
-        category_folder = os.path.dirname(path)
-        if category_folder in CATEGORIES and CATEGORIES[category_folder] in ["fotografias", "designs"]:
-            basename = os.path.splitext(path)[0]
-            # Se o nome base já existe como JPG, não precisamos de processar de novo
-            if basename not in existing_jpg_basenames:
+        basename = os.path.splitext(path)[0]
+        # Adiciona à lista de processamento se o nome base ainda não existir como JPG
+        if not path.lower().endswith('.jpg') and basename not in processed_jpg_basenames:
+            category_folder = os.path.dirname(path)
+            if category_folder in CATEGORIES and CATEGORIES[category_folder] in ["fotografias", "designs"]:
                 files_to_process.append(path)
 
     if not files_to_process:
-        print("Nenhuma imagem nova para processar ou converter.")
+        print("Nenhuma imagem nova para processar.")
     else:
         print(f"Encontradas {len(files_to_process)} imagens para processar.")
 
@@ -123,7 +108,10 @@ def main():
         try:
             print(f"-> Processando: {path}")
             filename = os.path.basename(path)
+            
+            # **CORREÇÃO CRÍTICA**: Garante que o diretório local existe
             local_path = os.path.join(TEMP_DIR, filename)
+            os.makedirs(os.path.dirname(local_path), exist_ok=True)
             
             run_command(["rclone", "copyto", f"{RCLONE_REMOTE}/{path}", local_path])
             
@@ -135,9 +123,8 @@ def main():
                 print(f"  -> Upload para: {final_path}")
                 run_command(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE}/{final_path}"])
 
-                if path.lower() != final_path.lower():
-                    print(f"  -> Apagando original obsoleto: {path}")
-                    run_command(["rclone", "deletefile", f"{RCLONE_REMOTE}/{path}"])
+                print(f"  -> Apagando original obsoleto: {path}")
+                run_command(["rclone", "deletefile", f"{RCLONE_REMOTE}/{path}"])
             
             os.remove(local_path)
             if os.path.exists(local_processed_path):
@@ -156,18 +143,13 @@ def main():
             filename = os.path.basename(path)
             category_key = CATEGORIES[category_folder]
             
-            # Garante que ficheiros de categorias não-media são incluídos
-            if category_key in ['apresentacoes', 'carousel', 'capas', 'videos']:
-                 file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
-                 if category_key == 'videos':
-                     file_data["thumbnail_url"] = f"{PUBLIC_URL}/Thumbnails/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
-                 new_data[category_key].append(file_data)
-            
-            # Adiciona apenas ficheiros .jpg das categorias de imagem para evitar duplicados
-            elif category_key in ['fotografias', 'designs'] and path.lower().endswith('.jpg'):
+            if category_key in ['apresentacoes', 'carousel', 'capas', 'videos'] or \
+               (category_key in ['fotografias', 'designs'] and path.lower().endswith('.jpg')):
+                
                 file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
+                if category_key == 'videos':
+                    file_data["thumbnail_url"] = f"{PUBLIC_URL}/Thumbnails/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
                 new_data[category_key].append(file_data)
-
 
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)

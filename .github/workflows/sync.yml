@@ -39,29 +39,28 @@ jobs:
       - name: Gerar Thumbnails Incrementais
         run: python3 scripts/thumbnail_generator.py
 
-      - name: Gerar data.json e aplicar Marcas de Água
+      - name: Aplicar Marcas de Água e Gerar data.json
         run: |
-          echo "--- Processar media com marca de água ---"
+          echo "--- A executar o script principal de processamento ---"
           mkdir -p scripts/
-          # ALTERADO: Garante que descarrega a fonte SemiBold para a marca de água
           curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
           python3 scripts/process_files.py
 
       - name: Gerar Manifesto de Ficheiros do R2
         run: |
-          echo "--- Gerando manifesto do R2 ---"
+          echo "--- Gerando manifesto final do R2 ---"
           MANIFEST_FILE="r2_file_manifest.txt"
           echo "Manifesto de Ficheiros do Bucket 'bia-portfolio-assets'" > "$MANIFEST_FILE"
           echo "Gerado em: $(date)" >> "$MANIFEST_FILE"
           echo "----------------------------------------------------" >> "$MANIFEST_FILE"
+          # Ordena por data, do mais recente para o mais antigo
           JQ_FILTER='.[] | "\(.ModTime | fromdate | strflocaltime("%Y-%m-%d %H:%M:%S %Z"))\t\(.Size | tostring | rpad(10))\t\(.Path)"'
-          rclone lsl --json "R2:bia-portfolio-assets" --recursive | jq -r "$JQ_FILTER" | sort >> "$MANIFEST_FILE"
+          rclone lsl --json "R2:bia-portfolio-assets" --recursive | jq -r "$JQ_FILTER" | sort -r >> "$MANIFEST_FILE"
 
       - name: Fazer commit e push de alterações
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          # Adiciona apenas os ficheiros relevantes
           git add data.json r2_file_manifest.txt
           if ! git diff --quiet --exit-code --cached; then
             git commit -m "Atualiza data.json e manifesto [skip ci]"
