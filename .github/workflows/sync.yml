@@ -39,10 +39,11 @@ jobs:
       - name: Gerar Thumbnails Incrementais
         run: python3 scripts/thumbnail_generator.py
 
-      - name: Gerar data.json e Aplicar Marcas de Água
+      - name: Gerar data.json e aplicar Marcas de Água
         run: |
           echo "--- Processar media com marca de água ---"
           mkdir -p scripts/
+          # ALTERADO: Garante que descarrega a fonte SemiBold para a marca de água
           curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
           python3 scripts/process_files.py
 

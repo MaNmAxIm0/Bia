@@ -6,6 +6,9 @@ import os
 import time
 from datetime import datetime, timezone
 
+# --- Importação movida para o topo para clareza ---
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+
 # --- Configuração ---
 RCLONE_REMOTE = "R2:bia-portfolio-assets"
 PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
@@ -17,32 +20,28 @@ WATERMARK_TEXT = "© Beatriz Rodrigues"
 FONT_PATH = os.path.join(os.path.dirname(__file__), 'Montserrat-SemiBold.ttf')
 TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
-MANIFEST_FILE = "r2_file_manifest.txt"
 MAX_IMAGE_WIDTH = 1920
 JPEG_QUALITY = 85
 
 # --- Funções Auxiliares ---
-def get_rclone_lsl_json(path):
-    command = ["rclone", "lsl", "--json", path, "--recursive"]
+def run_command(cmd, check=True):
+    """Executa um comando de terminal de forma segura."""
     try:
-        result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
-        return json.loads(result.stdout)
-    except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
-        print(f"AVISO: Não foi possível obter lista de ficheiros de {path}: {e}")
-        return []
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, check=check, encoding='utf-8'
+        )
+        return result
+    except subprocess.CalledProcessError as e:
+        print(f"ERRO ao executar: {' '.join(cmd)}\n{e.stderr}")
+        return None
 
-def get_last_manifest_time():
-    try:
-        with open(MANIFEST_FILE, 'r', encoding='utf-8') as f:
-            for line in f:
-                if line.startswith("Gerado em:"):
-                    parts = line.split()
-                    date_str = " ".join(parts[2:5] + [parts[6]])
-                    # Exemplo de formato: "Jul 16 21:50:52 2025" -> %b %d %H:%M:%S %Y
-                    return datetime.strptime(date_str, "%b %d %H:%M:%S %Y").replace(tzinfo=timezone.utc)
-    except (FileNotFoundError, IndexError, ValueError) as e:
-        print(f"AVISO: Não foi possível ler a data do manifesto ({e}). A processar todos os ficheiros.")
-    return datetime.fromtimestamp(0, tz=timezone.utc)
+def get_rclone_files(path):
+    """Obtém a lista de ficheiros de um caminho no R2."""
+    print(f"A obter lista de ficheiros de: {path}")
+    result = run_command(["rclone", "lsf", path, "--recursive", "--files-only"])
+    if result:
+        return {line.strip() for line in result.stdout.split('\n') if line.strip()}
+    return set()
 
 def parse_filename_for_titles(filename):
     name_without_ext = os.path.splitext(filename)[0]
@@ -51,134 +50,128 @@ def parse_filename_for_titles(filename):
     elif len(parts) == 2: return {'pt': parts[0].replace('-', ' '), 'en': parts[1].replace('-', ' '), 'es': parts[1].replace('-', ' ')}
     else: return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
 
-def get_media_dimensions(local_path, media_type):
-    from PIL import Image, ImageOps
-    width, height = 0, 0
+def get_media_dimensions(local_path):
+    """Obtém as dimensões de uma imagem local."""
     try:
-        if media_type in ['fotografias', 'designs']:
-            with Image.open(local_path) as img:
-                img_corrected = ImageOps.exif_transpose(img)
-                width, height = img_corrected.size
-        elif media_type == 'videos':
-            command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "json", local_path]
-            result = subprocess.run(command, capture_output=True, text=True, check=True)
-            dims = json.loads(result.stdout)["streams"][0]
-            width, height = int(dims.get("width", 0)), int(dims.get("height", 0))
+        with Image.open(local_path) as img:
+            img_corrected = ImageOps.exif_transpose(img)
+            return img_corrected.size
     except Exception as e:
         print(f"  AVISO: Não foi possível obter dimensões para '{local_path}'. Erro: {e}")
-    return width, height
+        return 0, 0
 
-def apply_watermark_and_optimize(input_path, output_path):
-    from PIL import Image, ImageDraw, ImageFont, ImageOps
+def apply_watermark_and_compress(input_path, output_path):
+    """Aplica marca de água e comprime a imagem, salvando como JPG."""
     try:
         with Image.open(input_path) as img:
-            img_corrected = ImageOps.exif_transpose(img)
-            if img_corrected.mode == 'RGBA':
-                background = Image.new("RGB", img_corrected.size, (255, 255, 255))
-                background.paste(img_corrected, mask=img_corrected.split()[3])
-                img_corrected = background
-            if img_corrected.width > MAX_IMAGE_WIDTH:
-                new_height = int(MAX_IMAGE_WIDTH * img_corrected.height / img_corrected.width)
-                img_corrected = img_corrected.resize((MAX_IMAGE_WIDTH, new_height), Image.Resampling.LANCZOS)
-            draw = ImageDraw.Draw(img_corrected)
-            font_size = max(24, int(img_corrected.height * 0.05))
+            img = ImageOps.exif_transpose(img)
+            if img.mode == 'RGBA':
+                background = Image.new("RGB", img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[3])
+                img = background
+            
+            if img.width > MAX_IMAGE_WIDTH:
+                h = int((MAX_IMAGE_WIDTH / img.width) * img.height)
+                img = img.resize((MAX_IMAGE_WIDTH, h), Image.Resampling.LANCZOS)
+            
+            draw = ImageDraw.Draw(img)
+            font_size = max(24, int(img.height * 0.05)) # Tamanho aumentado
             font = ImageFont.truetype(FONT_PATH, font_size)
+            
             bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
             text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
-            margin = int(img_corrected.width * 0.025)
-            x, y = img_corrected.width - text_width - margin, img_corrected.height - text_height - margin
-            draw.text((x + 2, y + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
-            draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220))
-            img_corrected.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True, subsampling=0)
+            margin = int(img.width * 0.025)
+            position = (img.width - text_width - margin, img.height - text_height - margin)
+            
+            draw.text((position[0] + 2, position[1] + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
+            draw.text(position, WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220))
+            
+            img.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True)
         return True
-    except Exception as e: return f"PIL Error: {e}"
+    except Exception as e:
+        print(f"  ERRO ao aplicar marca de água na imagem: {e}")
+        return False
 
-def apply_watermark_to_video(input_path, output_path, video_width, video_height):
-    escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
-    font_size = max(30, int(video_width * 0.055))
-    margin = int(video_width * 0.025)
-    command = [ "ffmpeg", "-i", input_path, "-vf", f"drawtext=text='{escaped_text}':fontfile='{FONT_PATH}':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2:borderw=1:bordercolor=white@0.8", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-c:a", "copy", "-y", output_path ]
-    try:
-        subprocess.run(command, check=True, capture_output=True, text=True, timeout=600)
-        return True
-    except Exception as e: return f"FFmpeg Error: {e}"
-
+# --- Lógica Principal ---
 def main():
     start_time = time.time()
     print(">>> INICIANDO SCRIPT DE PROCESSAMENTO E GERAÇÃO DE DADOS...")
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-    print("\n--- [FASE 1] Lendo o estado atual do R2 e o último manifesto ---")
-    all_r2_files_data = get_rclone_lsl_json(RCLONE_REMOTE)
-    last_run_time = get_last_manifest_time()
-
-    files_to_process = []
-    for item in all_r2_files_data:
-        mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
-        if mod_time > last_run_time:
-            path = item["Path"]
-            category_folder = os.path.dirname(path)
-            if category_folder in CATEGORIES and CATEGORIES[category_folder] in ["fotografias", "designs", "videos"]:
-                files_to_process.append(item)
-
-    if not files_to_process: print("Nenhum ficheiro novo ou modificado para processar.")
-    else: print(f"Encontrados {len(files_to_process)} ficheiros novos ou modificados para processar.")
-
-    for item in files_to_process:
-        try:
-            path = item["Path"]
-            filename = os.path.basename(path)
-            category_folder = os.path.dirname(path)
-            category_key = CATEGORIES[category_folder]
-
-            print(f"-> Processando: {path}")
-
-            local_original_path = os.path.join(TEMP_DIR, filename)
-            subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE}/{path}", local_original_path], check=True)
-            
-            width, height = get_media_dimensions(local_original_path, category_key)
-            
-            if category_key in ["fotografias", "designs"]:
-                processed_filename = f"{os.path.splitext(filename)[0]}.jpg"
-                final_path = os.path.join(category_folder, processed_filename)
-                local_processed_path = os.path.join(TEMP_DIR, processed_filename)
-                apply_watermark_and_optimize(local_original_path, local_processed_path)
-            else: # videos
-                local_processed_path = os.path.join(TEMP_DIR, f"proc_{filename}")
-                apply_watermark_to_video(local_original_path, local_processed_path, width, height)
-                final_path = path
-
-            print(f"  -> A fazer upload e a sobrescrever: {final_path}")
-            subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE}/{final_path}"], check=True)
-
-            if path != final_path:
-                print(f"  -> Apagando ficheiro de origem obsoleto: {path}")
-                subprocess.run(["rclone", "deletefile", f"{RCLONE_REMOTE}/{path}"])
-
-            os.remove(local_original_path)
-            os.remove(local_processed_path)
-
-        except Exception as e: print(f"  -> ERRO ao processar {item['Path']}: {e}")
+    print("\n--- [FASE 1] Mapeando ficheiros no R2 ---")
+    all_r2_files = get_rclone_files(RCLONE_REMOTE)
     
+    files_to_process = []
+    
+    # Cria um mapa de nomes base para verificação de existência (ex: 'foto1' -> 'foto1.jpg')
+    existing_jpg_basenames = {os.path.splitext(f)[0] for f in all_r2_files if f.lower().endswith('.jpg')}
+
+    for path in all_r2_files:
+        category_folder = os.path.dirname(path)
+        if category_folder in CATEGORIES and CATEGORIES[category_folder] in ["fotografias", "designs"]:
+            basename = os.path.splitext(path)[0]
+            # Se o nome base já existe como JPG, não precisamos de processar de novo
+            if basename not in existing_jpg_basenames:
+                files_to_process.append(path)
+
+    if not files_to_process:
+        print("Nenhuma imagem nova para processar ou converter.")
+    else:
+        print(f"Encontradas {len(files_to_process)} imagens para processar.")
+
+    for path in files_to_process:
+        try:
+            print(f"-> Processando: {path}")
+            filename = os.path.basename(path)
+            local_path = os.path.join(TEMP_DIR, filename)
+            
+            run_command(["rclone", "copyto", f"{RCLONE_REMOTE}/{path}", local_path])
+            
+            processed_filename = f"{os.path.splitext(filename)[0]}.jpg"
+            local_processed_path = os.path.join(TEMP_DIR, processed_filename)
+
+            if apply_watermark_and_compress(local_path, local_processed_path):
+                final_path = os.path.join(os.path.dirname(path), processed_filename)
+                print(f"  -> Upload para: {final_path}")
+                run_command(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE}/{final_path}"])
+
+                if path.lower() != final_path.lower():
+                    print(f"  -> Apagando original obsoleto: {path}")
+                    run_command(["rclone", "deletefile", f"{RCLONE_REMOTE}/{path}"])
+            
+            os.remove(local_path)
+            if os.path.exists(local_processed_path):
+                os.remove(local_processed_path)
+
+        except Exception as e:
+            print(f"  -> ERRO CRÍTICO ao processar {path}: {e}")
+            
     print("\n--- [FASE 2] Gerando o ficheiro data.json final ---")
-    final_r2_files_data = get_rclone_lsl_json(RCLONE_REMOTE)
+    final_r2_files = get_rclone_files(RCLONE_REMOTE)
     new_data = {key: [] for key in CATEGORIES.values()}
-    for item in final_r2_files_data:
-        path = item["Path"]
+    
+    for path in final_r2_files:
         category_folder = os.path.dirname(path)
         if category_folder in CATEGORIES:
             filename = os.path.basename(path)
             category_key = CATEGORIES[category_folder]
-            file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
-            if category_key == 'videos': file_data["thumbnail_url"] = f"{PUBLIC_URL}/Thumbnails/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
-            if category_key in ["fotografias", "designs", "videos"]:
-                # A orientação será determinada durante o processamento para ficheiros novos,
-                # para os antigos podemos tentar obter ou deixar um default
-                file_data['orientation'] = 'horizontal' # Default
-            new_data[category_key].append(file_data)
+            
+            # Garante que ficheiros de categorias não-media são incluídos
+            if category_key in ['apresentacoes', 'carousel', 'capas', 'videos']:
+                 file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
+                 if category_key == 'videos':
+                     file_data["thumbnail_url"] = f"{PUBLIC_URL}/Thumbnails/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
+                 new_data[category_key].append(file_data)
+            
+            # Adiciona apenas ficheiros .jpg das categorias de imagem para evitar duplicados
+            elif category_key in ['fotografias', 'designs'] and path.lower().endswith('.jpg'):
+                file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
+                new_data[category_key].append(file_data)
+
 
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
+    print("Ficheiro data.json gerado com sucesso.")
 
     print(f"\n>>> SCRIPT CONCLUÍDO em {time.time() - start_time:.2f} segundos.")
 
