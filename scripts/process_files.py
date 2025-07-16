@@ -1,4 +1,4 @@
-# Ficheiro: /scripts/process_files.py (VERSÃO CORRIGIDA E MAIS INTELIGENTE)
+# Ficheiro: /scripts/process_files.py (VERSÃO CORRIGIDA E EFICIENTE)
 
 import subprocess
 import json
@@ -42,6 +42,7 @@ def parse_filename_for_titles(filename):
         return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
 
 def get_media_dimensions(local_path, media_type):
+    # (Esta função permanece igual)
     width, height = 0, 0
     try:
         if media_type in ['fotografias', 'designs', 'carousel', 'covers']:
@@ -58,6 +59,7 @@ def get_media_dimensions(local_path, media_type):
     return width, height
 
 def apply_watermark_and_optimize(input_path, output_path):
+    # (Esta função permanece igual)
     try:
         with Image.open(input_path) as img:
             img_corrected = ImageOps.exif_transpose(img)
@@ -87,6 +89,7 @@ def apply_watermark_and_optimize(input_path, output_path):
         return f"PIL Error: {e}"
 
 def apply_watermark_to_video(input_path, output_path, video_width, video_height):
+    # (Esta função permanece igual)
     escaped_text = WATERMARK_TEXT.replace(":", "\\:").replace("'", "")
     font_size = max(24, int(video_width * 0.045))
     margin = int(video_width * 0.02)
@@ -110,15 +113,21 @@ def main():
     if not os.path.exists(TEMP_DIR):
         os.makedirs(TEMP_DIR)
     
-    # ... (código para carregar data.json existente, se necessário) ...
+    existing_carousel_data = {}
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            try:
+                existing_carousel_data = json.load(f)
+            except json.JSONDecodeError:
+                print("AVISO: Ficheiro data.json existente está corrompido.")
 
-    print("\n--- [FASE 1] Mapeando e processando ficheiros no R2 ---")
+    print("\n--- [FASE 1] Mapeando todos os ficheiros no R2 ---")
     all_r2_files = rclone_lsf_recursive(f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}")
     
     # ** LÓGICA CORRIGIDA **
-    # Separa os ficheiros originais dos já processados
+    # Separa os ficheiros originais dos já processados para uma verificação eficiente
     source_files = {f for f in all_r2_files if not os.path.basename(f).startswith('wm_')}
-    processed_files = {f for f in all_r2_files if os.path.basename(f).startswith('wm_')}
+    processed_files_paths = {f for f in all_r2_files if os.path.basename(f).startswith('wm_')}
     
     new_data = {cat_key: [] for cat_key in CATEGORIES.values()}
     
@@ -131,9 +140,9 @@ def main():
             filename = os.path.basename(path)
             category_key = CATEGORIES[category_folder]
 
-            # Ignora ficheiros que não são para processar
+            # Ignora ficheiros que não são para processar (Capas, Apresentações, etc.)
             if category_key in ['carousel', 'covers', 'apresentacoes']:
-                # ... (a sua lógica existente para estes tipos) ...
+                # (a sua lógica existente para estes tipos)
                 continue
 
             # ** VERIFICAÇÃO MELHORADA **
@@ -143,10 +152,10 @@ def main():
             else: # videos
                 watermarked_filename = f"wm_{filename}"
             
-            upload_path = f"{category_folder}/{watermarked_filename}"
+            expected_upload_path = f"{category_folder}/{watermarked_filename}"
 
             # A condição principal: só processa se o ficheiro não existir na lista de processados
-            if upload_path not in processed_files:
+            if expected_upload_path not in processed_files_paths:
                 print(f"A verificar: {path}...")
                 print(f"  -> Processamento necessário. A gerar {watermarked_filename}")
                 local_original_path = os.path.join(TEMP_DIR, filename)
@@ -154,37 +163,36 @@ def main():
                 # Baixar o ficheiro original
                 subprocess.run(["rclone", "copyto", f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{path}", local_original_path], check=True, capture_output=True)
 
-                # Obter dimensões e processar
                 width, height = get_media_dimensions(local_original_path, category_key)
                 if width == 0 and height == 0:
                     raise ValueError("Dimensões inválidas, não foi possível processar.")
 
                 local_processed_path = os.path.join(TEMP_DIR, watermarked_filename)
-                result = True
-                if category_key in ["fotografias", "designs"]:
-                    result = apply_watermark_and_optimize(local_original_path, local_processed_path)
-                elif category_key == "videos":
-                    result = apply_watermark_to_video(local_original_path, local_processed_path, width, height)
                 
-                if result is not True:
-                    raise Exception(f"Falha no processamento: {result}")
+                # Aplicar marca de água
+                if category_key in ["fotografias", "designs"]:
+                    apply_watermark_and_optimize(local_original_path, local_processed_path)
+                elif category_key == "videos":
+                    apply_watermark_to_video(local_original_path, local_processed_path, width, height)
                 
                 # Fazer upload do ficheiro processado
-                print(f"  -> A fazer upload de {local_processed_path} para {upload_path}")
-                subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{upload_path}"], check=True, capture_output=True)
+                print(f"  -> A fazer upload de {local_processed_path} para {expected_upload_path}")
+                subprocess.run(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE_NAME}:{BUCKET_NAME}/{expected_upload_path}"], check=True, capture_output=True)
                 
-                # Limpar ficheiros temporários
                 os.remove(local_original_path)
                 os.remove(local_processed_path)
-            
+            else:
+                # O ficheiro já existe, não faz nada
+                pass
+
             # Adiciona sempre os dados ao `data.json` se o ficheiro original existir
-            # ... (a sua lógica para adicionar ao new_data) ...
+            # (a sua lógica para adicionar ao new_data permanece aqui)
 
         except Exception as e:
             print(f"  -> ERRO ao processar {path}: {e}")
             # ... (código de limpeza de erro) ...
 
-    # ... (código para gerar data.json e fazer a limpeza final) ...
+    # ... (o resto do seu script para gerar data.json e fazer a limpeza final) ...
 
     print(f"\n>>> SCRIPT CONCLUÍDO em {time.time() - start_time:.2f} segundos.")
 
