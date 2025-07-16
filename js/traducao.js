@@ -20,6 +20,7 @@ export const translations = {
         toggle_navigation: 'Alternar navegação',
         close: 'Fechar',
         all_rights_reserved: '&copy; 2025 Beatriz Rodrigues. Todos os direitos reservados.',
+        privacy_policy: 'Política de Privacidade',
         
         // Conteúdo Dinâmico (Galerias)
         loading_content: 'A carregar conteúdo...',
@@ -90,7 +91,21 @@ export const translations = {
         videos_horizontal_section_description: 'Uma seleção de vídeos em formato paisagem.',
         videos_vertical_page_title: 'Beatriz Rodrigues - Vídeos Verticais',
         videos_vertical_section_title: 'Vídeos Verticais',
-        videos_vertical_section_description: 'Uma seleção de vídeos em formato retrato.'
+        videos_vertical_section_description: 'Uma seleção de vídeos em formato retrato.',
+
+        // Chaves de tradução para o banner de cookies
+        cookie_consent_title: 'Utilizamos Cookies',
+        cookie_consent_message: 'Este site utiliza cookies para melhorar a sua experiência de navegação, analisar o tráfego e personalizar conteúdo. Pode escolher quais cookies aceitar.',
+        accept_all_cookies: 'Aceitar Todos',
+        accept_necessary_cookies: 'Apenas Necessários',
+        cookie_settings: 'Configurações',
+        save_preferences: 'Guardar Preferências',
+        necessary_cookies: 'Cookies Necessários',
+        analytics_cookies: 'Cookies de Análise',
+        marketing_cookies: 'Cookies de Marketing',
+        necessary_desc: 'Estes cookies são essenciais para o funcionamento básico do site.',
+        analytics_desc: 'Ajudam-nos a entender como os visitantes interagem com o site.',
+        marketing_desc: 'Utilizados para mostrar anúncios relevantes aos utilizadores.'
     },
     en: {
         // Language names
@@ -111,6 +126,7 @@ export const translations = {
         toggle_navigation: 'Toggle navigation',
         close: 'Close',
         all_rights_reserved: '&copy; 2025 Beatriz Rodrigues. All rights reserved.',
+        privacy_policy: 'Privacy Policy',
 
         // Dynamic Content (Galleries)
         loading_content: 'Loading content...',
@@ -181,7 +197,21 @@ export const translations = {
         videos_horizontal_section_description: 'A selection of videos in landscape format.',
         videos_vertical_page_title: 'Beatriz Rodrigues - Vertical Videos',
         videos_vertical_section_title: 'Vertical Videos',
-        videos_vertical_section_description: 'A selection of videos in portrait format.'
+        videos_vertical_section_description: 'A selection of videos in portrait format.',
+
+        // Translation keys for the cookie banner
+        cookie_consent_title: 'We Use Cookies',
+        cookie_consent_message: 'This website uses cookies to improve your browsing experience, analyze traffic and personalize content. You can choose which cookies to accept.',
+        accept_all_cookies: 'Accept All',
+        accept_necessary_cookies: 'Necessary Only',
+        cookie_settings: 'Settings',
+        save_preferences: 'Save Preferences',
+        necessary_cookies: 'Necessary Cookies',
+        analytics_cookies: 'Analytics Cookies',
+        marketing_cookies: 'Marketing Cookies',
+        necessary_desc: 'These cookies are essential for the basic functioning of the website.',
+        analytics_desc: 'Help us understand how visitors interact with the website.',
+        marketing_desc: 'Used to show relevant advertisements to users.'
     },
     es: {
         // Nombres de los idiomas
@@ -202,10 +232,11 @@ export const translations = {
         toggle_navigation: 'Alternar navegación',
         close: 'Cerrar',
         all_rights_reserved: '&copy; 2025 Beatriz Rodrigues. Todos los derechos reservados.',
+        privacy_policy: 'Política de Privacidad',
 
         // Contenido Dinámico (Galerías)
         loading_content: 'Cargando contenido...',
-        no_content_found: 'No se encontró contenido para \'{type}\'.',
+        no_content_found: 'No se encontró contenido para \'{type}\'',
         error_loading_content: 'Error al cargar {type}. Por favor, inténtelo de nuevo más tarde.',
         loading_presentations: 'Cargando presentaciones...',
         no_presentations_found: 'No se encontraron presentaciones.',
@@ -272,6 +303,21 @@ export const translations = {
         videos_horizontal_section_description: 'Una selección de vídeos en formato apaisado.',
         videos_vertical_page_title: 'Beatriz Rodrigues - Vídeos Verticales',
         videos_vertical_section_title: 'Vídeos Verticales',
-        videos_vertical_section_description: 'Una selección de vídeos en formato retrato.'
+        videos_vertical_section_description: 'Una selección de vídeos en formato retrato.',
+
+        // Claves de traducción para el banner de cookies
+        cookie_consent_title: 'Utilizamos Cookies',
+        cookie_consent_message: 'Este sitio web utiliza cookies para mejorar su experiencia de navegación, analizar el tráfico y personalizar el contenido. Puede elegir qué cookies aceptar.',
+        accept_all_cookies: 'Aceptar Todas',
+        accept_necessary_cookies: 'Solo Necesarias',
+        cookie_settings: 'Configuraciones',
+        save_preferences: 'Guardar Preferencias',
+        necessary_cookies: 'Cookies Necesarias',
+        analytics_cookies: 'Cookies de Análisis',
+        marketing_cookies: 'Cookies de Marketing',
+        necessary_desc: 'Estas cookies son esenciales para el funcionamiento básico del sitio web.',
+        analytics_desc: 'Nos ayudan a entender cómo los visitantes interactúan con el sitio web.',
+        marketing_desc: 'Utilizadas para mostrar anuncios relevantes a los usuarios.'
     }
 };
+

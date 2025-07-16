@@ -87,7 +87,7 @@ async function loadWorkCards() {
 
         const coverUrls = {};
         covers.forEach(cover => {
-            const coverKey = cover.name.split('.')[0].toLowerCase().replace('ç', 'c').replace('õ', 'o');
+            const coverKey = cover.name.split('.')[0].toLowerCase().replace('ç', 'c').replace('õ', 'o').replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('ã', 'a').replace('ê', 'e').replace('â', 'a').replace('ô', 'o').replace('ú', 'u').replace('à', 'a');
             coverUrls[coverKey] = cover.url;
         });
 
