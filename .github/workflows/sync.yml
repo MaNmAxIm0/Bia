@@ -39,22 +39,22 @@ jobs:
       - name: Gerar Thumbnails Incrementais para Vídeos Novos
         run: python3 scripts/thumbnail_generator.py
 
-      - name: Aplicar Marcas de Água e Otimizar Imagens
+      - name: Processar Media e Gerar Ficheiros de Dados
         run: |
-          echo "--- Processando Imagens (Fotografias e Designs) ---"
+          echo "--- Executando o script principal de processamento e geração de dados ---"
           mkdir -p scripts/
           curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
-          python3 scripts/process_images.py
+          python3 scripts/process_files.py
 
-      - name: Aplicar Marcas de Água a Vídeos
+      - name: Gerar Manifesto de Ficheiros do R2
         run: |
-          echo "--- Processando Vídeos ---"
-          python3 scripts/process_videos.py
-      
-      - name: Gerar data.json e Manifesto de Ficheiros
-        run: |
-          echo "--- Gerando data.json e manifesto final do R2 ---"
-          python3 scripts/generate_final_data.py
+          echo "--- Gerando manifesto final do R2 ---"
+          MANIFEST_FILE="r2_file_manifest.txt"
+          echo "Manifesto de Ficheiros do Bucket 'bia-portfolio-assets'" > "$MANIFEST_FILE"
+          echo "Gerado em: $(date)" >> "$MANIFEST_FILE"
+          echo "----------------------------------------------------" >> "$MANIFEST_FILE"
+          JQ_FILTER='.[] | "\(.ModTime | fromdate | strflocaltime("%Y-%m-%d %H:%M:%S %Z"))\t\(.Size | tostring | rpad(10))\t\(.Path)"'
+          rclone lsl --json "R2:bia-portfolio-assets" --recursive | jq -r "$JQ_FILTER" | sort -r >> "$MANIFEST_FILE"
 
       - name: Fazer commit e push de alterações
         run: |
