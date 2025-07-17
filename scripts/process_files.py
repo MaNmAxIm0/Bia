@@ -1,12 +1,11 @@
-# Ficheiro: scripts/process_files.py (VERSÃO FINAL COM DIAGNÓSTICO E CORREÇÕES)
-
 import subprocess
 import json
 import os
 import time
 import sys
 from datetime import datetime, timezone
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+# Importa as funções do novo ficheiro
+from apply_watermark import apply_image_watermark, apply_video_watermark
 
 # --- Configuração ---
 RCLONE_REMOTE = "R2:bia-portfolio-assets"
@@ -20,14 +19,11 @@ SUPPORTED_IMAGE_EXT = ['.jpeg', '.jpg', '.png', '.webp']
 SUPPORTED_VIDEO_EXT = ['.mp4', '.mov', '.avi']
 
 THUMBNAIL_DIR_R2 = "Thumbnails"
-WATERMARK_TEXT = "© Beatriz Rodrigues"
 FONT_PATH = os.path.join(os.path.dirname(__file__), 'Montserrat-SemiBold.ttf')
 TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
 MANIFEST_FILE = "r2_file_manifest.txt"
 ERROR_LOG_FILE = "upload_errors.log"
-MAX_IMAGE_WIDTH = 1920
-JPEG_QUALITY = 85
 
 # --- Funções Auxiliares ---
 def run_command(cmd, check=True):
@@ -62,66 +58,14 @@ def parse_filename_for_titles(filename):
     if len(parts) >= 3: return {'pt': parts[0].replace('-', ' '), 'en': parts[1].replace('-', ' '), 'es': parts[2].replace('-', ' ')}
     return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
 
-def get_media_dimensions(local_path, is_video):
-    try:
-        if not is_video:
-            with Image.open(local_path) as img:
-                return ImageOps.exif_transpose(img).size
-        else:
-            result = run_command(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "json", local_path])
-            if result:
-                dims = json.loads(result.stdout)["streams"][0]
-                return int(dims.get("width", 0)), int(dims.get("height", 0))
-    except Exception as e:
-        print(f"  AVISO: Não foi possível obter dimensões para '{os.path.basename(local_path)}'. Erro: {e}", file=sys.stderr)
-    return 0, 0
-
 def generate_thumbnail(video_path, thumb_path):
     print(f"  -> A gerar thumbnail para: {os.path.basename(video_path)}")
     try:
         command = ["ffmpeg", "-i", video_path, "-ss", "00:00:01.000", "-vframes", "1", "-q:v", "2", "-y", thumb_path]
-        run_command(command)
+        run_command(command, check=True)
         return True
     except Exception as e:
         print(f"  ERRO ao gerar thumbnail: {e}", file=sys.stderr)
-        return False
-
-def apply_watermark(input_path, output_path, is_video):
-    width, height = get_media_dimensions(input_path, is_video)
-    if width == 0:
-        return False
-    try:
-        if not is_video:
-            with Image.open(input_path) as img:
-                img = ImageOps.exif_transpose(img)
-                if img.mode == 'RGBA':
-                    background = Image.new("RGB", img.size, (255, 255, 255))
-                    background.paste(img, mask=img.split()[3])
-                    img = background
-                if img.width > MAX_IMAGE_WIDTH:
-                    h = int((MAX_IMAGE_WIDTH / img.width) * img.height)
-                    img = img.resize((MAX_IMAGE_WIDTH, h), Image.Resampling.LANCZOS)
-                draw = ImageDraw.Draw(img)
-                font_size = max(24, int(img.height * 0.05))
-                font = ImageFont.truetype(FONT_PATH, font_size)
-                bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
-                text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
-                margin = int(img.width * 0.025)
-                position = (img.width - text_width - margin, img.height - text_height - margin)
-                draw.text((position[0] + 2, position[1] + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
-                draw.text(position, WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220))
-                img.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True)
-        else:
-            font_size = max(30, int(width * 0.055))
-            margin = int(width * 0.025)
-            escaped_text = WATERMARK_TEXT.replace("'", "'\\\\''")
-            escaped_font_path = FONT_PATH.replace(":", "\\\\:")
-            vf_command = f"drawtext=text='{escaped_text}':fontfile='{escaped_font_path}':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2"
-            command = ["ffmpeg", "-i", input_path, "-vf", vf_command, "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "copy", "-y", output_path]
-            run_command(command)
-        return True
-    except Exception as e:
-        print(f"  ERRO DETALHADO ao aplicar marca de água em '{os.path.basename(input_path)}': {e}", file=sys.stderr)
         return False
 
 # --- Lógica Principal ---
@@ -172,19 +116,27 @@ def main():
                 local_thumb_path = os.path.join(TEMP_DIR, f"{basename}.jpg")
                 if generate_thumbnail(local_path, local_thumb_path):
                     upload_result = run_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}/{basename}.jpg"])
-                    if upload_result.returncode != 0: upload_errors.append(f"Thumbnail upload failed for: {basename}.jpg")
+                    if not upload_result or upload_result.returncode != 0:
+                        upload_errors.append(f"Falha no upload da thumbnail: {basename}.jpg")
                     os.remove(local_thumb_path)
             
             print(f"  -> A aplicar marca de água...")
             output_basename = os.path.splitext(filename)[0]
-            output_ext = ".jpg" if is_image else os.path.splitext(filename)[1]
+            output_ext = ".jpg" if is_image else ext
             local_processed_path = os.path.join(TEMP_DIR, f"wm_{output_basename}{output_ext}")
+            
+            success = False
+            if is_image:
+                success = apply_image_watermark(local_path, local_processed_path, FONT_PATH)
+            elif is_video:
+                success = apply_video_watermark(local_path, local_processed_path, FONT_PATH)
 
-            if apply_watermark(local_path, local_processed_path, is_video):
+            if success:
                 final_r2_path = os.path.join(category_folder, f"{output_basename}{output_ext}")
                 print(f"  -> A enviar ficheiro com marca de água para: {final_r2_path}")
                 upload_result = run_command(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE}/{final_r2_path}"])
-                if upload_result.returncode != 0: upload_errors.append(f"Watermarked file upload failed for: {final_r2_path}")
+                if not upload_result or upload_result.returncode != 0:
+                    upload_errors.append(f"Falha no upload do ficheiro com marca de água: {final_r2_path}")
                 
                 if is_image and path != final_r2_path:
                     print(f"  -> A apagar original não-JPG: {path}")
