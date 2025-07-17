@@ -3,7 +3,7 @@
 import sys
 import os
 import subprocess
-import json  # <--- CORREÇÃO: Módulo importado
+import json
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 # --- Configuração ---
@@ -41,7 +41,7 @@ def apply_image_watermark(input_path, output_path, font_path):
             img.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True)
             return True
     except Exception as e:
-        print(f"  ERRO DETALHADO ao aplicar marca de água na imagem '{os.path.basename(input_path)}': {e}", file=sys.stderr)
+        print(f"  ERRO DETALHADO ao aplicar marca de água na imagem \'{os.path.basename(input_path)}\': {e}", file=sys.stderr)
         return False
 
 def apply_video_watermark(input_path, output_path, font_path):
@@ -54,18 +54,18 @@ def apply_video_watermark(input_path, output_path, font_path):
         width = int(dims.get("width", 0))
 
         if width == 0:
-            print(f"  ERRO: Não foi possível obter dimensões do vídeo '{os.path.basename(input_path)}'.", file=sys.stderr)
+            print(f"  ERRO: Não foi possível obter dimensões do vídeo \'{os.path.basename(input_path)}\'.", file=sys.stderr)
             return False
 
         font_size = max(30, int(width * 0.055))
         margin = int(width * 0.025)
-        escaped_text = WATERMARK_TEXT.replace("'", "'\\\\''")
+        escaped_text = WATERMARK_TEXT.replace("\\'", "\\'\\\\\\'\'")
         escaped_font_path = font_path.replace(":", "\\\\:")
-        vf_command = f"drawtext=text='{escaped_text}':fontfile='{escaped_font_path}':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2"
+        vf_command = f"drawtext=text=\'{escaped_text}\':fontfile=\'{escaped_font_path}\':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2"
         
         ffmpeg_cmd = ["ffmpeg", "-i", input_path, "-vf", vf_command, "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "copy", "-y", output_path]
         subprocess.run(ffmpeg_cmd, check=True, capture_output=True, text=True)
         return True
     except Exception as e:
-        print(f"  ERRO DETALHADO ao aplicar marca de água ao vídeo '{os.path.basename(input_path)}': {e}", file=sys.stderr)
+        print(f"  ERRO DETALHADO ao aplicar marca de água ao vídeo \'{os.path.basename(input_path)}\': {e}", file=sys.stderr)
         return False

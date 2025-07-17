@@ -17,8 +17,8 @@ CATEGORIES = {
     "Apresentações": "apresentacoes", "Melhores": "carousel", "Capas": "covers"
 }
 PROCESSABLE_CATEGORIES = ["fotografias", "videos", "designs"]
-SUPPORTED_IMAGE_EXT = ['.jpeg', '.jpg', '.png', '.webp']
-SUPPORTED_VIDEO_EXT = ['.mp4', '.mov', '.avi']
+SUPPORTED_IMAGE_EXT = [".jpeg", ".jpg", ".png", ".webp"]
+SUPPORTED_VIDEO_EXT = [".mp4", ".mov", ".avi"]
 
 THUMBNAIL_DIR_R2 = "Thumbnails"
 FONT_PATH = os.path.join(os.path.dirname(__file__), 'Montserrat-SemiBold.ttf')
@@ -48,11 +48,12 @@ def get_last_manifest_time():
             for line in f:
                 if line.startswith("Gerado em:"):
                     parts = line.split()
+                    # Ajustar o formato da data para corresponder ao que é escrito
                     date_str = " ".join(parts[2:5] + [parts[6]])
                     return datetime.strptime(date_str, "%b %d %H:%M:%S %Y").replace(tzinfo=timezone.utc)
     except Exception:
         print(f"AVISO: Manifesto não encontrado ou inválido. A processar todos os ficheiros.")
-    return datetime.fromtimestamp(0, tz=timezone.utc)
+    return datetime.fromtimestamp(0, tzinfo=timezone.utc) # Retorna um timestamp de época para garantir que todos os ficheiros são processados na primeira execução
 
 def parse_filename_for_titles(filename):
     name_without_ext = os.path.splitext(filename)[0]
@@ -89,6 +90,9 @@ def main():
     existing_thumbnails = {os.path.splitext(f["Name"])[0] for f in get_rclone_json_list(f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}")}
     last_run_time = get_last_manifest_time()
 
+    # Obter lista de ficheiros já processados com marca d'água no R2
+    processed_files_r2 = {item["Path"] for item in all_files_data if "wm_" in item["Name"] or item["Name"].lower().endswith(tuple(SUPPORTED_IMAGE_EXT))}
+
     for item in all_files_data:
         try:
             path = item["Path"]
@@ -106,13 +110,18 @@ def main():
                 continue
 
             mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
-            if mod_time < last_run_time:
+            
+            # Verificar se o ficheiro já foi processado e não foi modificado desde a última execução
+            # A lógica de verificação de modificação é crucial aqui
+            if mod_time < last_run_time and path in processed_files_r2:
+                print(f"-> Ignorando ficheiro não modificado: {path}")
                 continue
 
-            print(f"-> Processando ficheiro modificado: {path}")
+            print(f"-> Processando ficheiro modificado/novo: {path}")
             
             local_path = os.path.join(TEMP_DIR, filename)
-            run_command(["rclone", "copyto", f"{RCLONE_REMOTE}/{path}", local_path])
+            # CORREÇÃO: Usar 'rclone copy' para garantir que o ficheiro é copiado para o diretório temporário
+            run_command(["rclone", "copy", f"{RCLONE_REMOTE}/{path}", TEMP_DIR])
             
             if is_video and basename not in existing_thumbnails:
                 local_thumb_path = os.path.join(TEMP_DIR, f"{basename}.jpg")
@@ -140,8 +149,10 @@ def main():
                 if not upload_result or upload_result.returncode != 0:
                     upload_errors.append(f"Falha no upload do ficheiro com marca de água: {final_r2_path}")
                 
-                if is_image and path != final_r2_path:
-                    print(f"  -> A apagar original não-JPG: {path}")
+                # CORREÇÃO: Apagar o ficheiro original apenas se o processamento e upload do ficheiro com marca d'água for bem-sucedido
+                # E se o ficheiro original não for o mesmo que o ficheiro com marca d'água (evitar apagar o que acabou de enviar)
+                if success and path != final_r2_path:
+                    print(f"  -> A apagar original: {path}")
                     run_command(["rclone", "deletefile", f"{RCLONE_REMOTE}/{path}"])
 
             if os.path.exists(local_path): os.remove(local_path)
