@@ -1,4 +1,4 @@
-# Ficheiro: .github/workflows/sync.yml (VERSÃO CORRIGIDA E SIMPLIFICADA)
+# Ficheiro: .github/workflows/sync.yml (VERSÃO FINAL COM DEPENDÊNCIAS DE IMAGEM)
 
 name: Sincronizar Media, Gerar Dados e Manifesto
 
@@ -19,6 +19,7 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
+      # ETAPA CORRIGIDA: Adiciona as bibliotecas de imagem necessárias
       - name: Instalar ferramentas e dependências
         run: |
           sudo apt-get update
@@ -46,16 +47,16 @@ jobs:
             mkdir -p scripts/
             curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
           fi
-          # Executa o script principal que agora faz tudo
+          # Executa o script principal que agora tem toda a lógica
           python3 scripts/process_files.py
 
       - name: Fazer commit e push de alterações
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data.json r2_file_manifest.txt
+          git add data.json r2_file_manifest.txt upload_errors.log
           if ! git diff --quiet --exit-code --cached; then
-            git commit -m "Atualiza data.json e manifesto [skip ci]"
+            git commit -m "Atualiza data.json, manifesto e logs de erro [skip ci]"
             git pull --rebase
             git push
           else
