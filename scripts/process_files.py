@@ -1,4 +1,4 @@
-# Ficheiro: scripts/process_files.py (VERSÃO FINAL CORRIGIDA)
+# Ficheiro: scripts/process_files.py (VERSÃO FINAL COM DIAGNÓSTICO E CORREÇÕES)
 
 import subprocess
 import json
@@ -15,12 +15,17 @@ CATEGORIES = {
     "Fotografias": "fotografias", "Vídeos": "videos", "Designs": "designs",
     "Apresentações": "apresentacoes", "Melhores": "carousel", "Capas": "covers"
 }
+PROCESSABLE_CATEGORIES = ["fotografias", "videos", "designs"]
+SUPPORTED_IMAGE_EXT = ['.jpeg', '.jpg', '.png', '.webp']
+SUPPORTED_VIDEO_EXT = ['.mp4', '.mov', '.avi']
+
 THUMBNAIL_DIR_R2 = "Thumbnails"
 WATERMARK_TEXT = "© Beatriz Rodrigues"
 FONT_PATH = os.path.join(os.path.dirname(__file__), 'Montserrat-SemiBold.ttf')
 TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
 MANIFEST_FILE = "r2_file_manifest.txt"
+ERROR_LOG_FILE = "upload_errors.log"
 MAX_IMAGE_WIDTH = 1920
 JPEG_QUALITY = 85
 
@@ -32,11 +37,9 @@ def run_command(cmd, check=True):
         print(f"ERRO ao executar: {' '.join(cmd)}\n{e.stderr}")
         return None
 
-# CORREÇÃO: Utiliza o comando 'lsjson' em vez de 'lsljson'
-def get_rclone_json(command, path, flags=None):
+def get_rclone_json_list(path, flags=None):
     if flags is None:
         flags = []
-    # O comando para listar ficheiros com detalhes em JSON é 'lsjson'
     cmd = ["rclone", "lsjson", path] + flags
     result = run_command(cmd)
     return json.loads(result.stdout) if result and result.stdout else []
@@ -70,13 +73,13 @@ def get_media_dimensions(local_path, is_video):
                 dims = json.loads(result.stdout)["streams"][0]
                 return int(dims.get("width", 0)), int(dims.get("height", 0))
     except Exception as e:
-        print(f"  AVISO: Não foi possível obter dimensões para '{local_path}'. Erro: {e}", file=sys.stderr)
+        print(f"  AVISO: Não foi possível obter dimensões para '{os.path.basename(local_path)}'. Erro: {e}", file=sys.stderr)
     return 0, 0
 
 def generate_thumbnail(video_path, thumb_path):
     print(f"  -> A gerar thumbnail para: {os.path.basename(video_path)}")
     try:
-        command = ["ffmpeg", "-i", video_path, "-ss", "00:00:01.000", "-vframes", "1", "-q:v", "2", thumb_path]
+        command = ["ffmpeg", "-i", video_path, "-ss", "00:00:01.000", "-vframes", "1", "-q:v", "2", "-y", thumb_path]
         run_command(command)
         return True
     except Exception as e:
@@ -86,7 +89,6 @@ def generate_thumbnail(video_path, thumb_path):
 def apply_watermark(input_path, output_path, is_video):
     width, height = get_media_dimensions(input_path, is_video)
     if width == 0:
-        print(f"  ERRO: Dimensões inválidas para {input_path}. A saltar marca de água.", file=sys.stderr)
         return False
     try:
         if not is_video:
@@ -109,7 +111,7 @@ def apply_watermark(input_path, output_path, is_video):
                 draw.text((position[0] + 2, position[1] + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
                 draw.text(position, WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220))
                 img.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True)
-        else: # é vídeo
+        else:
             font_size = max(30, int(width * 0.055))
             margin = int(width * 0.025)
             escaped_text = WATERMARK_TEXT.replace("'", "'\\\\''")
@@ -119,55 +121,84 @@ def apply_watermark(input_path, output_path, is_video):
             run_command(command)
         return True
     except Exception as e:
-        print(f"  ERRO DETALHADO ao aplicar marca de água: {e}", file=sys.stderr)
+        print(f"  ERRO DETALHADO ao aplicar marca de água em '{os.path.basename(input_path)}': {e}", file=sys.stderr)
         return False
 
 # --- Lógica Principal ---
 def main():
     start_time = time.time()
+    upload_errors = []
     print(">>> INICIANDO SCRIPT DE PROCESSAMENTO E GERAÇÃO DE DADOS...")
     os.makedirs(TEMP_DIR, exist_ok=True)
 
     print("\n--- [FASE 1] Verificando ficheiros novos ou modificados ---")
-    all_files_data = get_rclone_json("lsljson", RCLONE_REMOTE, ["--recursive"])
+    all_files_data = get_rclone_json_list(RCLONE_REMOTE, ["--recursive"])
+    
     if not all_files_data:
-        # CORREÇÃO: se lsljson falhar, tenta lsjson
-        print("AVISO: 'lsljson' pode não ser suportado. A tentar com 'lsjson'.")
-        all_files_data = get_rclone_json("lsjson", RCLONE_REMOTE, ["--recursive"])
+        print("AVISO: Nenhum ficheiro encontrado no bucket R2. A sair.")
+        with open(DATA_FILE, "w", encoding="utf-8") as f: json.dump({key: [] for key in CATEGORIES.values()}, f)
+        with open(MANIFEST_FILE, "w", encoding="utf-8") as f: f.write("Manifesto vazio.")
+        sys.exit(0)
 
-    existing_thumbnails = {os.path.splitext(f["Name"])[0] for f in get_rclone_json("lsjson", f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}")}
+    existing_thumbnails = {os.path.splitext(f["Name"])[0] for f in get_rclone_json_list(f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}")}
     last_run_time = get_last_manifest_time()
 
     for item in all_files_data:
         try:
             path = item["Path"]
             filename = os.path.basename(path)
-            basename, _ = os.path.splitext(filename)
-            category_folder, _ = os.path.split(path)
-
-            if category_folder not in CATEGORIES: continue
+            basename, ext = os.path.splitext(filename)
+            category_folder = os.path.dirname(path)
+            category_key = CATEGORIES.get(category_folder)
             
-            mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
-            if mod_time < last_run_time: continue
+            if not category_key or category_key not in PROCESSABLE_CATEGORIES:
+                continue
+            
+            is_video = ext.lower() in SUPPORTED_VIDEO_EXT
+            is_image = ext.lower() in SUPPORTED_IMAGE_EXT
+            if not is_video and not is_image:
+                continue
 
-            print(f"-> Detetado ficheiro modificado: {path}")
+            mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
+            if mod_time < last_run_time:
+                continue
+
+            print(f"-> Processando ficheiro modificado: {path}")
             
             local_path = os.path.join(TEMP_DIR, filename)
             run_command(["rclone", "copyto", f"{RCLONE_REMOTE}/{path}", local_path])
-
-            if CATEGORIES.get(category_folder) == "videos" and basename not in existing_thumbnails:
+            
+            if is_video and basename not in existing_thumbnails:
                 local_thumb_path = os.path.join(TEMP_DIR, f"{basename}.jpg")
                 if generate_thumbnail(local_path, local_thumb_path):
-                    run_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}/{basename}.jpg"])
+                    upload_result = run_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}/{basename}.jpg"])
+                    if upload_result.returncode != 0: upload_errors.append(f"Thumbnail upload failed for: {basename}.jpg")
                     os.remove(local_thumb_path)
             
-            os.remove(local_path)
+            print(f"  -> A aplicar marca de água...")
+            output_basename = os.path.splitext(filename)[0]
+            output_ext = ".jpg" if is_image else os.path.splitext(filename)[1]
+            local_processed_path = os.path.join(TEMP_DIR, f"wm_{output_basename}{output_ext}")
+
+            if apply_watermark(local_path, local_processed_path, is_video):
+                final_r2_path = os.path.join(category_folder, f"{output_basename}{output_ext}")
+                print(f"  -> A enviar ficheiro com marca de água para: {final_r2_path}")
+                upload_result = run_command(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE}/{final_r2_path}"])
+                if upload_result.returncode != 0: upload_errors.append(f"Watermarked file upload failed for: {final_r2_path}")
+                
+                if is_image and path != final_r2_path:
+                    print(f"  -> A apagar original não-JPG: {path}")
+                    run_command(["rclone", "deletefile", f"{RCLONE_REMOTE}/{path}"])
+
+            if os.path.exists(local_path): os.remove(local_path)
+            if os.path.exists(local_processed_path): os.remove(local_processed_path)
 
         except Exception as e:
              print(f"  -> ERRO CRÍTICO ao processar {item.get('Path', 'item desconhecido')}: {e}")
+             upload_errors.append(f"CRITICAL ERROR on file: {item.get('Path', 'unknown')}")
             
     print("\n--- [FASE 2] Gerando o ficheiro data.json e o manifesto final ---")
-    final_r2_files = get_rclone_json("lsjson", RCLONE_REMOTE, ["--recursive"])
+    final_r2_files = get_rclone_json_list(RCLONE_REMOTE, ["--recursive"])
     new_data = {v: [] for v in CATEGORIES.values()}
     
     with open(MANIFEST_FILE, "w", encoding="utf-8") as f:
@@ -180,7 +211,7 @@ def main():
             mod_time = datetime.fromisoformat(mod_time_str.replace("Z", "+00:00")).strftime('%Y-%m-%d %H:%M:%S')
             f.write(f"{mod_time}\t{size:>10}\t{path}\n")
 
-            category_folder, _ = os.path.split(path)
+            category_folder = os.path.dirname(path)
             if category_folder in CATEGORIES:
                 category_key = CATEGORIES[category_folder]
                 file_data = {"name": os.path.basename(path), "titles": parse_filename_for_titles(item["Name"]), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
@@ -192,6 +223,15 @@ def main():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
     print("Ficheiro data.json e manifesto gerados com sucesso.")
+
+    if upload_errors:
+        print("\n--- [ERROS DE UPLOAD] ---")
+        with open(ERROR_LOG_FILE, "w", encoding="utf-8") as f:
+            for error in upload_errors:
+                print(error)
+                f.write(error + "\n")
+        print(f"Um log com {len(upload_errors)} erros foi guardado em '{ERROR_LOG_FILE}'")
+
     print(f"\n>>> SCRIPT CONCLUÍDO em {time.time() - start_time:.2f} segundos.")
 
 if __name__ == "__main__":
