@@ -102,3 +102,11 @@
     color: var(--light-text-color);
     padding: 0 15px;
 }
+
+/* -- Para tornar as imagens de preview quadradas -- */
+
+.preview-item img {
+  aspect-ratio: 5 / 3;  /* Força a proporção para 1:1 (quadrado) */
+  object-fit: cover;    /* Garante que a imagem cobre toda a área, cortando o excesso sem distorcer */
+  height: auto;         /* Permite que a altura se ajuste para manter a proporção */
+}

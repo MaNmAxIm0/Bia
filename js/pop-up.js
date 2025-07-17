@@ -1,7 +1,7 @@
 // js/pop-up.js (Versão Final com Integração Plyr.io)
 
 import { createWatermarkElement } from './ferramentas.js';
-import { getTranslation } from './gestor-de-linguagem.js';
+import { getTranslation } from './linguagem.js';
 
 let currentLightbox = null;
 

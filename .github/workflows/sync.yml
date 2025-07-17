@@ -1,71 +1,101 @@
-# Ficheiro: .github/workflows/sync.yml (VERSÃO FINAL E CORRIGIDA)
-
-name: Sincronizar Media, Gerar Dados e Manifesto
+name: Sync, Process and Deploy Portfolio Assets
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
-  schedule:
-    - cron: '0 19,20 * * *'
-
-permissions:
-  contents: write
 
 jobs:
   sync-and-build:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write 
+      
     env:
-      TZ: 'Europe/Lisbon'
+      TZ: Europe/Lisbon
+      RCLONE_VERSION: "v1.68.0" 
+
     steps:
-      - name: Checkout do repositório
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Instalar ferramentas e dependências
+      # --- ETAPA DE CACHING E CONFIGURAÇÃO ---
+      
+      - name: Cache for apt packages
+        id: cache-apt
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('**/sync.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Cache for pip packages
+        id: cache-pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache for rclone binary
+        id: cache-rclone
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/rclone
+          key: ${{ runner.os }}-rclone-${{ env.RCLONE_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-rclone-
+
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg jq libjpeg-dev zlib1g-dev libtiff5-dev libwebp-dev libfreetype6-dev
-          curl https://rclone.org/install.sh | sudo bash
-          pip3 install --no-cache-dir --force-reinstall Pillow
-
-      - name: Verificar funcionalidades do Pillow
+          sudo apt-get install -y --no-install-recommends \
+            ffmpeg jq libjpeg-dev zlib1g-dev libwebp-dev libfreetype6-dev curl unzip
+      
+      - name: Install Rclone
+        if: steps.cache-rclone.outputs.cache-hit!= 'true'
         run: |
-          echo "A verificar o suporte a formatos no Pillow:"
-          python3 -c "from PIL import features; print(features.pilinfo())"
+          curl -O https://downloads.rclone.org/v1.68.0/rclone-v1.68.0-linux-amd64.zip
+          unzip rclone-v1.68.0-linux-amd64.zip
+          sudo mv rclone-v1.68.0-linux-amd64/rclone /usr/local/bin/
+          sudo chmod 755 /usr/local/bin/rclone
+          rm -rf rclone-*
 
-      - name: Configurar rclone
-        env:
-          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/requirements.txt
+
+      # --- ETAPA DE EXECUÇÃO ---
+
+      - name: Setup Rclone Config
         run: |
           mkdir -p ~/.config/rclone
-          echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
+          echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
 
-      - name: Sincronizar Google Drive para Cloudflare R2
-        run: |
-          echo "--- Sincronizando Drive -> R2 (protegendo a pasta Thumbnails) ---"
-          rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "/Thumbnails/**" --exclude "desktop.ini" -v
+      - name: Generate R2 Manifest
+        run: python scripts/generate_manifest.py
 
-      - name: Processar Media, Gerar Thumbnails e Ficheiros de Dados
+      - name: Sync from Drive to Local
         run: |
-          echo "--- Executando o script principal de processamento e geração de dados ---"
-          if [ ! -f scripts/Montserrat-SemiBold.ttf ]; then
-            mkdir -p scripts/
-            curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
-          fi
-          # CORREÇÃO: Executa o script como um módulo para garantir que os imports funcionam
-          python3 -m scripts.process_files
+          mkdir -p./local_drive
+          rclone copy "Drive:Portfólio Bia"./local_drive -v --exclude "/Thumbnails/**" --exclude "desktop.ini"
 
-      - name: Fazer commit e push de alterações
+      - name: Process Assets
+        run: python scripts/process_assets.py
+
+      - name: Sync Processed Files to R2
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data.json r2_file_manifest.txt
-          # CORREÇÃO: Adiciona o log de erros apenas se ele existir, para evitar falhas
-          if [ -f upload_errors.log ]; then
-            git add upload_errors.log
-          fi
-          if ! git diff --quiet --exit-code --cached; then
-            git commit -m "Atualiza data.json, manifesto e logs de erro [skip ci]"
-            git pull --rebase
-            git push
-          else
-            echo "Nenhuma alteração para fazer commit."
-          fi
+          rclone sync./output "R2:bia-portfolio-assets" -v --fast-list --checksum
+
+      - name: Upload Processing Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: processing-logs
+          path: "./output/success.log\n./output/failure.log"
+          retention-days: 7
