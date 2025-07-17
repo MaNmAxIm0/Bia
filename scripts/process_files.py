@@ -1,4 +1,4 @@
-# Ficheiro: scripts/process_files.py (VERSÃO FINAL COM CORREÇÃO DO COMANDO)
+# Ficheiro: scripts/process_files.py (VERSÃO FINAL COM LÓGICA DE FILTRAGEM CORRIGIDA)
 
 import subprocess
 import json
@@ -15,6 +15,12 @@ CATEGORIES = {
     "Fotografias": "fotografias", "Vídeos": "videos", "Designs": "designs",
     "Apresentações": "apresentacoes", "Melhores": "carousel", "Capas": "covers"
 }
+# Apenas estas categorias terão os seus ficheiros processados
+PROCESSABLE_CATEGORIES = ["fotografias", "videos", "designs"]
+# Apenas ficheiros com estas extensões serão considerados para processamento
+SUPPORTED_IMAGE_EXT = ['.jpeg', '.jpg', '.png', '.webp']
+SUPPORTED_VIDEO_EXT = ['.mp4', '.mov']
+
 THUMBNAIL_DIR_R2 = "Thumbnails"
 WATERMARK_TEXT = "© Beatriz Rodrigues"
 FONT_PATH = os.path.join(os.path.dirname(__file__), 'Montserrat-SemiBold.ttf')
@@ -27,24 +33,19 @@ JPEG_QUALITY = 85
 # --- Funções Auxiliares ---
 def run_command(cmd, check=True):
     try:
-        # Executa o comando e retorna o resultado.
         return subprocess.run(cmd, capture_output=True, text=True, check=check, encoding='utf-8')
     except subprocess.CalledProcessError as e:
-        # Se o comando falhar, imprime o erro.
         print(f"ERRO ao executar: {' '.join(cmd)}\n{e.stderr}")
         return None
 
 def get_rclone_json_list(path, flags=None):
-    """Obtém uma lista de ficheiros do R2 em formato JSON."""
     if flags is None:
         flags = []
-    # CORREÇÃO APLICADA AQUI: Utiliza o comando 'lsjson' que é o correto.
     cmd = ["rclone", "lsjson", path] + flags
     result = run_command(cmd)
     return json.loads(result.stdout) if result and result.stdout else []
 
 def get_last_manifest_time():
-    """Lê a data do último manifesto para saber o que processar."""
     try:
         with open(MANIFEST_FILE, 'r', encoding='utf-8') as f:
             for line in f:
@@ -111,7 +112,7 @@ def apply_watermark(input_path, output_path, is_video):
                 draw.text((position[0] + 2, position[1] + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
                 draw.text(position, WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220))
                 img.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True)
-        else: # é vídeo
+        else:
             font_size = max(30, int(width * 0.055))
             margin = int(width * 0.025)
             escaped_text = WATERMARK_TEXT.replace("'", "'\\\\''")
@@ -133,10 +134,8 @@ def main():
     print("\n--- [FASE 1] Verificando ficheiros novos ou modificados ---")
     all_files_data = get_rclone_json_list(RCLONE_REMOTE, ["--recursive"])
     
-    # Se a primeira listagem falhar (por exemplo, o bucket estar vazio), não podemos continuar.
     if not all_files_data:
-        print("AVISO: Nenhum ficheiro encontrado no bucket R2. A sair do script.")
-        # Cria ficheiros vazios para não dar erro no commit
+        print("AVISO: Nenhum ficheiro encontrado no bucket R2. A sair.")
         with open(DATA_FILE, "w", encoding="utf-8") as f: json.dump({key: [] for key in CATEGORIES.values()}, f)
         with open(MANIFEST_FILE, "w", encoding="utf-8") as f: f.write("Manifesto vazio.")
         sys.exit(0)
@@ -148,36 +147,44 @@ def main():
         try:
             path = item["Path"]
             filename = os.path.basename(path)
-            basename, _ = os.path.splitext(filename)
+            basename, ext = os.path.splitext(filename.lower())
             category_folder = os.path.dirname(path)
-
-            if category_folder not in CATEGORIES or CATEGORIES[category_folder] == "covers": continue
             
+            category_key = CATEGORIES.get(category_folder)
+            
+            # **LÓGICA DE FILTRAGEM CORRIGIDA**
+            # 1. Ignora se a categoria não for processável
+            if not category_key or category_key not in PROCESSABLE_CATEGORIES:
+                continue
+            
+            # 2. Ignora se a extensão do ficheiro não for suportada
+            is_video = ext in SUPPORTED_VIDEO_EXT
+            is_image = ext in SUPPORTED_IMAGE_EXT
+            if not is_video and not is_image:
+                print(f"-> A ignorar ficheiro com formato não suportado: {path}")
+                continue
+
             mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
-            if mod_time < last_run_time: continue
+            if mod_time < last_run_time:
+                continue
 
             print(f"-> Processando ficheiro modificado: {path}")
             
             local_path = os.path.join(TEMP_DIR, filename)
             run_command(["rclone", "copyto", f"{RCLONE_REMOTE}/{path}", local_path])
             
-            is_video = CATEGORIES.get(category_folder) == "videos"
-
-            # Gera thumbnail se for um vídeo e não existir
             if is_video and basename not in existing_thumbnails:
                 local_thumb_path = os.path.join(TEMP_DIR, f"{basename}.jpg")
                 if generate_thumbnail(local_path, local_thumb_path):
                     run_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}/{basename}.jpg"])
                     os.remove(local_thumb_path)
             
-            # Aplica marca de água
             print(f"  -> A aplicar marca de água...")
             local_processed_path = os.path.join(TEMP_DIR, f"wm_{filename}")
             if apply_watermark(local_path, local_processed_path, is_video):
                 print(f"  -> A enviar ficheiro com marca de água para: {path}")
                 run_command(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE}/{path}"])
             
-            # Limpa ficheiros temporários
             if os.path.exists(local_path): os.remove(local_path)
             if os.path.exists(local_processed_path): os.remove(local_processed_path)
 
