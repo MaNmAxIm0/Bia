@@ -1,4 +1,4 @@
-# Ficheiro: scripts/process_files.py (VERSÃO FINAL COM LÓGICA DE FILTRAGEM CORRIGIDA)
+# Ficheiro: scripts/process_files.py (VERSÃO FINAL COM DIAGNÓSTICO E CORREÇÕES)
 
 import subprocess
 import json
@@ -15,11 +15,9 @@ CATEGORIES = {
     "Fotografias": "fotografias", "Vídeos": "videos", "Designs": "designs",
     "Apresentações": "apresentacoes", "Melhores": "carousel", "Capas": "covers"
 }
-# Apenas estas categorias terão os seus ficheiros processados
 PROCESSABLE_CATEGORIES = ["fotografias", "videos", "designs"]
-# Apenas ficheiros com estas extensões serão considerados para processamento
 SUPPORTED_IMAGE_EXT = ['.jpeg', '.jpg', '.png', '.webp']
-SUPPORTED_VIDEO_EXT = ['.mp4', '.mov']
+SUPPORTED_VIDEO_EXT = ['.mp4', '.mov', '.avi']
 
 THUMBNAIL_DIR_R2 = "Thumbnails"
 WATERMARK_TEXT = "© Beatriz Rodrigues"
@@ -27,6 +25,7 @@ FONT_PATH = os.path.join(os.path.dirname(__file__), 'Montserrat-SemiBold.ttf')
 TEMP_DIR = "temp_files"
 DATA_FILE = "data.json"
 MANIFEST_FILE = "r2_file_manifest.txt"
+ERROR_LOG_FILE = "upload_errors.log"
 MAX_IMAGE_WIDTH = 1920
 JPEG_QUALITY = 85
 
@@ -74,7 +73,7 @@ def get_media_dimensions(local_path, is_video):
                 dims = json.loads(result.stdout)["streams"][0]
                 return int(dims.get("width", 0)), int(dims.get("height", 0))
     except Exception as e:
-        print(f"  AVISO: Não foi possível obter dimensões para '{local_path}'. Erro: {e}", file=sys.stderr)
+        print(f"  AVISO: Não foi possível obter dimensões para '{os.path.basename(local_path)}'. Erro: {e}", file=sys.stderr)
     return 0, 0
 
 def generate_thumbnail(video_path, thumb_path):
@@ -122,12 +121,13 @@ def apply_watermark(input_path, output_path, is_video):
             run_command(command)
         return True
     except Exception as e:
-        print(f"  ERRO DETALHADO ao aplicar marca de água: {e}", file=sys.stderr)
+        print(f"  ERRO DETALHADO ao aplicar marca de água em '{os.path.basename(input_path)}': {e}", file=sys.stderr)
         return False
 
 # --- Lógica Principal ---
 def main():
     start_time = time.time()
+    upload_errors = []
     print(">>> INICIANDO SCRIPT DE PROCESSAMENTO E GERAÇÃO DE DADOS...")
     os.makedirs(TEMP_DIR, exist_ok=True)
 
@@ -147,21 +147,16 @@ def main():
         try:
             path = item["Path"]
             filename = os.path.basename(path)
-            basename, ext = os.path.splitext(filename.lower())
+            basename, ext = os.path.splitext(filename)
             category_folder = os.path.dirname(path)
-            
             category_key = CATEGORIES.get(category_folder)
             
-            # **LÓGICA DE FILTRAGEM CORRIGIDA**
-            # 1. Ignora se a categoria não for processável
             if not category_key or category_key not in PROCESSABLE_CATEGORIES:
                 continue
             
-            # 2. Ignora se a extensão do ficheiro não for suportada
-            is_video = ext in SUPPORTED_VIDEO_EXT
-            is_image = ext in SUPPORTED_IMAGE_EXT
+            is_video = ext.lower() in SUPPORTED_VIDEO_EXT
+            is_image = ext.lower() in SUPPORTED_IMAGE_EXT
             if not is_video and not is_image:
-                print(f"-> A ignorar ficheiro com formato não suportado: {path}")
                 continue
 
             mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
@@ -176,20 +171,31 @@ def main():
             if is_video and basename not in existing_thumbnails:
                 local_thumb_path = os.path.join(TEMP_DIR, f"{basename}.jpg")
                 if generate_thumbnail(local_path, local_thumb_path):
-                    run_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}/{basename}.jpg"])
+                    upload_result = run_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}/{basename}.jpg"])
+                    if upload_result.returncode != 0: upload_errors.append(f"Thumbnail upload failed for: {basename}.jpg")
                     os.remove(local_thumb_path)
             
             print(f"  -> A aplicar marca de água...")
-            local_processed_path = os.path.join(TEMP_DIR, f"wm_{filename}")
+            output_basename = os.path.splitext(filename)[0]
+            output_ext = ".jpg" if is_image else os.path.splitext(filename)[1]
+            local_processed_path = os.path.join(TEMP_DIR, f"wm_{output_basename}{output_ext}")
+
             if apply_watermark(local_path, local_processed_path, is_video):
-                print(f"  -> A enviar ficheiro com marca de água para: {path}")
-                run_command(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE}/{path}"])
-            
+                final_r2_path = os.path.join(category_folder, f"{output_basename}{output_ext}")
+                print(f"  -> A enviar ficheiro com marca de água para: {final_r2_path}")
+                upload_result = run_command(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE}/{final_r2_path}"])
+                if upload_result.returncode != 0: upload_errors.append(f"Watermarked file upload failed for: {final_r2_path}")
+                
+                if is_image and path != final_r2_path:
+                    print(f"  -> A apagar original não-JPG: {path}")
+                    run_command(["rclone", "deletefile", f"{RCLONE_REMOTE}/{path}"])
+
             if os.path.exists(local_path): os.remove(local_path)
             if os.path.exists(local_processed_path): os.remove(local_processed_path)
 
         except Exception as e:
              print(f"  -> ERRO CRÍTICO ao processar {item.get('Path', 'item desconhecido')}: {e}")
+             upload_errors.append(f"CRITICAL ERROR on file: {item.get('Path', 'unknown')}")
             
     print("\n--- [FASE 2] Gerando o ficheiro data.json e o manifesto final ---")
     final_r2_files = get_rclone_json_list(RCLONE_REMOTE, ["--recursive"])
@@ -217,6 +223,15 @@ def main():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
     print("Ficheiro data.json e manifesto gerados com sucesso.")
+
+    if upload_errors:
+        print("\n--- [ERROS DE UPLOAD] ---")
+        with open(ERROR_LOG_FILE, "w", encoding="utf-8") as f:
+            for error in upload_errors:
+                print(error)
+                f.write(error + "\n")
+        print(f"Um log com {len(upload_errors)} erros foi guardado em '{ERROR_LOG_FILE}'")
+
     print(f"\n>>> SCRIPT CONCLUÍDO em {time.time() - start_time:.2f} segundos.")
 
 if __name__ == "__main__":
