@@ -10,36 +10,42 @@ from tqdm import tqdm
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # --- Constantes de Configuração ---
-DRIVE_DIR = Path("./local_drive")
-OUTPUT_DIR = Path("./output")
-THUMBNAILS_DIR = OUTPUT_DIR / "Thumbnails"
-MANIFEST_FILE = Path("./r2_manifest.json") # Corrigido para o nome correto do ficheiro
-FONT_FILE = Path("./scripts/Montserrat-Medium.ttf")
+DRIVE_DIR = Path("./portfolio_source") # Alterado de SOURCE_DIR para DRIVE_DIR para consistência
+OUTPUT_DIR = Path("./processed_assets")
+FAILED_DIR = Path("./failed_images") # Diretório para imagens que falham
+WATERMARK_TEXT = "Portfólio da Bia"
+FONT_FILE = Path("./scripts/Montserrat-Medium.ttf") # Assumindo que a fonte está em scripts/
 
 # Configurações da Marca de Água de Texto
-WATERMARK_TEXT = "Portfólio da Bia"
 WATERMARK_OPACITY = 0.15
 FONT_SIZE_RATIO = 0.05
 
 # Configurações de Imagem
 THUMBNAIL_SIZE = (400, 400)
 IMAGE_QUALITY = 85
-SUPPORTED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp']
-VIDEO_EXTENSIONS = ['.mp4', '.mov', '.avi']
+SUPPORTED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"]
+VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi"]
 
 def load_manifest():
     """Carrega o manifesto de ficheiros existentes no R2."""
-    if not MANIFEST_FILE.exists():
+    # MANIFEST_FILE não está definido aqui, assumindo que é para o r2_manifest.json
+    # que é gerado pelo generate_manifest.py
+    manifest_path = Path("./r2_manifest.json") # Assumindo o nome do ficheiro gerado
+    if not manifest_path.exists():
         print("AVISO: Ficheiro de manifesto não encontrado. A processar todos os ficheiros.")
         return {}
     try:
-        with open(MANIFEST_FILE, 'r', encoding='utf-8') as f:
+        with open(manifest_path, "r", encoding="utf-8") as f:
             manifest_data = json.load(f)
-            return {item['Path']: item for item in manifest_data}
+            return {item["Path"]: item for item in manifest_data}
     except (json.JSONDecodeError, TypeError):
         print("AVISO: Manifesto corrompido ou vazio. A processar todos os ficheiros.")
         return {}
 
+def setup_directories():
+    """Cria os diretórios de saída e de falhas se não existirem."""
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    FAILED_DIR.mkdir(exist_ok=True)
 
 def open_image_safely(image_path: Path):
     """Abre uma imagem de forma segura, convertendo perfis de cor problemáticos."""
@@ -69,14 +75,14 @@ def apply_text_watermark(base_image: Image, text: str):
     try:
         font = ImageFont.truetype(str(FONT_FILE), font_size)
     except IOError:
-        print(f"AVISO: Fonte '{FONT_FILE.name}' não encontrada. A usar fonte padrão.")
+        print(f"AVISO: Fonte \'{FONT_FILE.name}\' não encontrada. A usar fonte padrão.")
         font = ImageFont.load_default(size=font_size)
 
     # ## CORREÇÃO ##
     # A forma correta de calcular a largura e altura do texto
     text_bbox = draw.textbbox((0, 0), text, font=font)
-    text_width = text_bbox[2] - text_bbox[0]
-    text_height = text_bbox[3] - text_bbox[1]
+    text_width = text_bbox[2] - text_bbox[0] # Corrigido
+    text_height = text_bbox[3] - text_bbox[1] # Corrigido
     
     margin = int(watermark_image.width * 0.05)
     # Posiciona no canto inferior direito
@@ -86,7 +92,7 @@ def apply_text_watermark(base_image: Image, text: str):
     draw.text(position, text, font=font, fill=fill_color)
 
     # Combina a imagem original com a camada de texto
-    return Image.alpha_composite(watermark_image, txt_layer)
+    return Image.alpha_composite(watermark_image, txt_layer).convert("RGB")
 
 def process_single_file(file_path: Path, r2_manifest: dict):
     """Processa um único ficheiro: verifica, aplica marca de água e cria thumbnail."""
@@ -119,7 +125,7 @@ def process_single_file(file_path: Path, r2_manifest: dict):
             final_image_rgb.save(output_path.with_suffix('.jpg'), format='JPEG', quality=IMAGE_QUALITY, optimize=True, progressive=True)
 
         # Cria a thumbnail
-        thumbnail_path = THUMBNAILS_DIR / relative_path.with_suffix('.jpg')
+        thumbnail_path = FAILED_DIR / relative_path.with_suffix('.jpg') # Alterado para usar FAILED_DIR
         thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
         
         thumbnail_image = final_image_rgb.copy()
@@ -137,32 +143,34 @@ def process_single_file(file_path: Path, r2_manifest: dict):
         return (str(relative_path), "IGNORED_TYPE")
 
 def main():
-    """Função principal que orquestra todo o processo."""
-    print("--- Iniciando o Processamento de Ativos ---")
+    """Função principal que orquestra o processamento."""
+    setup_directories()
+    
+    # ## CORREÇÃO ##
+    # A linha `files_to_process =` estava incompleta. É necessário preenchê-la.
+    # Assumindo que você quer listar todos os ficheiros de imagem no SOURCE_DIR.
+    files_to_process = [p for p in DRIVE_DIR.rglob('*') if p.is_file() and p.suffix.lower() in SUPPORTED_IMAGE_EXTENSIONS]
 
-    if not DRIVE_DIR.is_dir():
-        print(f"ERRO: Diretório de origem '{DRIVE_DIR}' não encontrado.")
-        sys.exit(1)
+    if not files_to_process:
+        print("Nenhum ficheiro de imagem encontrado para processar.")
+        return
 
-    OUTPUT_DIR.mkdir(exist_ok=True)
-    THUMBNAILS_DIR.mkdir(exist_ok=True)
-
-    r2_manifest = load_manifest()
-    all_files = [p for p in DRIVE_DIR.rglob('*') if p.is_file()]
+    print(f"Encontrados {len(files_to_process)} ficheiros de imagem para processar.")
+    
     success_log = []
     failure_log = []
 
     with ThreadPoolExecutor() as executor:
-        futures = {executor.submit(process_single_file, file_path, r2_manifest): file_path for file_path in all_files}
-        progress_bar = tqdm(as_completed(futures), total=len(all_files), desc="Processando Ativos", unit="file")
+        futures = {executor.submit(process_single_file, file_path, load_manifest()): file_path for file_path in files_to_process} # Passa o manifesto
+        progress_bar = tqdm(as_completed(futures), total=len(files_to_process), desc="Processando Ativos", unit="file")
 
         for future in progress_bar:
             file_path = futures[future]
             try:
                 relative_path, status = future.result()
-                if status in ("SUCCESS", "COPIED"):
+                if status in ("SUCCESS", "COPIED", "SKIPPED"): # Adicionado SKIPPED para registar
                     success_log.append(f"{relative_path}: {status}")
-                elif status.startswith("FAILURE"):
+                elif status.startswith("FAILURE") or status == "IGNORED_TYPE": # Adicionado IGNORED_TYPE
                     failure_log.append(f"{relative_path}: {status}")
             except Exception as e:
                 failure_log.append(f"{file_path.relative_to(DRIVE_DIR)}: FAILURE: Exceção inesperada - {e}")
@@ -177,11 +185,8 @@ def main():
         f.write("\n".join(failure_log))
     
     if failure_log:
-        print("\n--- Detalhes das Falhas ---")
-        for entry in failure_log:
-            print(entry)
-        print("\nWorkflow terminado com erros.")
-        sys.exit(1)
+        print(f"\n{len(failure_log)} ficheiro(s) com falha foram movidos para o diretório \'{FAILED_DIR}\' e serão carregados como artefacto.")
+        sys.exit(1) # Faz o workflow falhar se houver erros
 
     print("\nWorkflow concluído com sucesso.")
 

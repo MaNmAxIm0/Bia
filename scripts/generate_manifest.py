@@ -6,7 +6,7 @@ import sys
 # Defina o seu remote e o caminho no R2
 R2_REMOTE_PATH = 'R2:bia-portfolio-assets' 
 # Ficheiro onde o manifesto será guardado
-MANIFEST_FILE = 'manifest.json'
+MANIFEST_FILE = 'r2_manifest.json' # Alterado para r2_manifest.json para consistência
 # Regras de exclusão para o rclone
 EXCLUDE_RULES = [
     '--exclude', '.DS_Store',
@@ -61,3 +61,4 @@ def generate_manifest():
 
 if __name__ == "__main__":
     generate_manifest()
+

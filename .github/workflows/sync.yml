@@ -10,29 +10,30 @@ jobs:
   sync-and-build:
     runs-on: ubuntu-latest
     
-    permissions:
-      contents: write 
-      
-    env:
-      TZ: Europe/Lisbon # A variável RCLONE_VERSION foi removida daqui
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # --- ETAPA DE CACHING E CONFIGURAÇÃO ---
-      
-      - name: Cache for apt packages
-        id: cache-apt
+      - name: Cache APT packages
         uses: actions/cache@v4
         with:
           path: /var/cache/apt/archives
           key: ${{ runner.os }}-apt-${{ hashFiles('**/sync.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-apt-
 
-      - name: Cache for pip packages
-        id: cache-pip
+      - name: Install System Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg jq libjpeg-dev zlib1g-dev libtiff5-dev libwebp-dev libfreetype6-dev curl unzip
+
+      - name: Install Rclone
+        run: curl https://rclone.org/install.sh | sudo bash
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache Pip packages
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
@@ -40,66 +41,33 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Cache for rclone binary
-        id: cache-rclone
-        uses: actions/cache@v4
-        with:
-          path: /usr/local/bin/rclone
-          # A chave de cache continua a usar a versão, mas como texto simples, o que está correto.
-          key: ${{ runner.os }}-rclone-v1.68.0
-          restore-keys: |
-            ${{ runner.os }}-rclone-
-
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            ffmpeg jq libjpeg-dev zlib1g-dev libwebp-dev libfreetype6-dev curl unzip
-      
-      - name: Install Rclone
-        if: steps.cache-rclone.outputs.cache-hit!= 'true'
-        run: |
-          curl -O https://downloads.rclone.org/v1.68.0/rclone-v1.68.0-linux-amd64.zip
-          unzip rclone-v1.68.0-linux-amd64.zip
-          sudo mv rclone-v1.68.0-linux-amd64/rclone /usr/local/bin/
-          sudo chmod 755 /usr/local/bin/rclone
-          rm -rf rclone-*
-
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r scripts/requirements.txt
-
-      # --- ETAPA DE EXECUÇÃO ---
 
       - name: Setup Rclone Config
         run: |
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
 
-      - name: Generate R2 Manifest
-        # Este passo agora deve funcionar corretamente
-        run: python scripts/generate_manifest.py
-
       - name: Sync from Drive to Local
         run: |
-          mkdir -p ./local_drive
-          rclone copy "Drive:Portfólio Bia" ./local_drive -v --exclude "/Thumbnails/**" --exclude "desktop.ini"
+          mkdir -p ./portfolio_source
+          rclone copy "Drive:Portfólio Bia" ./portfolio_source -v --exclude "/Thumbnails/**" --exclude "desktop.ini"
 
       - name: Process Assets
         run: python scripts/process_assets.py
 
       - name: Sync Processed Files to R2
         run: |
-          rclone sync ./output "R2:bia-portfolio-assets" -v --fast-list --checksum
+          # Sincroniza apenas os ficheiros processados com sucesso
+          rclone sync ./processed_assets "R2:bia-portfolio-assets" -v --fast-list --checksum
 
-      - name: Upload Processing Logs
-        if: always( )
+      - name: Upload Failed Images as Artifact
+        if: always() # Executa este passo mesmo que os passos anteriores falhem
         uses: actions/upload-artifact@v4
         with:
-          name: processing-logs
-          path: |
-            ./output/success.log
-            ./output/failure.log
+          name: failed-images
+          path: ./failed_images/ # Caminho para o diretório com as imagens falhadas
           retention-days: 7
-
