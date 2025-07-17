@@ -14,8 +14,7 @@ jobs:
       contents: write 
       
     env:
-      TZ: Europe/Lisbon
-      RCLONE_VERSION: "v1.68.0" 
+      TZ: Europe/Lisbon # A variável RCLONE_VERSION foi removida daqui
 
     steps:
       - name: Checkout repository
@@ -46,7 +45,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /usr/local/bin/rclone
-          key: ${{ runner.os }}-rclone-${{ env.RCLONE_VERSION }}
+          # A chave de cache continua a usar a versão, mas como texto simples, o que está correto.
+          key: ${{ runner.os }}-rclone-v1.68.0
           restore-keys: |
             ${{ runner.os }}-rclone-
 
@@ -78,24 +78,28 @@ jobs:
           echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
 
       - name: Generate R2 Manifest
+        # Este passo agora deve funcionar corretamente
         run: python scripts/generate_manifest.py
 
       - name: Sync from Drive to Local
         run: |
-          mkdir -p./local_drive
-          rclone copy "Drive:Portfólio Bia"./local_drive -v --exclude "/Thumbnails/**" --exclude "desktop.ini"
+          mkdir -p ./local_drive
+          rclone copy "Drive:Portfólio Bia" ./local_drive -v --exclude "/Thumbnails/**" --exclude "desktop.ini"
 
       - name: Process Assets
         run: python scripts/process_assets.py
 
       - name: Sync Processed Files to R2
         run: |
-          rclone sync./output "R2:bia-portfolio-assets" -v --fast-list --checksum
+          rclone sync ./output "R2:bia-portfolio-assets" -v --fast-list --checksum
 
       - name: Upload Processing Logs
-        if: always()
+        if: always( )
         uses: actions/upload-artifact@v4
         with:
           name: processing-logs
-          path: "./output/success.log\n./output/failure.log"
+          path: |
+            ./output/success.log
+            ./output/failure.log
           retention-days: 7
+
