@@ -1,4 +1,4 @@
-# Ficheiro: scripts/process_files.py (VERSÃO FINAL COMPLETA)
+# Ficheiro: scripts/process_files.py (VERSÃO FINAL CORRIGIDA)
 
 import subprocess
 import json
@@ -32,10 +32,12 @@ def run_command(cmd, check=True):
         print(f"ERRO ao executar: {' '.join(cmd)}\n{e.stderr}")
         return None
 
+# CORREÇÃO: Utiliza o comando 'lsjson' em vez de 'lsljson'
 def get_rclone_json(command, path, flags=None):
     if flags is None:
         flags = []
-    cmd = ["rclone", command, path] + flags
+    # O comando para listar ficheiros com detalhes em JSON é 'lsjson'
+    cmd = ["rclone", "lsjson", path] + flags
     result = run_command(cmd)
     return json.loads(result.stdout) if result and result.stdout else []
 
@@ -81,11 +83,7 @@ def generate_thumbnail(video_path, thumb_path):
         print(f"  ERRO ao gerar thumbnail: {e}", file=sys.stderr)
         return False
 
-# ... (A função apply_watermark que já lhe forneci pode ser mantida aqui) ...
 def apply_watermark(input_path, output_path, is_video):
-    """
-    Aplica uma marca de água a uma imagem ou vídeo. Retorna True em caso de sucesso.
-    """
     width, height = get_media_dimensions(input_path, is_video)
     if width == 0:
         print(f"  ERRO: Dimensões inválidas para {input_path}. A saltar marca de água.", file=sys.stderr)
@@ -123,6 +121,7 @@ def apply_watermark(input_path, output_path, is_video):
     except Exception as e:
         print(f"  ERRO DETALHADO ao aplicar marca de água: {e}", file=sys.stderr)
         return False
+
 # --- Lógica Principal ---
 def main():
     start_time = time.time()
@@ -131,6 +130,11 @@ def main():
 
     print("\n--- [FASE 1] Verificando ficheiros novos ou modificados ---")
     all_files_data = get_rclone_json("lsljson", RCLONE_REMOTE, ["--recursive"])
+    if not all_files_data:
+        # CORREÇÃO: se lsljson falhar, tenta lsjson
+        print("AVISO: 'lsljson' pode não ser suportado. A tentar com 'lsjson'.")
+        all_files_data = get_rclone_json("lsjson", RCLONE_REMOTE, ["--recursive"])
+
     existing_thumbnails = {os.path.splitext(f["Name"])[0] for f in get_rclone_json("lsjson", f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}")}
     last_run_time = get_last_manifest_time()
 
@@ -151,7 +155,7 @@ def main():
             local_path = os.path.join(TEMP_DIR, filename)
             run_command(["rclone", "copyto", f"{RCLONE_REMOTE}/{path}", local_path])
 
-            if CATEGORIES[category_folder] == "videos" and basename not in existing_thumbnails:
+            if CATEGORIES.get(category_folder) == "videos" and basename not in existing_thumbnails:
                 local_thumb_path = os.path.join(TEMP_DIR, f"{basename}.jpg")
                 if generate_thumbnail(local_path, local_thumb_path):
                     run_command(["rclone", "copyto", local_thumb_path, f"{RCLONE_REMOTE}/{THUMBNAIL_DIR_R2}/{basename}.jpg"])
@@ -163,7 +167,7 @@ def main():
              print(f"  -> ERRO CRÍTICO ao processar {item.get('Path', 'item desconhecido')}: {e}")
             
     print("\n--- [FASE 2] Gerando o ficheiro data.json e o manifesto final ---")
-    final_r2_files = get_rclone_json("lsljson", RCLONE_REMOTE, ["--recursive"])
+    final_r2_files = get_rclone_json("lsjson", RCLONE_REMOTE, ["--recursive"])
     new_data = {v: [] for v in CATEGORIES.values()}
     
     with open(MANIFEST_FILE, "w", encoding="utf-8") as f:
