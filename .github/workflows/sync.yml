@@ -1,3 +1,5 @@
+# Ficheiro: .github/workflows/sync.yml (VERSÃO CORRIGIDA E SIMPLIFICADA)
+
 name: Sincronizar Media, Gerar Dados e Manifesto
 
 on:
@@ -36,16 +38,15 @@ jobs:
           echo "--- Sincronizando Drive -> R2 (protegendo a pasta Thumbnails) ---"
           rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "/Thumbnails/**" --exclude "desktop.ini" -v
 
-      - name: Gerar Thumbnails Incrementais para Vídeos Novos
-        run: python3 scripts/thumbnail_generator.py
-
-      - name: Processar Media e Gerar Ficheiros de Dados
+      - name: Processar Media, Gerar Thumbnails e Ficheiros de Dados
         run: |
           echo "--- Executando o script principal de processamento e geração de dados ---"
+          # Garante que a fonte para a marca de água existe
           if [ ! -f scripts/Montserrat-SemiBold.ttf ]; then
             mkdir -p scripts/
             curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
           fi
+          # Executa o script principal que agora faz tudo
           python3 scripts/process_files.py
 
       - name: Fazer commit e push de alterações
