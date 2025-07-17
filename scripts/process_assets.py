@@ -13,7 +13,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 DRIVE_DIR = Path("./local_drive")
 OUTPUT_DIR = Path("./output")
 THUMBNAILS_DIR = OUTPUT_DIR / "Thumbnails"
-MANIFEST_FILE = Path("./r2_manifest.json")
+MANIFEST_FILE = Path("./r2_manifest.json") # Corrigido para o nome correto do ficheiro
 FONT_FILE = Path("./scripts/Montserrat-Medium.ttf")
 
 # Configurações da Marca de Água de Texto
@@ -32,16 +32,24 @@ def load_manifest():
     if not MANIFEST_FILE.exists():
         print("AVISO: Ficheiro de manifesto não encontrado. A processar todos os ficheiros.")
         return {}
-    with open(MANIFEST_FILE, 'r') as f:
-        manifest_data = json.load(f)
-        return {item['Path']: item for item in manifest_data}
+    try:
+        with open(MANIFEST_FILE, 'r', encoding='utf-8') as f:
+            manifest_data = json.load(f)
+            return {item['Path']: item for item in manifest_data}
+    except (json.JSONDecodeError, TypeError):
+        print("AVISO: Manifesto corrompido ou vazio. A processar todos os ficheiros.")
+        return {}
+
 
 def open_image_safely(image_path: Path):
     """Abre uma imagem de forma segura, convertendo perfis de cor problemáticos."""
     try:
         img = Image.open(image_path)
-        if img.mode in ('CMYK', 'P'):
-            img = img.convert('RGBA' if 'A' in img.mode else 'RGB')
+        # Converte para RGB para garantir compatibilidade
+        if img.mode == 'P': # Paleta
+             img = img.convert('RGBA')
+        if img.mode == 'CMYK':
+            img = img.convert('RGB')
         return img
     except UnidentifiedImageError:
         return None
@@ -51,29 +59,34 @@ def open_image_safely(image_path: Path):
 
 def apply_text_watermark(base_image: Image, text: str):
     """Aplica uma marca de água de texto na imagem."""
-    if base_image.mode!= 'RGBA':
-        base_image = base_image.convert('RGBA')
-
-    txt_layer = Image.new('RGBA', base_image.size, (255, 255, 255, 0))
+    # Converte para RGBA para suportar a camada de texto com transparência
+    watermark_image = base_image.convert('RGBA')
+    
+    txt_layer = Image.new('RGBA', watermark_image.size, (255, 255, 255, 0))
     draw = ImageDraw.Draw(txt_layer)
 
-    font_size = int(base_image.width * FONT_SIZE_RATIO)
+    font_size = int(watermark_image.width * FONT_SIZE_RATIO)
     try:
         font = ImageFont.truetype(str(FONT_FILE), font_size)
     except IOError:
         print(f"AVISO: Fonte '{FONT_FILE.name}' não encontrada. A usar fonte padrão.")
-        font = ImageFont.load_default()
+        font = ImageFont.load_default(size=font_size)
 
+    # ## CORREÇÃO ##
+    # A forma correta de calcular a largura e altura do texto
     text_bbox = draw.textbbox((0, 0), text, font=font)
-    text_width = text_bbox[1] - text_bbox
-    text_height = text_bbox[2] - text_bbox[3]
-    margin = int(base_image.width * 0.05)
-    position = (base_image.width - text_width - margin, base_image.height - text_height - margin)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    
+    margin = int(watermark_image.width * 0.05)
+    # Posiciona no canto inferior direito
+    position = (watermark_image.width - text_width - margin, watermark_image.height - text_height - margin)
 
     fill_color = (255, 255, 255, int(255 * WATERMARK_OPACITY))
     draw.text(position, text, font=font, fill=fill_color)
 
-    return Image.alpha_composite(base_image, txt_layer)
+    # Combina a imagem original com a camada de texto
+    return Image.alpha_composite(watermark_image, txt_layer)
 
 def process_single_file(file_path: Path, r2_manifest: dict):
     """Processa um único ficheiro: verifica, aplica marca de água e cria thumbnail."""
@@ -96,39 +109,45 @@ def process_single_file(file_path: Path, r2_manifest: dict):
 
         final_image = apply_text_watermark(base_image, WATERMARK_TEXT)
         
-        if final_image.mode == 'RGBA':
-            final_image.save(output_path, format='WEBP', quality=IMAGE_QUALITY, method=6)
-        else:
-            final_image.save(output_path, format='JPEG', quality=IMAGE_QUALITY, optimize=True, progressive=True)
+        # Converte de volta para RGB antes de salvar em formatos que não suportam alfa (como JPEG)
+        final_image_rgb = final_image.convert('RGB')
 
-        thumbnail_path = THUMBNAILS_DIR / relative_path
+        # Salva a imagem principal em WEBP ou JPEG
+        if final_image.mode == 'RGBA': # Se a imagem original já tinha transparência
+            final_image.save(output_path.with_suffix('.webp'), format='WEBP', quality=IMAGE_QUALITY)
+        else:
+            final_image_rgb.save(output_path.with_suffix('.jpg'), format='JPEG', quality=IMAGE_QUALITY, optimize=True, progressive=True)
+
+        # Cria a thumbnail
+        thumbnail_path = THUMBNAILS_DIR / relative_path.with_suffix('.jpg')
         thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
-        final_image.thumbnail(THUMBNAIL_SIZE, Image.Resampling.LANCZOS)
-        final_image.save(thumbnail_path, format='JPEG', quality=80)
+        
+        thumbnail_image = final_image_rgb.copy()
+        thumbnail_image.thumbnail(THUMBNAIL_SIZE, Image.Resampling.LANCZOS)
+        thumbnail_image.save(thumbnail_path, format='JPEG', quality=80)
 
         return (str(relative_path), "SUCCESS")
 
     elif file_ext in VIDEO_EXTENSIONS or file_ext == '.pdf':
-        os.link(file_path, output_path)
+        # Usa shutil.copy2 para preservar metadados
+        import shutil
+        shutil.copy2(file_path, output_path)
         return (str(relative_path), "COPIED")
     else:
         return (str(relative_path), "IGNORED_TYPE")
 
 def main():
     """Função principal que orquestra todo o processo."""
-    print("--- Iniciando o Processamento de Ativos com Marca de Água de Texto ---")
+    print("--- Iniciando o Processamento de Ativos ---")
 
     if not DRIVE_DIR.is_dir():
         print(f"ERRO: Diretório de origem '{DRIVE_DIR}' não encontrado.")
         sys.exit(1)
-    if not FONT_FILE.exists():
-        print(f"AVISO: Ficheiro da fonte '{FONT_FILE.name}' não encontrado. A usar fonte padrão.")
 
     OUTPUT_DIR.mkdir(exist_ok=True)
     THUMBNAILS_DIR.mkdir(exist_ok=True)
 
     r2_manifest = load_manifest()
-    # Inicializa as variáveis com as suas expressões corretas.
     all_files = [p for p in DRIVE_DIR.rglob('*') if p.is_file()]
     success_log = []
     failure_log = []
@@ -152,9 +171,9 @@ def main():
     print(f"Total de ficheiros processados com sucesso: {len(success_log)}")
     print(f"Total de falhas: {len(failure_log)}")
 
-    with open(OUTPUT_DIR / "success.log", "w") as f:
+    with open(OUTPUT_DIR / "success.log", "w", encoding='utf-8') as f:
         f.write("\n".join(success_log))
-    with open(OUTPUT_DIR / "failure.log", "w") as f:
+    with open(OUTPUT_DIR / "failure.log", "w", encoding='utf-8') as f:
         f.write("\n".join(failure_log))
     
     if failure_log:
