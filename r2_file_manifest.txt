@@ -1,41 +1,41 @@
 Manifesto de Ficheiros do Bucket 'R2:bia-portfolio-assets'
-Gerado em: Thu Jul 17 14:41:10 WEST 2025
+Gerado em: Thu Jul 17 15:51:11 WEST 2025
 ----------------------------------------------------
-2025-07-17 14:41:10	        -1	Apresentações
-2025-07-17 14:41:10	        -1	Capas
-2025-07-17 14:41:10	        -1	Designs
-2025-07-17 14:41:10	        -1	Fotografias
-2025-07-17 14:41:10	        -1	Melhores
-2025-07-17 14:41:10	        -1	Thumbnails
-2025-07-17 14:41:10	        -1	Vídeos
-2025-07-17 14:40:16	  12452265	Vídeos/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor.mp4
-2025-07-17 14:39:49	      5604	Thumbnails/é com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor.jpg
-2025-07-17 14:39:47	   1173743	Vídeos/highlights - 18057588424859151.mp4
-2025-07-17 14:39:44	     25043	Thumbnails/highlights - 18057588424859151.jpg
-2025-07-17 14:39:40	    144538	Vídeos/highlights - 18026883509390937.mp4
-2025-07-17 14:39:37	    111059	Thumbnails/highlights - 18026883509390937.jpg
-2025-07-17 14:39:34	   1073801	Vídeos/highlights - 17941463183908702.mp4
-2025-07-17 14:39:29	     99003	Thumbnails/highlights - 17941463183908702.jpg
-2025-07-17 14:39:26	     52731	Vídeos/highlights - 17875946589196602.mp4
-2025-07-17 14:39:24	     60226	Thumbnails/highlights - 17875946589196602.jpg
-2025-07-17 14:39:20	    619728	Vídeos/highlights - 17869451268147253.mp4
-2025-07-17 14:39:17	     25504	Thumbnails/highlights - 17869451268147253.jpg
-2025-07-17 14:39:13	   2580749	Vídeos/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! .mp4
-2025-07-17 14:39:10	     20691	Thumbnails/tens mais de 16 anos e não sabes onde ir quinta à noite a lista v tem a melhor solução para ti! .jpg
-2025-07-17 14:39:06	   3338587	Vídeos/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.mp4
-2025-07-17 14:39:00	     21505	Thumbnails/snapinsta.to_aqnaqdz8jimz2el_4yfaxv2nqzn9-aup2iuggoizyb4icg8hfmx2i2hukflfjhpb6jii-poxxcfebddg3ef4ejsoccfhzuk7h6n8rio.jpg
-2025-07-17 14:38:55	  20523200	Vídeos/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO.mp4
-2025-07-17 14:38:17	      5606	Thumbnails/estudantes, atenção! se estão na zona da expo e a precisar de uma pausa, o pepe taco.jpg
-2025-07-17 14:37:02	  18482161	Vídeos/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖.mp4
-2025-07-17 14:36:38	    174925	Thumbnails/este foi o nosso dia da campanha de hoje. preparem-se para amanhã 🔥lista v- somos a tua voz🧡🖖.jpg
-2025-07-17 14:35:39	  16222454	Vídeos/E foi assim que terminámos o nosso último dia de campanha.mp4
-2025-07-17 14:35:19	    125706	Thumbnails/e foi assim que terminámos o nosso último dia de campanha.jpg
-2025-07-17 14:35:15	    906571	Vídeos/Design_sem_nome_1.mp4
-2025-07-17 14:35:09	    120825	Thumbnails/design_sem_nome_1.jpg
-2025-07-17 14:35:03	  26826832	Vídeos/Design sem nome.mp4
-2025-07-17 14:34:03	    104160	Thumbnails/design sem nome.jpg
-2025-07-17 14:33:55	  12711424	Vídeos/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p.mp4
-2025-07-17 14:33:27	      5603	Thumbnails/a vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p.jpg
+2025-07-17 15:51:11	        -1	Apresentações
+2025-07-17 15:51:11	        -1	Capas
+2025-07-17 15:51:11	        -1	Designs
+2025-07-17 15:51:11	        -1	Fotografias
+2025-07-17 15:51:11	        -1	Melhores
+2025-07-17 15:51:11	        -1	Thumbnails
+2025-07-17 15:51:11	        -1	Vídeos
+2025-07-17 15:50:30	  12452265	Vídeos/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor.mp4
+2025-07-17 15:50:04	      5604	Thumbnails/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor.jpg
+2025-07-17 15:50:01	   1173743	Vídeos/highlights - 18057588424859151.mp4
+2025-07-17 15:49:58	     25043	Thumbnails/highlights - 18057588424859151.jpg
+2025-07-17 15:49:56	    144538	Vídeos/highlights - 18026883509390937.mp4
+2025-07-17 15:49:54	    111059	Thumbnails/highlights - 18026883509390937.jpg
+2025-07-17 15:49:52	   1073801	Vídeos/highlights - 17941463183908702.mp4
+2025-07-17 15:49:47	     99003	Thumbnails/highlights - 17941463183908702.jpg
+2025-07-17 15:49:45	     52731	Vídeos/highlights - 17875946589196602.mp4
+2025-07-17 15:49:43	     60226	Thumbnails/highlights - 17875946589196602.jpg
+2025-07-17 15:49:41	    619728	Vídeos/highlights - 17869451268147253.mp4
+2025-07-17 15:49:39	     25504	Thumbnails/highlights - 17869451268147253.jpg
+2025-07-17 15:49:36	   2580749	Vídeos/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! .mp4
+2025-07-17 15:49:32	     20691	Thumbnails/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! .jpg
+2025-07-17 15:49:30	   3338587	Vídeos/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.mp4
+2025-07-17 15:49:25	     21505	Thumbnails/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.jpg
+2025-07-17 15:49:22	  20523200	Vídeos/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO.mp4
+2025-07-17 15:48:44	      5606	Thumbnails/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO.jpg
+2025-07-17 15:48:41	  18482161	Vídeos/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖.mp4
+2025-07-17 15:48:16	    174925	Thumbnails/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖.jpg
+2025-07-17 15:48:13	  16222454	Vídeos/E foi assim que terminámos o nosso último dia de campanha.mp4
+2025-07-17 15:47:54	    125706	Thumbnails/E foi assim que terminámos o nosso último dia de campanha.jpg
+2025-07-17 15:47:51	    906571	Vídeos/Design_sem_nome_1.mp4
+2025-07-17 15:47:45	    120825	Thumbnails/Design_sem_nome_1.jpg
+2025-07-17 15:47:40	  26826832	Vídeos/Design sem nome.mp4
+2025-07-17 15:46:40	    104160	Thumbnails/Design sem nome.jpg
+2025-07-17 15:46:37	  12711424	Vídeos/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p.mp4
+2025-07-17 15:46:09	      5603	Thumbnails/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p.jpg
 2025-07-16 19:04:16	    526675	Capas/Contactos.png
 2025-07-16 19:04:05	     93504	Capas/Sobre mim.png
 2025-07-15 18:29:59	     23906	Capas/Designs.png
