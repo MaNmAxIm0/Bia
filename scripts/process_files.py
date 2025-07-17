@@ -48,12 +48,12 @@ def get_last_manifest_time():
             for line in f:
                 if line.startswith("Gerado em:"):
                     parts = line.split()
-                    # Ajustar o formato da data para corresponder ao que é escrito
                     date_str = " ".join(parts[2:5] + [parts[6]])
                     return datetime.strptime(date_str, "%b %d %H:%M:%S %Y").replace(tzinfo=timezone.utc)
     except Exception:
         print(f"AVISO: Manifesto não encontrado ou inválido. A processar todos os ficheiros.")
-    return datetime.fromtimestamp(0, tzinfo=timezone.utc) # Retorna um timestamp de época para garantir que todos os ficheiros são processados na primeira execução
+    # CORREÇÃO: Usar datetime.fromtimestamp(0, tz=timezone.utc) para compatibilidade com Python 3.6+
+    return datetime.fromtimestamp(0, tz=timezone.utc)
 
 def parse_filename_for_titles(filename):
     name_without_ext = os.path.splitext(filename)[0]
