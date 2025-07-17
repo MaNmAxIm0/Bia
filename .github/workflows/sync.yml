@@ -1,4 +1,4 @@
-# Ficheiro: .github/workflows/sync.yml (VERSÃO FINAL COM DEPENDÊNCIAS DE IMAGEM)
+# Ficheiro: .github/workflows/sync.yml (VERSÃO FINAL COM CORREÇÃO DE DEPENDÊNCIAS)
 
 name: Sincronizar Media, Gerar Dados e Manifesto
 
@@ -19,14 +19,19 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      # ETAPA CORRIGIDA: Adiciona as bibliotecas de imagem necessárias
+      # ETAPA CORRIGIDA E FINAL: Garante a ordem correta de instalação
       - name: Instalar ferramentas e dependências
         run: |
           sudo apt-get update
-          # Instala ffmpeg, jq, e as bibliotecas de desenvolvimento para JPEG e PNG
+          # 1. Instala as bibliotecas de sistema primeiro
           sudo apt-get install -y ffmpeg jq libjpeg-dev zlib1g-dev
-          pip3 install Pillow
+          
+          # 2. Instala o rclone
           curl https://rclone.org/install.sh | sudo bash
+          
+          # 3. Força a reinstalação do Pillow DEPOIS das bibliotecas de sistema estarem presentes
+          # A flag --no-cache-dir garante que não usa uma versão em cache "quebrada"
+          pip3 install --no-cache-dir --force-reinstall Pillow
 
       - name: Configurar rclone
         env:
@@ -43,18 +48,17 @@ jobs:
       - name: Processar Media, Gerar Thumbnails e Ficheiros de Dados
         run: |
           echo "--- Executando o script principal de processamento e geração de dados ---"
-          # Garante que a fonte para a marca de água existe
           if [ ! -f scripts/Montserrat-SemiBold.ttf ]; then
             mkdir -p scripts/
             curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
           fi
-          # Executa o script principal que agora tem toda a lógica
           python3 scripts/process_files.py
 
       - name: Fazer commit e push de alterações
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          # Adiciona o log de erros ao commit, caso seja gerado
           git add data.json r2_file_manifest.txt upload_errors.log
           if ! git diff --quiet --exit-code --cached; then
             git commit -m "Atualiza data.json, manifesto e logs de erro [skip ci]"
