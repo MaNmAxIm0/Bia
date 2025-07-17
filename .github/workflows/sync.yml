@@ -36,25 +36,17 @@ jobs:
           echo "--- Sincronizando Drive -> R2 (protegendo a pasta Thumbnails) ---"
           rclone sync "Drive:Portfólio Bia" "R2:bia-portfolio-assets" --exclude "/Thumbnails/**" --exclude "desktop.ini" -v
 
-      # ETAPA UNIFICADA: Executa o script principal que faz tudo
+      - name: Gerar Thumbnails Incrementais para Vídeos Novos
+        run: python3 scripts/thumbnail_generator.py
+
       - name: Processar Media e Gerar Ficheiros de Dados
         run: |
           echo "--- Executando o script principal de processamento e geração de dados ---"
-          # Garante que a pasta e a fonte existem para o script
-          mkdir -p scripts/
-          curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
+          if [ ! -f scripts/Montserrat-SemiBold.ttf ]; then
+            mkdir -p scripts/
+            curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
+          fi
           python3 scripts/process_files.py
-
-      - name: Gerar Manifesto de Ficheiros do R2
-        run: |
-          echo "--- Gerando manifesto final do R2 ---"
-          MANIFEST_FILE="r2_file_manifest.txt"
-          echo "Manifesto de Ficheiros do Bucket 'bia-portfolio-assets'" > "$MANIFEST_FILE"
-          echo "Gerado em: $(date)" >> "$MANIFEST_FILE"
-          echo "----------------------------------------------------" >> "$MANIFEST_FILE"
-          # Ordena por data, do mais recente para o mais antigo
-          JQ_FILTER='.[] | "\(.ModTime | fromdate | strflocaltime("%Y-%m-%d %H:%M:%S %Z"))\t\(.Size | tostring | rpad(10))\t\(.Path)"'
-          rclone lsl --json "R2:bia-portfolio-assets" --recursive | jq -r "$JQ_FILTER" | sort -r >> "$MANIFEST_FILE"
 
       - name: Fazer commit e push de alterações
         run: |
