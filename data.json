@@ -2059,6 +2059,24 @@
   ],
   "covers": [
     {
+      "name": "Vídeos Horizontais.png",
+      "titles": {
+        "pt": "Vídeos Horizontais",
+        "en": "Vídeos Horizontais",
+        "es": "Vídeos Horizontais"
+      },
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Vídeos%20Horizontais.png"
+    },
+    {
+      "name": "Fotografias Verticais.png",
+      "titles": {
+        "pt": "Fotografias Verticais",
+        "en": "Fotografias Verticais",
+        "es": "Fotografias Verticais"
+      },
+      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Fotografias%20Verticais.png"
+    },
+    {
       "name": "Contactos.png",
       "titles": {
         "pt": "Contactos",
@@ -2086,15 +2104,6 @@
       "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Designs.png"
     },
     {
-      "name": "Fotografias.png",
-      "titles": {
-        "pt": "Fotografias",
-        "en": "Fotografias",
-        "es": "Fotografias"
-      },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Fotografias.png"
-    },
-    {
       "name": "Apresentações.png",
       "titles": {
         "pt": "Apresentações",
@@ -2102,15 +2111,6 @@
         "es": "Apresentações"
       },
       "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Apresentações.png"
-    },
-    {
-      "name": "Vídeos.png",
-      "titles": {
-        "pt": "Vídeos",
-        "en": "Vídeos",
-        "es": "Vídeos"
-      },
-      "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Vídeos.png"
     }
   ]
 }
