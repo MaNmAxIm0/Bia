@@ -1,3 +1,5 @@
+# Ficheiro: .github/workflows/sync.yml (VERSÃO FINAL E CORRIGIDA)
+
 name: Sincronizar Media, Gerar Dados e Manifesto
 
 on:
@@ -20,13 +22,8 @@ jobs:
       - name: Instalar ferramentas e dependências
         run: |
           sudo apt-get update
-          # 1. Instala um conjunto completo de bibliotecas de imagem do sistema
           sudo apt-get install -y ffmpeg jq libjpeg-dev zlib1g-dev libtiff5-dev libwebp-dev libfreetype6-dev
-          
-          # 2. Instala o rclone
           curl https://rclone.org/install.sh | sudo bash
-          
-          # 3. Força a reinstalação do Pillow DEPOIS das bibliotecas de sistema estarem presentes
           pip3 install --no-cache-dir --force-reinstall Pillow
 
       - name: Verificar funcionalidades do Pillow
@@ -53,15 +50,15 @@ jobs:
             mkdir -p scripts/
             curl -L -o scripts/Montserrat-SemiBold.ttf "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-SemiBold.ttf"
           fi
-          # Executa o script principal
-          python3 scripts/process_files.py
+          # CORREÇÃO: Executa o script como um módulo para garantir que os imports funcionam
+          python3 -m scripts.process_files
 
       - name: Fazer commit e push de alterações
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          # Adiciona o log de erros ao commit, se existir
           git add data.json r2_file_manifest.txt
+          # CORREÇÃO: Adiciona o log de erros apenas se ele existir, para evitar falhas
           if [ -f upload_errors.log ]; then
             git add upload_errors.log
           fi
