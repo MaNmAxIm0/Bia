@@ -1,11 +1,13 @@
+# Ficheiro: scripts/process_files.py (VERSÃO FINAL COM IMPORT RELATIVO)
+
 import subprocess
 import json
 import os
 import time
 import sys
 from datetime import datetime, timezone
-# Importa as funções do novo ficheiro
-from apply_watermark import apply_image_watermark, apply_video_watermark
+# CORREÇÃO: Adicionado um ponto (.) antes de 'apply_watermark' para indicar importação relativa
+from .apply_watermark import apply_image_watermark, apply_video_watermark
 
 # --- Configuração ---
 RCLONE_REMOTE = "R2:bia-portfolio-assets"
