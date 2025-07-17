@@ -1,9 +1,10 @@
-# Ficheiro: scripts/process_files.py (VERSÃO FINAL E UNIFICADA)
+# Ficheiro: scripts/process_files.py (VERSÃO CORRIGIDA E UNIFICADA)
 
 import subprocess
 import json
 import os
 import time
+import sys
 from datetime import datetime, timezone
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
@@ -40,6 +41,9 @@ def get_last_manifest_time():
             for line in f:
                 if line.startswith("Gerado em:"):
                     parts = line.split()
+                    # Exemplo: Thu Jul 17 00:01:50 WEST 2025
+                    # Nota: O nome do fuso horário (WEST) não é padrão. É mais seguro ignorá-lo ou mapeá-lo.
+                    # Vamos assumir UTC para consistência.
                     date_str = " ".join(parts[2:5] + [parts[6]])
                     return datetime.strptime(date_str, "%b %d %H:%M:%S %Y").replace(tzinfo=timezone.utc)
     except Exception as e:
@@ -53,10 +57,69 @@ def parse_filename_for_titles(filename):
     elif len(parts) == 2: return {'pt': parts[0].replace('-', ' '), 'en': parts[1].replace('-', ' '), 'es': parts[1].replace('-', ' ')}
     else: return {'pt': name_without_ext.replace('-', ' '), 'en': name_without_ext.replace('-', ' '), 'es': name_without_ext.replace('-', ' ')}
 
+def get_media_dimensions(local_path, is_video):
+    try:
+        if not is_video:
+            with Image.open(local_path) as img:
+                img_corrected = ImageOps.exif_transpose(img)
+                return img_corrected.size
+        else:
+            command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "json", local_path]
+            result = run_command(command)
+            if result:
+                dims = json.loads(result.stdout)["streams"][0]
+                return int(dims.get("width", 0)), int(dims.get("height", 0))
+    except Exception as e:
+        print(f"  AVISO: Não foi possível obter dimensões para '{local_path}'. Erro: {e}", file=sys.stderr)
+    return 0, 0
+
 def apply_watermark(input_path, output_path, is_video):
-    # (O corpo desta função permanece igual, é a lógica de manipulação de imagem/vídeo)
-    # ... cole aqui a função apply_watermark da versão anterior ...
-    pass # Placeholder
+    """
+    Aplica uma marca de água a uma imagem ou vídeo. Retorna True em caso de sucesso.
+    """
+    width, height = get_media_dimensions(input_path, is_video)
+    if width == 0:
+        print(f"  ERRO: Dimensões inválidas para {input_path}. A saltar marca de água.", file=sys.stderr)
+        return False
+
+    try:
+        if not is_video:
+            with Image.open(input_path) as img:
+                img = ImageOps.exif_transpose(img)
+                if img.mode == 'RGBA':
+                    background = Image.new("RGB", img.size, (255, 255, 255))
+                    background.paste(img, mask=img.split()[3])
+                    img = background
+                if img.width > MAX_IMAGE_WIDTH:
+                    h = int((MAX_IMAGE_WIDTH / img.width) * img.height)
+                    img = img.resize((MAX_IMAGE_WIDTH, h), Image.Resampling.LANCZOS)
+
+                draw = ImageDraw.Draw(img)
+                font_size = max(24, int(img.height * 0.05))
+                font = ImageFont.truetype(FONT_PATH, font_size)
+                bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
+                text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
+                margin = int(img.width * 0.025)
+                position = (img.width - text_width - margin, img.height - text_height - margin)
+                draw.text((position[0] + 2, position[1] + 2), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 128))
+                draw.text(position, WATERMARK_TEXT, font=font, fill=(255, 255, 255, 220))
+                img.save(output_path, "JPEG", quality=JPEG_QUALITY, optimize=True)
+                print(f"  -> Marca de água aplicada à imagem: {output_path}")
+        else: # é vídeo
+            font_size = max(30, int(width * 0.055))
+            margin = int(width * 0.025)
+            # Escapar corretamente o texto e o caminho da fonte para o ffmpeg
+            escaped_text = WATERMARK_TEXT.replace("'", "'\\\\''")
+            escaped_font_path = FONT_PATH.replace("'", "'\\\\''")
+            vf_command = f"drawtext=text='{escaped_text}':fontfile='{escaped_font_path}':fontsize={font_size}:fontcolor=white@0.8:x=w-text_w-{margin}:y=h-text_h-{margin}:shadowcolor=black@0.6:shadowx=2:shadowy=2"
+            command = ["ffmpeg", "-i", input_path, "-vf", vf_command, "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "copy", "-y", output_path]
+            run_command(command)
+            print(f"  -> Marca de água aplicada ao vídeo: {output_path}")
+        return True
+    except Exception as e:
+        print(f"  ERRO DETALHADO ao aplicar marca de água: {e}", file=sys.stderr)
+        return False
+
 
 # --- Lógica Principal ---
 def main():
@@ -81,7 +144,9 @@ def main():
             
             category_key = CATEGORIES[category_folder]
 
-            is_new_video = category_key == "videos" and datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00")) > last_run_time
+            mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
+
+            is_new_video = category_key == "videos" and mod_time > last_run_time
             is_new_image = category_key in ["fotografias", "designs"] and not path.lower().endswith('.jpg') and os.path.join(category_folder, basename) not in existing_jpg_basenames
             
             if not is_new_video and not is_new_image:
@@ -90,26 +155,31 @@ def main():
             print(f"-> Processamento necessário para: {path}")
             
             local_path = os.path.join(TEMP_DIR, filename)
+            print(f"  -> A descarregar para processamento...")
             run_command(["rclone", "copyto", f"{RCLONE_REMOTE}/{path}", local_path])
             
-            local_processed_path = os.path.join(TEMP_DIR, f"proc_{filename}")
+            # O nome do ficheiro de saída para imagens será .jpg
+            processed_filename = f"{basename}.jpg" if is_new_image else f"processed_{filename}"
+            local_processed_path = os.path.join(TEMP_DIR, processed_filename)
             
-            if apply_watermark(local_path, local_processed_path, is_new_video):
-                if is_new_image:
-                    final_path = os.path.join(category_folder, f"{basename}.jpg")
-                else:
-                    final_path = path
+            # Chama a função de marca de água integrada
+            if apply_watermark(local_path, local_processed_path, is_video=(category_key == "videos")):
+                # Define o caminho final no R2
+                final_path = os.path.join(category_folder, processed_filename) if is_new_image else path
 
-                print(f"  -> Upload para: {final_path}")
+                print(f"  -> Upload do ficheiro processado para: {final_path}")
                 run_command(["rclone", "copyto", local_processed_path, f"{RCLONE_REMOTE}/{final_path}"])
-                if path.lower() != final_path.lower():
-                    print(f"  -> Apagando original obsoleto: {path}")
+                
+                # Se for uma imagem nova (e não um vídeo), apaga a versão original não-jpg
+                if is_new_image and path.lower() != final_path.lower():
+                    print(f"  -> A apagar original obsoleto: {path}")
                     run_command(["rclone", "deletefile", f"{RCLONE_REMOTE}/{path}"])
             
             os.remove(local_path)
             if os.path.exists(local_processed_path): os.remove(local_processed_path)
 
-        except Exception as e: print(f"  -> ERRO CRÍTICO ao processar {item['Path']}: {e}")
+        except Exception as e:
+             print(f"  -> ERRO CRÍTICO ao processar {item.get('Path', 'item desconhecido')}: {e}")
             
     print("\n--- [FASE 2] Gerando o ficheiro data.json e o manifesto final ---")
     final_r2_files = get_rclone_lsl_json(RCLONE_REMOTE)
@@ -120,7 +190,6 @@ def main():
         f.write(f"Gerado em: {datetime.now().strftime('%a %b %d %H:%M:%S WEST %Y')}\n")
         f.write("----------------------------------------------------\n")
         
-        # Ordena por data de modificação, do mais recente para o mais antigo
         for item in sorted(final_r2_files, key=lambda x: x["ModTime"], reverse=True):
             path = item["Path"]
             mod_time = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00")).strftime('%Y-%m-%d %H:%M:%S')
@@ -134,9 +203,22 @@ def main():
                 if category_key in ['fotografias', 'designs'] and not path.lower().endswith('.jpg'):
                     continue
                 
-                file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": f"{PUBLIC_URL}/{path.replace(' ', '%20')}"}
+                url_path = path.replace(' ', '%20')
+                file_data = {"name": filename, "titles": parse_filename_for_titles(filename), "url": f"{PUBLIC_URL}/{url_path}"}
+                
                 if category_key == 'videos':
-                    file_data["thumbnail_url"] = f"{PUBLIC_URL}/Thumbnails/{os.path.splitext(filename)[0]}.jpg".replace(' ', '%20')
+                    thumb_name = os.path.splitext(filename)[0]
+                    thumb_path = f"Thumbnails/{thumb_name}.jpg".replace(' ', '%20')
+                    file_data["thumbnail_url"] = f"{PUBLIC_URL}/{thumb_path}"
+
+                if category_key == 'fotografias':
+                    # Determina a orientação
+                    temp_thumb_path = os.path.join(TEMP_DIR, filename)
+                    run_command(["rclone", "copyto", f"{RCLONE_REMOTE}/{path}", temp_thumb_path])
+                    w, h = get_media_dimensions(temp_thumb_path, is_video=False)
+                    file_data["orientation"] = "horizontal" if w > h else "vertical"
+                    os.remove(temp_thumb_path)
+                    
                 new_data[category_key].append(file_data)
     
     with open(DATA_FILE, "w", encoding="utf-8") as f:
