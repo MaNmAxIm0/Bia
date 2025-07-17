@@ -15,6 +15,10 @@ def generate_manifest():
     """
     print(f"--- Gerando manifesto de ficheiros de '{R2_REMOTE_PATH}' ---")
 
+    # ## CORREÇÃO FINAL ##
+    # A linha anterior 'command = + EXCLUDE_RULES' estava sintaticamente incorreta.
+    # A forma correta é construir a lista de comandos base e depois concatenar
+    # a lista de regras de exclusão usando o operador '+'.
     command = + EXCLUDE_RULES
 
     try:
