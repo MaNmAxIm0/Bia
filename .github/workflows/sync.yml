@@ -1,16 +1,19 @@
 # .github/workflows/sync.yml
 
-name: Processar e Sincronizar Portfólio (Otimizado)
+name: Processar e Sincronizar Portfólio
 
 on:
-  workflow_dispatch:
   push:
     branches:
-      - main
+      - main # Executa em cada push para o branch principal
+  workflow_dispatch: # Permite a execução manual a partir da interface do GitHub
 
 jobs:
-  process-and-sync:
+  sync-and-process:
     runs-on: ubuntu-latest
+    
+    # --- CORREÇÃO: Permissões para o git push ---
+    # Concede ao workflow a permissão para escrever no repositório.
     permissions:
       contents: write
 
@@ -23,31 +26,24 @@ jobs:
         with:
           python-version: '3.10'
 
-      # --- OTIMIZAÇÃO: Caching de dependências do sistema e do Python ---
-      - name: Cache de dependências Apt
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/apt/archives
-          key: ${{ runner.os }}-apt-packages-${{ hashFiles('**/apt-packages.txt') }}
-          enableCrossOsArchive: true
-
-      - name: Cache de dependências Pip
+      - name: Cache para dependências Pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-      - name: Instalar dependências
+      # --- CORREÇÃO: Uso de uma ação dedicada para o cache de Apt ---
+      # Esta ação simplifica o cache de pacotes de sistema e lida com permissões.
+      - name: Instalar e fazer cache de dependências Apt
+        uses: awalsh128/cache-apt-pkgs-action@v1.5.0
+        with:
+          packages: ffmpeg libimage-exiftool-perl
+          version: 1.0 # Mude esta versão para invalidar o cache se os pacotes mudarem
+
+      - name: Instalar dependências Python
         run: |
-          # Lista de pacotes agora num ficheiro para o caching funcionar
-          echo "ffmpeg" > apt-packages.txt
-          echo "libimage-exiftool-perl" >> apt-packages.txt
-          
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends $(cat apt-packages.txt)
-          
-          sudo rm -f /var/cache/apt/archives/lock /var/lib/dpkg/lock*
-          
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
@@ -55,21 +51,31 @@ jobs:
         run: |
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
+          # Usa 'cat << EOF' para escrever o conteúdo do segredo literalmente,
+          # preservando todos os caracteres especiais.
           cat << EOF > ~/.config/rclone/rclone.conf
           ${{ secrets.RCLONE_CONF }}
           EOF
-
+          
       - name: Executar Pipeline Principal
+        # Este passo executa o seu script orquestrador principal.
         run: python3 main.py
 
-      - name: Fazer Commit dos Manifestos e Dados
+      - name: Configurar Git para o bot
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add r2_file_manifest.txt data.json || echo "Nenhum ficheiro novo para adicionar."
+
+      - name: Fazer commit e push dos ficheiros de manifesto
+        run: |
+          # --- CORREÇÃO: Lógica de commit e push robusta ---
+          # Adiciona os ficheiros gerados. Se não existirem, o comando não falha.
+          git add data.json r2_file_manifest.txt || echo "Ficheiros de manifesto não encontrados para adicionar."
+          
+          # Verifica se existem alterações preparadas para commit
           if ! git diff --staged --quiet; then
-            git commit -m "CI: Atualiza manifestos e dados do portfólio"
+            git commit -m "CI: Atualiza data.json e manifesto R2"
             git push
           else
-            echo "Nenhuma alteração nos ficheiros de manifesto para commitar."
+            echo "Nenhuma alteração nos ficheiros de manifesto para fazer commit."
           fi
