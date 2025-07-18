@@ -27,17 +27,16 @@ jobs:
 
       - name: Instalar e configurar Rclone
         env:
-          # CORREÇÃO: Usa o nome exato do seu segredo: rclone.conf
-          RCLONE_CONF_CONTENT: ${{ secrets.rclone_conf }}
+          RCLONE_CONF: ${{ secrets.rclone_conf }}
         run: |
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
-          echo "$RCLONE_CONF_CONTENT" > ~/.config/rclone/rclone.conf
+          echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
 
       - name: Executar o pipeline de processamento
         run: python3 run_processing.py
 
       - name: Sincronizar ficheiros processados para o R2
         run: |
-          # Usa a variável DEST_RCLONE_PATH do config.py (indiretamente, pois o script já correu)
-          rclone sync processed_assets/ R2:bia-portfolio-assets-watermarked --exclude "*.log" -v
+          # CORREÇÃO: Aponta para o bucket de destino correto e exclui ficheiros.log
+          rclone sync processed_assets/ R2:bia-portfolio-assets --exclude "*.log" -v
