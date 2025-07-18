@@ -1,192 +1,190 @@
-import subprocess
-import json
+import os
 import sys
+import json
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageFile, UnidentifiedImageError, ImageDraw, ImageFont
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
+# Permite que o Pillow tente carregar imagens mesmo que estejam truncadas
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 # --- Constantes de Configuração ---
-DRIVE_DIR = Path("./portfolio_source") 
+SOURCE_DIR = Path("./portfolio_source")
 OUTPUT_DIR = Path("./processed_assets")
-FAILED_DIR = Path("./failed_images") 
-WATERMARK_TEXT = "© Beatriz Rodrigues"
-FONT_FILE = Path("./scripts/Montserrat-Medium.ttf") 
+FAILED_DIR = Path("./failed_images")
+MANIFEST_FILE = Path("./r2_manifest.json")
+FONT_FILE = Path("./scripts/Montserrat-Medium.ttf")
 
 # Configurações da Marca de Água de Texto
-WATERMARK_OPACITY = 0.5 # Ajuste conforme necessário (0.0 a 1.0)
+WATERMARK_TEXT = "Portfólio da Bia"
+WATERMARK_OPACITY = 1.0
 FONT_SIZE_RATIO = 0.05
 
-# --- Funções Auxiliares ---
+# Configurações de Imagem
+THUMBNAIL_SIZE = (400, 400)
+IMAGE_QUALITY = 85
+SUPPORTED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp']
+VIDEO_EXTENSIONS = ['.mp4', '.mov', '.avi']
+
 def setup_directories():
-    """Cria os diretórios de saída e falhas se não existirem."""
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    FAILED_DIR.mkdir(parents=True, exist_ok=True)
+    """Cria os diretórios de saída e de falhas se não existirem."""
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    FAILED_DIR.mkdir(exist_ok=True)
 
 def load_manifest():
-    """
-    Carrega o manifesto de ficheiros existentes no R2.
-    Retorna um dicionário com o nome do ficheiro como chave e o hash como valor.
-    """
-    # CORRIGIDO: Usar o nome de ficheiro correto
-    manifest_path = Path("./r2_file_manifest.txt") 
-    manifest = {}
-    if manifest_path.exists():
-        try:
-            with open(manifest_path, 'r', encoding='utf-8') as f:
-                # Assumindo que o r2_file_manifest.txt é um JSON válido
-                data = json.load(f)
-                for item in data:
-                    # Usar o 'Key' que representa o caminho completo no R2
-                    manifest[item['Key']] = item['Hash'] # Ou outro identificador único
-            print(f"Manifesto carregado com {len(manifest)} entradas.")
-        except json.JSONDecodeError:
-            print(f"AVISO: O ficheiro de manifesto '{manifest_path}' não é um JSON válido. Será ignorado.")
-        except Exception as e:
-            print(f"AVISO: Erro ao carregar o manifesto '{manifest_path}': {e}. Será ignorado.")
-    else:
-        print(f"AVISO: Ficheiro de manifesto '{manifest_path}' não encontrado. A processar todos os ficheiros.")
-    return manifest
-
-def calculate_file_hash(file_path: Path):
-    """Calcula um hash simples do ficheiro para comparação."""
-    # Para simplificar, vamos usar o tamanho do ficheiro e a data de modificação
-    # Para uma verificação mais robusta, pode usar hashlib.md5
-    return f"{file_path.stat().st_size}-{file_path.stat().st_mtime_ns}"
-
-def add_watermark(image_path: Path, output_path: Path):
-    """Adiciona uma marca de água de texto a uma imagem."""
+    """Carrega o manifesto de ficheiros existentes no R2."""
+    if not MANIFEST_FILE.exists():
+        print(f"AVISO: Ficheiro de manifesto '{MANIFEST_FILE.name}' não encontrado. A processar todos os ficheiros.")
+        return {}
     try:
-        img = Image.open(image_path).convert("RGBA")
-        draw = ImageDraw.Draw(img)
+        with open(MANIFEST_FILE, 'r') as f:
+            manifest_data = json.load(f)
+            return {item['Path']: item for item in manifest_data}
+    except (json.JSONDecodeError, TypeError):
+        print(f"AVISO: O ficheiro de manifesto '{MANIFEST_FILE.name}' não é um JSON válido. Será ignorado.")
+        return {}
 
-        img_width, img_height = img.size
-        
-        # Tenta carregar a fonte, se falhar, usa a fonte padrão
-        try:
-            font_size = int(img_height * FONT_SIZE_RATIO)
-            font = ImageFont.truetype(str(FONT_FILE), font_size)
-        except IOError:
-            print(f"AVISO: Fonte '{FONT_FILE}' não encontrada. Usando fonte padrão.")
-            font = ImageFont.load_default()
-            font_size = int(img_height * FONT_SIZE_RATIO) # Ajusta o tamanho para a fonte padrão
+# --- FUNÇÃO ADICIONADA ---
+def open_image_safely(file_path: Path):
+    """Abre uma imagem de forma segura, retornando None se falhar."""
+    try:
+        img = Image.open(file_path)
+        img.load()  # Força a leitura dos dados da imagem para detetar corrupção
+        return img
+    except (IOError, UnidentifiedImageError):
+        return None
 
-        # Medir o tamanho do texto para posicionamento
-        # getbbox() é mais robusto que getsize() para versões recentes do Pillow
-        bbox = draw.textbbox((0,0), WATERMARK_TEXT, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
+def apply_text_watermark(base_image: Image, text: str):
+    """Aplica uma marca de água de texto na imagem."""
+    if base_image.mode != 'RGBA':
+        base_image = base_image.convert('RGBA')
 
-        # Posição central inferior
-        x = (img_width - text_width) / 2
-        y = img_height - text_height - (img_height * 0.02) # Pequena margem inferior
+    txt_layer = Image.new('RGBA', base_image.size, (255, 255, 255, 0))
+    draw = ImageDraw.Draw(txt_layer)
 
-        # Cor da marca de água (branco com opacidade)
-        # O valor 255 * WATERMARK_OPACITY é o canal alfa (transparência)
-        fill_color = (255, 255, 255, int(255 * WATERMARK_OPACITY))
+    font_size = int(base_image.width * FONT_SIZE_RATIO)
+    try:
+        font = ImageFont.truetype(str(FONT_FILE), font_size)
+    except IOError:
+        print(f"AVISO: Fonte '{FONT_FILE.name}' não encontrada. A usar fonte padrão.")
+        font = ImageFont.load_default()
 
-        draw.text((x, y), WATERMARK_TEXT, font=font, fill=fill_color)
+    # Correção no cálculo da bounding box do texto
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    margin = int(base_image.width * 0.05)
+    position = (base_image.width - text_width - margin, base_image.height - text_height - margin)
 
-        # Salvar a imagem processada
-        img.save(output_path)
-        return True
-    except Exception as e:
-        print(f"Erro ao adicionar marca de água a {image_path}: {e}")
-        return False
+    fill_color = (255, 255, 255, int(255 * WATERMARK_OPACITY))
+    draw.text(position, text, font=font, fill=fill_color)
+
+    return Image.alpha_composite(base_image, txt_layer)
 
 def process_single_file(file_path: Path, r2_manifest: dict):
-    """Processa um único ficheiro: aplica marca de água e verifica se precisa de atualização."""
-    relative_path = file_path.relative_to(DRIVE_DIR)
+    """Processa um único ficheiro: verifica, aplica marca de água e cria thumbnail."""
+    relative_path = file_path.relative_to(SOURCE_DIR)
     output_path = OUTPUT_DIR / relative_path
-
-    # CORRIGIDO: Criar o diretório pai antes de salvar o ficheiro
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Verifica se o ficheiro já existe no R2 e se é o mesmo
-    r2_key = str(relative_path).replace('\\', '/') # Chave no R2 usa barras normais
-    current_file_hash = calculate_file_hash(file_path)
+    local_size = file_path.stat().st_size
+    remote_file_info = r2_manifest.get(str(relative_path))
 
-    if r2_key in r2_manifest and r2_manifest[r2_key] == current_file_hash:
-        # print(f"DEBUG: Ficheiro {r2_key} inalterado. Ignorando.")
-        return {'status': 'skipped', 'path': file_path}
+    if remote_file_info and local_size == remote_file_info.get('Size'):
+        return (str(relative_path), "SKIPPED", None)
 
-    # Processa apenas imagens por enquanto
-    if file_path.suffix.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
-        if add_watermark(file_path, output_path):
-            return {'status': 'success', 'path': file_path}
+    try:
+        file_ext = file_path.suffix.lower()
+
+        if file_ext in SUPPORTED_IMAGE_EXTENSIONS:
+            base_image = open_image_safely(file_path)
+            if not base_image:
+                raise UnidentifiedImageError("Formato de imagem não identificado ou ficheiro corrompido")
+
+            final_image_rgba = apply_text_watermark(base_image, WATERMARK_TEXT)
+            
+            final_image_rgb = final_image_rgba.convert("RGB")
+
+            final_image_rgb.save(output_path, format='JPEG', quality=IMAGE_QUALITY, optimize=True, progressive=True)
+
+            thumbnail_path = OUTPUT_DIR / "Thumbnails" / relative_path
+            thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
+            thumbnail_image = final_image_rgb.copy()
+            thumbnail_image.thumbnail(THUMBNAIL_SIZE, Image.Resampling.LANCZOS)
+            thumbnail_image.save(thumbnail_path, format='JPEG', quality=80)
+
+            return (str(relative_path), "SUCCESS", None)
+
+        elif file_ext in VIDEO_EXTENSIONS or file_ext == '.pdf':
+            # Em vez de os.link, usamos os.symlink para compatibilidade ou shutil.copy2 para uma cópia real
+            # shutil.copy2(file_path, output_path) # Descomente se preferir copiar
+            if output_path.exists():
+                output_path.unlink()
+            os.link(file_path, output_path) # Hard link é mais eficiente se estiver no mesmo sistema de ficheiros
+            return (str(relative_path), "COPIED", None)
         else:
-            # Mover para a pasta de falhas se a marca de água falhar
-            failed_path = FAILED_DIR / relative_path.name
-            file_path.rename(failed_path) # Move o original para falhas
-            return {'status': 'failed', 'path': file_path, 'error': 'Watermark failed'}
-    else:
-        # Para outros tipos de ficheiro, apenas copia
-        try:
-            # Certifica-se de que o diretório de destino existe para ficheiros não-imagem
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            subprocess.run(['cp', str(file_path), str(output_path)], check=True)
-            return {'status': 'success', 'path': file_path}
-        except Exception as e:
-            print(f"Erro ao copiar ficheiro {file_path}: {e}")
-            failed_path = FAILED_DIR / relative_path.name
-            file_path.rename(failed_path) # Move o original para falhas
-            return {'status': 'failed', 'path': file_path, 'error': f'Copy failed: {e}'}
+            return (str(relative_path), "IGNORED_TYPE", None)
+
+    except Exception as e:
+        return (str(relative_path), "FAILURE", str(e))
 
 def main():
-    """Função principal que orquestra o processamento."""
+    """Função principal que orquestra todo o processo."""
     setup_directories()
-    
-    # CORRIGIDO: Carregar o manifesto uma única vez no início
+    print("--- Iniciando o Processamento de Ativos ---")
+
     r2_manifest = load_manifest()
     
-    # Encontra todos os ficheiros no diretório de origem, incluindo subpastas
-    files_to_process = [p for p in DRIVE_DIR.rglob('*') if p.is_file()]
-
-    if not files_to_process:
-        print("Nenhum ficheiro encontrado para processar.")
-        return
-
-    print(f"Encontrados {len(files_to_process)} ficheiros para processar.")
-    
+    # --- CORREÇÃO ---
+    # Inicializa as variáveis com os valores corretos
+    all_files = [p for p in SOURCE_DIR.rglob('*') if p.is_file()]
     success_log = []
     failure_log = []
     skipped_count = 0
 
-    # Usar ThreadPoolExecutor para processamento paralelo
     with ThreadPoolExecutor() as executor:
-        # Mapeia cada ficheiro para a função de processamento
-        # Passa o r2_manifest para cada chamada de process_single_file
-        futures = {executor.submit(process_single_file, file_path, r2_manifest): file_path for file_path in files_to_process}
-        
-        # Barra de progresso para acompanhar o processamento
-        progress_bar = tqdm(as_completed(futures), total=len(files_to_process), desc="Processando Ativos", unit="file")
+        futures = {executor.submit(process_single_file, file_path, r2_manifest): file_path for file_path in all_files}
+        progress_bar = tqdm(as_completed(futures), total=len(all_files), desc="Processando Ativos", unit="file")
 
         for future in progress_bar:
-            result = future.result()
-            if result['status'] == 'success':
-                success_log.append(str(result['path']))
-            elif result['status'] == 'failed':
-                failure_log.append(f"{result['path']} - {result['error']}")
-            elif result['status'] == 'skipped':
-                skipped_count += 1
-            
-            progress_bar.set_postfix(success=len(success_log), failed=len(failure_log), skipped=skipped_count)
+            try:
+                relative_path, status, error_msg = future.result()
+                if status == "SUCCESS" or status == "COPIED":
+                    success_log.append(f"{relative_path}: {status}")
+                elif status == "SKIPPED":
+                    skipped_count += 1
+                else: # FAILURE ou IGNORED_TYPE
+                    error_details = f"{relative_path}: {status}"
+                    if error_msg:
+                        error_details += f" (Detalhe: {error_msg})"
+                    failure_log.append(error_details)
+                    
+                    original_failed_path = SOURCE_DIR / Path(relative_path)
+                    if original_failed_path.exists():
+                        # Garante que o destino não existe antes de mover
+                        failed_dest = FAILED_DIR / original_failed_path.name
+                        if failed_dest.exists():
+                            os.remove(failed_dest)
+                        os.rename(original_failed_path, failed_dest)
+            except Exception as exc:
+                # Captura exceções inesperadas do próprio future
+                file_path = futures[future]
+                failure_log.append(f"{file_path.relative_to(SOURCE_DIR)}: FATAL_ERROR ({exc})")
 
-    print(f"\nProcessamento concluído.")
+
+    print("\n--- Processamento Concluído ---")
     print(f"Total de ficheiros processados com sucesso: {len(success_log)}")
     print(f"Total de ficheiros ignorados (inalterados): {skipped_count}")
     print(f"Total de falhas: {len(failure_log)}")
-
-    # CORRIGIDO: Salvar logs na raiz do projeto para serem apanhados pelo upload-artifact
-    with open("./success.log", "w", encoding='utf-8') as f:
+    
+    with open(OUTPUT_DIR / "success.log", "w") as f:
         f.write("\n".join(success_log))
-    with open("./failure.log", "w", encoding='utf-8') as f:
-        f.write("\n".join(failure_log))
     
     if failure_log:
-        print(f"Verifique o ficheiro 'failure.log' para detalhes das falhas.")
-    else:
-        print("Nenhuma falha registada.")
+        print("\nVerifique o artefacto 'failed-images' para os ficheiros com falha.")
+        with open(OUTPUT_DIR / "failure.log", "w") as f:
+            f.write("\n".join(failure_log))
 
 if __name__ == "__main__":
     main()
