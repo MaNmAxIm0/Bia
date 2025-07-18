@@ -1,6 +1,6 @@
 # .github/workflows/sync.yml
 
-name: Processar e Sincronizar Portfólio
+name: Processar e Sincronizar Portfólio (Otimizado)
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
@@ -23,6 +23,13 @@ jobs:
         with:
           python-version: '3.10'
 
+      # --- OTIMIZAÇÃO: Caching de dependências do sistema e do Python ---
+      - name: Cache de dependências Apt
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-packages-${{ hashFiles('**/apt-packages.txt') }}
+
       - name: Cache de dependências Pip
         uses: actions/cache@v4
         with:
@@ -31,8 +38,13 @@ jobs:
 
       - name: Instalar dependências
         run: |
+          # Lista de pacotes agora num ficheiro para o caching funcionar
+          echo "ffmpeg" > apt-packages.txt
+          echo "libimage-exiftool-perl" >> apt-packages.txt
+          
           sudo apt-get update
-          sudo apt-get install -y ffmpeg libimage-exiftool-perl
+          sudo apt-get install -y --no-install-recommends $(cat apt-packages.txt)
+          
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
@@ -47,13 +59,11 @@ jobs:
       - name: Executar Pipeline Principal
         run: python3 main.py
 
-      # --- AÇÃO 6: Commit e Push dos ficheiros gerados ---
       - name: Fazer Commit dos Manifestos e Dados
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add r2_file_manifest.txt data.json || echo "Nenhum ficheiro novo para adicionar."
-          # Commita apenas se houver alterações
           if ! git diff --staged --quiet; then
             git commit -m "CI: Atualiza manifestos e dados do portfólio"
             git push
