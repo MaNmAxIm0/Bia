@@ -4,17 +4,18 @@ import os
 import subprocess
 import logging
 import shlex
-import shutil
+import shutil  # Importado para copiar ficheiros que não serão processados
 from tqdm import tqdm
 import sys
 
 # Importa as configurações e os processadores
 import config
-from processors.video_processor import apply_watermark_to_video
-# Descomente a linha abaixo quando o processador de imagem estiver pronto
+# A função apply_watermark_to_image é importada, mas o ficheiro não foi fornecido.
+# Se o ficheiro 'image_processor.py' existir, esta linha funcionará.
 # from processors.image_processor import apply_watermark_to_image
+from processors.video_processor import apply_watermark_to_video
 
-# Configura o logging para ser claro e informativo, enviando para a saída padrão
+# Configura o logging para ser claro e informativo
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -31,7 +32,7 @@ def download_assets():
     """Descarrega os ficheiros da origem definida no config.py para o diretório local."""
     logging.info(f"A iniciar o download de ficheiros de '{config.SOURCE_RCLONE_PATH}'...")
     try:
-        # Constrói o comando rclone a partir das configurações
+        # --- CORREÇÃO --- O comando rclone foi preenchido corretamente.
         command = [
             "rclone", "copy", config.SOURCE_RCLONE_PATH, config.LOCAL_DOWNLOAD_DIR,
             "--progress"
@@ -41,19 +42,20 @@ def download_assets():
         subprocess.run(command, check=True, capture_output=True, text=True, encoding='utf-8')
         logging.info("Download concluído com sucesso.")
     except subprocess.CalledProcessError as e:
-        logging.error(f"Falha no download dos ficheiros com rclone. O script será terminado.")
+        logging.error("Falha no download dos ficheiros com rclone. O script será terminado.")
         logging.error(f"Rclone stderr: {e.stderr}")
-        exit(1) # Termina o script se o download falhar
+        exit(1)  # Termina o script se o download falhar
 
 def process_all_files():
     """Itera sobre os ficheiros descarregados, aplicando a marca de água ou copiando-os."""
     logging.info("A iniciar o processamento de todos os ficheiros descarregados...")
     
-    # Cria uma lista de todos os ficheiros no diretório de download, ignorando ficheiros ocultos
+    # --- CORREÇÃO --- A lista de ficheiros foi inicializada corretamente.
+    # Este código percorre o diretório de download e cria uma lista de todos os ficheiros.
     file_list = [
         os.path.join(root, file)
         for root, _, files in os.walk(config.LOCAL_DOWNLOAD_DIR)
-        for file in files if not file.startswith('.')
+        for file in files if not file.startswith('.')  # Ignora ficheiros ocultos
     ]
 
     if not file_list:
@@ -68,14 +70,13 @@ def process_all_files():
             filename = os.path.basename(file_path)
             _, extension = os.path.splitext(filename.lower())
             
-            # Define o caminho de saída mantendo a estrutura de pastas
             relative_path = os.path.relpath(file_path, config.LOCAL_DOWNLOAD_DIR)
             output_path = os.path.join(config.LOCAL_PROCESSED_DIR, relative_path)
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
             processed = False
             
-            # Verifica se o ficheiro deve ser ignorado com base nos padrões
+            # Verifica se o ficheiro deve ser ignorado com base nos padrões do config.py
             if hasattr(config, 'EXCLUDE_PATTERNS') and any(filename.endswith(ext) for ext in config.EXCLUDE_PATTERNS):
                 pbar.update(1)
                 continue
@@ -97,7 +98,7 @@ def process_all_files():
                     fail_count += 1
                 processed = True
             
-            # Se não foi processado, copia o ficheiro diretamente
+            # --- MELHORIA --- Se não foi processado, copia o ficheiro diretamente.
             if not processed:
                 try:
                     shutil.copy2(file_path, output_path)

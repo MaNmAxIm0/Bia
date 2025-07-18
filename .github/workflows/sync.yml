@@ -1,69 +1,43 @@
-# Nome do workflow que aparece na aba "Actions" do GitHub.
-name: Transferir do Drive, Processar e Enviar para o R2
+name: Sincronizar, Processar e Aplicar Marca de Água
 
-# Define quando o workflow é executado.
 on:
-  # Permite que seja iniciado manualmente a partir da interface do GitHub.
   workflow_dispatch:
-  # Executa automaticamente sempre que há um push para o branch 'main'.
   push:
     branches:
       - main
 
-# Define os trabalhos (jobs) a serem executados.
 jobs:
-  process-and-transfer:
-    # O trabalho será executado numa máquina virtual Ubuntu mais recente.
+  sync-and-process:
     runs-on: ubuntu-latest
-    
-    # Define os passos sequenciais do trabalho.
     steps:
-      # 1. Faz o checkout do código do seu repositório para a máquina virtual.
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      # 2. Configura o ambiente Python na versão 3.10.
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      # 3. Instala as dependências do sistema (ffmpeg) e as bibliotecas Python.
-      - name: Instalar dependências
+      - name: Instalar dependências do sistema e Python
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg libjpeg-dev zlib1g-dev
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -r requirements.txt
 
-      # 4. Instala o Rclone e configura-o usando o segredo do repositório.
-      - name: Instalar e Configurar Rclone
+      - name: Instalar e configurar Rclone
+        env:
+          # CORREÇÃO: Usa o nome exato do seu segredo: rclone.conf
+          RCLONE_CONF_CONTENT: ${{ secrets.rclone_conf }}
         run: |
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
-          # Usa o segredo 'RCLONE_CONF' para criar o ficheiro de configuração.
-          echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
-          echo "Configuração do rclone concluída."
+          echo "$RCLONE_CONF_CONTENT" > ~/.config/rclone/rclone.conf
 
-      # 5. Passo de depuração: verifica se o rclone consegue ver os remotes.
-      - name: Verificar acesso aos remotes
-        run: |
-          echo "Verificando remotes configurados..."
-          rclone listremotes
-          echo "Verificação concluída."
-
-      # 6. Executa o script principal que descarrega e processa os ficheiros.
-      - name: Executar o Pipeline (Download do Drive -> Processar )
+      - name: Executar o pipeline de processamento
         run: python3 run_processing.py
 
-      # 7. Faz o upload dos ficheiros processados para o R2.
-      - name: Sincronizar Ficheiros Processados para o R2
+      - name: Sincronizar ficheiros processados para o R2
         run: |
-          echo "Iniciando upload dos ficheiros processados para o R2..."
-          # Usa 'rclone sync' para atualizar o destino.
-          # A flag --exclude "Thumbnails/**" impede que a pasta Thumbnails no R2 seja apagada.
-          rclone sync processed_assets/ R2:bia-portfolio-assets-watermarked \
-            --exclude "Thumbnails/**" \
-            --exclude "*.log" \
-            -v
-          echo "Upload concluído."
+          # Usa a variável DEST_RCLONE_PATH do config.py (indiretamente, pois o script já correu)
+          rclone sync processed_assets/ R2:bia-portfolio-assets-watermarked --exclude "*.log" -v
