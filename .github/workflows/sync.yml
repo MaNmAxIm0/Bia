@@ -31,7 +31,7 @@ jobs:
         run: |
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
-          echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
+          echo "${{ secrets.RCLONE_CONFIG_R2 }}" > ~/.config/rclone/rclone.conf
 
       - name: Executar o pipeline de processamento
         run: python3 run_processing.py
