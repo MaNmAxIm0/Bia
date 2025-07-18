@@ -5,13 +5,12 @@ name: Processar e Sincronizar Portfólio
 on:
   push:
     branches:
-      - main # Executa em cada push para o branch principal
-  workflow_dispatch: # Permite a execução manual a partir da interface do GitHub
+      - main
+  workflow_dispatch:
 
 jobs:
   sync-and-process:
     runs-on: ubuntu-latest
-    
     permissions:
       contents: write
 
@@ -24,24 +23,23 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Cache para dependências Pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Instalar e fazer cache de dependências Apt
         uses: awalsh128/cache-apt-pkgs-action@v1.5.0
         with:
           packages: ffmpeg libimage-exiftool-perl
           version: 1.0
 
+      - name: Cache para dependências Pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
       - name: Instalar dependências Python
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install opencv-python-headless
 
       - name: Instalar e Configurar Rclone
         run: |
@@ -54,27 +52,37 @@ jobs:
       - name: Executar Pipeline Principal
         run: python3 main.py
 
-      # --- CORREÇÃO: Adicionar passo para copiar os manifestos para o R2 ---
-      - name: Copiar ficheiros de manifesto para o R2
+      # --- CORREÇÃO DE LÓGICA ---
+      # PASSO 1: Fazer o upload de TODOS os ficheiros processados (imagens, vídeos, thumbnails )
+      - name: Sincronizar Ativos Processados para o R2
         run: |
-          echo "A copiar data.json e r2_file_manifest.txt para o R2..."
-          # O comando 'copyto' copia ficheiros individuais para o destino.
-          # A flag --no-check-dest impede que o rclone verifique se o ficheiro já existe,
-          # simplesmente sobrescrevendo-o, o que é mais rápido.
+          echo "A sincronizar todos os ativos processados para o R2..."
+          rclone sync processed_assets/ R2:bia-portfolio-assets --progress -v
+
+      # PASSO 2: Gerar o manifesto DEPOIS do upload estar completo
+      - name: Gerar Manifesto de Ficheiros do R2
+        run: |
+          echo "A gerar o manifesto de ficheiros a partir do R2..."
+          # O rclone_handler.py tem a função para isto, mas podemos chamá-la aqui
+          # para garantir a ordem. Ou, mais simples, executar o comando diretamente.
+          rclone lsf -R R2:bia-portfolio-assets > r2_file_manifest.txt
+
+      # PASSO 3: Copiar os ficheiros de dados e manifesto para a raiz do R2
+      - name: Copiar data.json e Manifesto para a Raiz do R2
+        run: |
+          echo "A copiar data.json e r2_file_manifest.txt para a raiz do R2..."
           rclone copyto data.json R2:bia-portfolio-assets/data.json --no-check-dest -v
           rclone copyto r2_file_manifest.txt R2:bia-portfolio-assets/r2_file_manifest.txt --no-check-dest -v
 
-      - name: Configurar Git para o bot
+      # PASSO 4: Fazer o commit dos ficheiros para o repositório Git
+      - name: Fazer Commit e Push dos Ficheiros de Manifesto para o Git
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Fazer commit e push dos ficheiros de manifesto
-        run: |
-          git add data.json r2_file_manifest.txt || echo "Nenhum ficheiro novo para adicionar."
+          git add data.json r2_file_manifest.txt || echo "Nenhum ficheiro de manifesto para adicionar."
           
           if ! git diff --staged --quiet; then
-            git commit -m "CI: Atualiza data.json e manifesto R2"
+            git commit -m "CI: Atualiza data.json e manifesto R2 [skip ci]"
             git push
           else
             echo "Nenhuma alteração nos ficheiros de manifesto para fazer commit."

@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from tqdm import tqdm
 import config
+import os
 from processors import image_processor, video_processor
 from utils import rclone_handler
 import shutil
@@ -17,11 +18,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - 
 def get_asset_dimensions(file_path: Path) -> tuple:
     """Obtém as dimensões (largura, altura) de um ficheiro de imagem ou vídeo."""
     try:
-        # Primeiro, tenta abrir como imagem, que é mais rápido
         with Image.open(file_path) as img:
             return img.size
     except Exception:
-        # Se falhar, tenta como vídeo
         try:
             cmd = [
                 'ffprobe', '-v', 'error', '-select_streams', 'v:0',
@@ -29,9 +28,7 @@ def get_asset_dimensions(file_path: Path) -> tuple:
             ]
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             video_data = json.loads(result.stdout)
-            width = video_data['streams'][0]['width']
-            height = video_data['streams'][0]['height']
-            return width, height
+            return video_data['streams'][0]['width'], video_data['streams'][0]['height']
         except Exception as e:
             logging.warning(f"Não foi possível obter as dimensões para {file_path.name}: {e}")
     return None, None
@@ -73,7 +70,6 @@ def generate_structured_json(processed_files: list):
             "url": full_url
         }
         
-        # Adiciona a orientação e o URL do thumbnail
         width, height = get_asset_dimensions(local_path)
         if width and height:
             asset_data["orientation"] = "horizontal" if width >= height else "vertical"
@@ -93,19 +89,24 @@ def generate_structured_json(processed_files: list):
 
 def main():
     """Orquestra todo o pipeline de processamento de média."""
-    logging.info("--- INÍCIO DO PIPELINE DE PROCESSAMENTO INCREMENTAL ---")
+    logging.info("--- INÍCIO DO PIPELINE DE PROCESSAMENTO ---")
     
     config.LOCAL_ASSETS_DIR.mkdir(exist_ok=True)
     config.PROCESSED_ASSETS_DIR.mkdir(exist_ok=True)
     (config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR).mkdir(exist_ok=True)
     
-    r2_manifest = rclone_handler.get_r2_manifest_as_dict()
-    rclone_handler.download_changed_assets(r2_manifest)
+    # --- CORREÇÃO: Chama a função de download simplificada ---
+    rclone_handler.download_all_assets()
 
-    files_to_process = [p for p in config.LOCAL_ASSETS_DIR.rglob('*') if p.is_file()]
+    # --- CORREÇÃO: Lógica de descoberta de ficheiros mais explícita ---
+    files_to_process = []
+    for root, _, files in os.walk(config.LOCAL_ASSETS_DIR):
+        for file in files:
+            if not file.startswith('.'): # Ignora ficheiros ocultos como .DS_Store
+                files_to_process.append(Path(root) / file)
+
     if not files_to_process:
-        logging.info("Nenhum ficheiro para processar nesta execução.")
-        rclone_handler.generate_r2_manifest_file()
+        logging.warning("Nenhum ficheiro encontrado para processar após o download.")
         return
 
     logging.info(f"Iniciando o processamento de {len(files_to_process)} ficheiros...")
