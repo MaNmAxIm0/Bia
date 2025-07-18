@@ -12,8 +12,6 @@ jobs:
   sync-and-process:
     runs-on: ubuntu-latest
     
-    # --- CORREÇÃO: Permissões para o git push ---
-    # Concede ao workflow a permissão para escrever no repositório.
     permissions:
       contents: write
 
@@ -34,13 +32,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      # --- CORREÇÃO: Uso de uma ação dedicada para o cache de Apt ---
-      # Esta ação simplifica o cache de pacotes de sistema e lida com permissões.
       - name: Instalar e fazer cache de dependências Apt
         uses: awalsh128/cache-apt-pkgs-action@v1.5.0
         with:
           packages: ffmpeg libimage-exiftool-perl
-          version: 1.0 # Mude esta versão para invalidar o cache se os pacotes mudarem
+          version: 1.0
 
       - name: Instalar dependências Python
         run: |
@@ -51,15 +47,22 @@ jobs:
         run: |
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
-          # Usa 'cat << EOF' para escrever o conteúdo do segredo literalmente,
-          # preservando todos os caracteres especiais.
           cat << EOF > ~/.config/rclone/rclone.conf
           ${{ secrets.RCLONE_CONF }}
           EOF
           
       - name: Executar Pipeline Principal
-        # Este passo executa o seu script orquestrador principal.
         run: python3 main.py
+
+      # --- CORREÇÃO: Adicionar passo para copiar os manifestos para o R2 ---
+      - name: Copiar ficheiros de manifesto para o R2
+        run: |
+          echo "A copiar data.json e r2_file_manifest.txt para o R2..."
+          # O comando 'copyto' copia ficheiros individuais para o destino.
+          # A flag --no-check-dest impede que o rclone verifique se o ficheiro já existe,
+          # simplesmente sobrescrevendo-o, o que é mais rápido.
+          rclone copyto data.json R2:bia-portfolio-assets/data.json --no-check-dest -v
+          rclone copyto r2_file_manifest.txt R2:bia-portfolio-assets/r2_file_manifest.txt --no-check-dest -v
 
       - name: Configurar Git para o bot
         run: |
@@ -68,11 +71,8 @@ jobs:
 
       - name: Fazer commit e push dos ficheiros de manifesto
         run: |
-          # --- CORREÇÃO: Lógica de commit e push robusta ---
-          # Adiciona os ficheiros gerados. Se não existirem, o comando não falha.
-          git add data.json r2_file_manifest.txt || echo "Ficheiros de manifesto não encontrados para adicionar."
+          git add data.json r2_file_manifest.txt || echo "Nenhum ficheiro novo para adicionar."
           
-          # Verifica se existem alterações preparadas para commit
           if ! git diff --staged --quiet; then
             git commit -m "CI: Atualiza data.json e manifesto R2"
             git push

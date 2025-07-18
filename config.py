@@ -5,14 +5,12 @@ from pathlib import Path
 # --- Caminhos e Remotes ---
 DRIVE_REMOTE_PATH = "Drive:Portfólio Bia"
 R2_REMOTE_PATH = "R2:bia-portfolio-assets"
-R2_PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev" # Exemplo, use o seu URL real
+R2_PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev" # URL PÚBLICO DO SEU BUCKET
 
 # --- Diretórios Locais e de Destino ---
 LOCAL_ASSETS_DIR = Path("local_assets" )
 PROCESSED_ASSETS_DIR = Path("processed_assets")
-
-# --- CORREÇÃO: Adicionar a variável em falta ---
-THUMBNAIL_DIR = Path("Thumbnails") # Define o nome da pasta para os thumbnails
+THUMBNAIL_DIR = Path("Thumbnails") # Nome da pasta para os thumbnails
 
 # --- Geração de Ficheiros ---
 JSON_OUTPUT_FILE = Path("data.json")
