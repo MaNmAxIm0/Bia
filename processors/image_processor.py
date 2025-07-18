@@ -25,7 +25,7 @@ def correct_image_orientation(img: Image.Image) -> Image.Image:
     return img
 
 def apply_watermark(image: Image.Image) -> Image.Image:
-    """Aplica uma marca de água com tamanho proporcional à largura da imagem."""
+    """Aplica uma marca de água com sombra para melhor legibilidade."""
     if image.mode != 'RGBA':
         image = image.convert('RGBA')
 
@@ -50,7 +50,18 @@ def apply_watermark(image: Image.Image) -> Image.Image:
     x = image.width - text_width - margin
     y = image.height - text_height - margin
     
-    # Desenhar o texto na camada
+    # --- ATUALIZADO: Adicionar sombra ---
+    # 1. Definir a posição e cor da sombra
+    shadow_offset = int(font_size * 0.05) # Deslocamento de 5% do tamanho da fonte
+    shadow_x = x + shadow_offset
+    shadow_y = y + shadow_offset
+    # Sombra preta com uma opacidade ligeiramente inferior à do texto principal
+    shadow_color = (0, 0, 0, int(config.WATERMARK_OPACITY * 0.8)) 
+
+    # 2. Desenhar a sombra
+    draw.text((shadow_x, shadow_y), config.WATERMARK_TEXT, font=font, fill=shadow_color)
+
+    # 3. Desenhar o texto principal por cima da sombra
     fill_color = (*config.WATERMARK_COLOR_RGB, config.WATERMARK_OPACITY)
     draw.text((x, y), config.WATERMARK_TEXT, font=font, fill=fill_color)
     

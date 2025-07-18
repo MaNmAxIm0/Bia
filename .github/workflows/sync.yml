@@ -26,7 +26,6 @@ jobs:
       - name: Instalar e fazer cache de dependências Apt
         uses: awalsh128/cache-apt-pkgs-action@v1.5.0
         with:
-          # --- ATUALIZADO: Adicionado libblas3 para corrigir erro do FFmpeg ---
           packages: ffmpeg libimage-exiftool-perl libblas3
           version: 1.0
 
@@ -35,6 +34,17 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache para Ativos Processados
+        id: processed-assets-cache
+        uses: actions/cache@v4
+        with:
+          path: processed_assets
+          key: ${{ runner.os }}-processed-assets-${{ hashFiles('**/r2_file_manifest.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-processed-assets-
 
       - name: Instalar dependências Python
         run: |
@@ -53,20 +63,26 @@ jobs:
       - name: Executar Pipeline Principal
         run: python3 main.py
 
-      # --- ATUALIZADO: Sincroniza para o R2, espelhando adições, alterações e eliminações ---
-      - name: Sincronizar Ativos Processados para o R2
+      # --- ATUALIZADO: Lógica de Sincronização em Dois Passos ---
+
+      - name: Passo 1 - Sincronizar Ativos Principais (excluindo Thumbnails )
         run: |
-          echo "A sincronizar todos os ativos processados para o R2 (incluindo eliminações )..."
-          # O comando 'sync' garante que o R2 é um espelho exato da pasta 'processed_assets'.
-          # A flag '--track-renames' otimiza a operação para ficheiros renomeados.
-          rclone sync processed_assets/ R2:bia-portfolio-assets --progress -v --track-renames
+          echo "A sincronizar ativos principais (Vídeos, Fotografias, etc.) para o R2..."
+          rclone sync processed_assets/ R2:bia-portfolio-assets \
+            --exclude "/Thumbnails/**" \
+            --progress -v --track-renames
+
+      - name: Passo 2 - Sincronizar Apenas as Thumbnails para a Raiz
+        run: |
+          echo "A sincronizar Thumbnails para a pasta 'Thumbnails' na raiz do R2..."
+          # Sincroniza o conteúdo de 'processed_assets/Thumbnails' para 'R2:bia-portfolio-assets/Thumbnails'
+          rclone sync processed_assets/Thumbnails/ R2:bia-portfolio-assets/Thumbnails \
+            --progress -v --track-renames
 
       - name: Gerar Manifesto de Ficheiros do R2
         run: |
           echo "A gerar o manifesto de ficheiros a partir do R2..."
           rclone lsf -R R2:bia-portfolio-assets > r2_file_manifest.txt
-
-      # --- ATUALIZADO: O passo de cópia para o R2 foi removido ---
 
       - name: Fazer Commit e Push dos Ficheiros de Manifesto para o Git
         run: |

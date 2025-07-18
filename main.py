@@ -11,7 +11,7 @@ import shutil
 import sys
 import subprocess
 from PIL import Image
-import os # <-- CORREÇÃO: Importação do módulo 'os'
+import os
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
 
@@ -70,7 +70,6 @@ def generate_structured_json(processed_files: list):
             "url": full_url
         }
         
-        # --- ATUALIZADO: Só obter dimensões para imagens e vídeos ---
         file_ext = relative_path.suffix.lower()
         is_media_file = file_ext in config.IMAGE_EXTENSIONS or file_ext in config.VIDEO_EXTENSIONS
 
@@ -98,7 +97,6 @@ def main():
     
     config.LOCAL_ASSETS_DIR.mkdir(exist_ok=True)
     config.PROCESSED_ASSETS_DIR.mkdir(exist_ok=True)
-    (config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR).mkdir(exist_ok=True)
     
     rclone_handler.download_all_assets()
 
@@ -112,15 +110,30 @@ def main():
         logging.warning("Nenhum ficheiro encontrado para processar após o download.")
         return
 
-    logging.info(f"Iniciando o processamento de {len(files_to_process)} ficheiros...")
+    logging.info(f"Encontrados {len(files_to_process)} ficheiros na origem. Verificando contra os já processados...")
     failed_files = []
     successfully_processed = []
+    skipped_files = 0
 
-    with tqdm(total=len(files_to_process), desc="Processando ativos") as pbar:
+    with tqdm(total=len(files_to_process), desc="A verificar ativos") as pbar:
         for file_path in files_to_process:
-            pbar.set_description(f"Processando {file_path.name}")
             relative_path = file_path.relative_to(config.LOCAL_ASSETS_DIR)
             output_path = config.PROCESSED_ASSETS_DIR / relative_path
+            
+            pbar.set_description(f"Verificando {file_path.name}")
+
+            # --- LÓGICA DE OTIMIZAÇÃO PRINCIPAL ---
+            # Se o ficheiro de saída já existe, assume-se que foi processado
+            # corretamente numa execução anterior (graças à cache).
+            if output_path.exists():
+                skipped_files += 1
+                # Adicionamos na mesma à lista de sucesso para que apareça no data.json
+                successfully_processed.append({"path": str(relative_path)})
+                pbar.update(1)
+                continue
+
+            # Se não existe, processa-o
+            pbar.set_description(f"Processando {file_path.name}")
             output_path.parent.mkdir(parents=True, exist_ok=True)
             
             extension = file_path.suffix.lower()
@@ -129,6 +142,7 @@ def main():
             if extension in config.IMAGE_EXTENSIONS:
                 success = image_processor.process_image(file_path, output_path)
             elif extension in config.VIDEO_EXTENSIONS:
+                # A pasta de thumbnails é criada dentro do processador de vídeo
                 success = video_processor.apply_video_watermark(file_path, output_path)
                 if success:
                     video_processor.generate_thumbnail(output_path)
@@ -143,7 +157,9 @@ def main():
             
             pbar.update(1)
 
-    # A função upload_assets agora usa 'sync' para espelhar as eliminações
+    if skipped_files > 0:
+        logging.info(f"{skipped_files} ficheiros foram ignorados pois já estavam processados.")
+
     rclone_handler.upload_assets()
     rclone_handler.generate_r2_manifest_file()
     generate_structured_json(successfully_processed)
