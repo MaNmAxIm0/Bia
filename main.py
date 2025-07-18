@@ -1,174 +1,220 @@
-# main.py
-
-import logging
-import json
-from pathlib import Path
-from tqdm import tqdm
-import config
-from processors import image_processor, video_processor
-from utils import rclone_handler
-import shutil
-import sys
-import subprocess
-from PIL import Image
 import os
+import subprocess
+import json
+import logging
+from PIL import Image, ImageOps, ImageDraw, ImageFont
+from tqdm import tqdm
+import shutil
+from pathlib import Path
+
+# --- CONFIGURAÇÃO ---
+R2_PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
+DRIVE_REMOTE_PATH = "Drive:Portfólio Bia"
+R2_REMOTE_PATH = "R2:bia-portfolio-assets"
+LOCAL_ASSETS_DIR = Path("local_assets" )
+PROCESSED_ASSETS_DIR = Path("processed_assets")
+THUMBNAILS_DIR = PROCESSED_ASSETS_DIR / "Thumbnails"
+WATERMARK_TEXT = "© Beatriz Rodrigues"
+FONT_PATH = Path("fonts/Montserrat-Medium.ttf")
+
+IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png']
+VIDEO_EXTENSIONS = ['.mp4', '.mov', '.avi']
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
 
-def get_asset_dimensions(file_path: Path) -> tuple:
-    """Obtém as dimensões (largura, altura) de um ficheiro de imagem ou vídeo."""
+# --- FUNÇÕES AUXILIARES ---
+
+def run_rclone_command(command: list, operation_name: str) -> bool:
+    """Executa um comando rclone de forma segura e regista o resultado."""
+    logging.info(f"Iniciando operação rclone: {operation_name}")
     try:
-        with Image.open(file_path) as img:
-            return img.size
-    except Exception:
-        try:
+        subprocess.run(command, check=True, capture_output=True, text=True, encoding='utf-8')
+        logging.info(f"Operação rclone '{operation_name}' concluída com sucesso.")
+        return True
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Falha na operação rclone '{operation_name}': {e.stderr.strip()}")
+        return False
+
+def get_media_dimensions(file_path: Path) -> tuple:
+    """Obtém a largura e altura de uma imagem ou vídeo."""
+    try:
+        if file_path.suffix.lower() in IMAGE_EXTENSIONS:
+            with Image.open(file_path) as img:
+                return img.size
+        elif file_path.suffix.lower() in VIDEO_EXTENSIONS:
             cmd = [
                 'ffprobe', '-v', 'error', '-select_streams', 'v:0',
                 '-show_entries', 'stream=width,height', '-of', 'json', str(file_path)
             ]
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            video_data = json.loads(result.stdout)
-            return video_data['streams'][0]['width'], video_data['streams'][0]['height']
-        except Exception as e:
-            logging.warning(f"Não foi possível obter as dimensões para {file_path.name}: {e}")
+            video_data = json.loads(result.stdout)['streams'][0]
+            return video_data['width'], video_data['height']
+    except Exception as e:
+        logging.warning(f"Não foi possível obter as dimensões para {file_path.name}: {e}")
     return None, None
 
-def generate_structured_json(processed_files: list):
-    """Gera um ficheiro data.json estruturado por categoria, com títulos e orientação."""
+# --- FUNÇÕES DE PROCESSAMENTO ---
+
+def correct_image_orientation(img: Image.Image) -> Image.Image:
+    """Verifica e corrige a orientação da imagem com base nos metadados EXIF."""
+    try:
+        return ImageOps.exif_transpose(img)
+    except Exception as e:
+        logging.warning(f"Não foi possível aplicar a transposição EXIF para uma imagem: {e}")
+        return img
+
+def apply_watermark_to_image(base_image: Image.Image) -> Image.Image:
+    """Aplica uma marca de água de texto com sombra e tamanho dinâmico a uma imagem."""
+    image_with_watermark = base_image.copy().convert("RGBA")
+    draw = ImageDraw.Draw(image_with_watermark)
+    font_size = int(image_with_watermark.width * 0.035)
+    try:
+        font = ImageFont.truetype(str(FONT_PATH), font_size)
+    except IOError:
+        logging.warning(f"Fonte '{FONT_PATH}' não encontrada. Usando fonte padrão.")
+        font = ImageFont.load_default()
+    
+    bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+    
+    margin = int(image_with_watermark.width * 0.02)
+    x = image_with_watermark.width - text_width - margin
+    y = image_with_watermark.height - text_height - margin
+
+    shadow_offset = int(font_size * 0.05)
+    shadow_color = (0, 0, 0, 100)
+    draw.text((x + shadow_offset, y + shadow_offset), WATERMARK_TEXT, font=font, fill=shadow_color)
+    
+    text_color = (255, 255, 255, 180)
+    draw.text((x, y), WATERMARK_TEXT, font=font, fill=text_color)
+    
+    return image_with_watermark.convert("RGB")
+
+def process_video(input_path: Path, output_path: Path) -> bool:
+    """Aplica marca de água e gera uma thumbnail para um vídeo."""
+    font_path_ffmpeg = str(FONT_PATH).replace("\\", "/").replace(":", "\\\\:")
+    watermark_cmd = [
+        "ffmpeg", "-i", str(input_path),
+        "-vf", (
+            f"drawtext=fontfile='{font_path_ffmpeg}':text='{WATERMARK_TEXT}':fontsize=h*0.03:fontcolor=black@0.5:x=(w-text_w-w*0.02)+2:y=(h-text_h-h*0.02)+2,"
+            f"drawtext=fontfile='{font_path_ffmpeg}':text='{WATERMARK_TEXT}':fontsize=h*0.03:fontcolor=white@0.8:x=w-text_w-w*0.02:y=h-text_h-h*0.02"
+        ),
+        "-codec:v", "libx264", "-preset", "medium", "-crf", "23", "-codec:a", "copy", "-y", str(output_path)
+    ]
+    try:
+        subprocess.run(watermark_cmd, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as e:
+        logging.error(f"FFmpeg falhou ao aplicar marca de água ao vídeo '{input_path.name}': {e.stderr.strip()}")
+        return False
+
+    thumbnail_path = THUMBNAILS_DIR / f"{input_path.stem}_thumb.jpg"
+    thumbnail_cmd = ["ffmpeg", "-i", str(output_path), "-ss", "00:00:01.000", "-vframes", "1", "-q:v", "2", "-y", str(thumbnail_path)]
+    try:
+        subprocess.run(thumbnail_cmd, check=True, capture_output=True, text=True)
+        return True
+    except subprocess.CalledProcessError as e:
+        logging.error(f"FFmpeg falhou ao gerar thumbnail para '{input_path.name}': {e.stderr.strip()}")
+        return True
+
+# --- GERAÇÃO DE METADATOS ---
+
+def generate_data_json(output_file: str):
+    """Gera um ficheiro data.json que cataloga todos os ativos por categoria e orientação."""
     logging.info("Gerando ficheiro de metadados data.json com estrutura completa...")
+    if "xxxx" in R2_PUBLIC_URL:
+        logging.warning("A variável R2_PUBLIC_URL não foi definida! Os URLs no data.json estarão incorretos.")
+
+    asset_catalog = {}
     
-    if "<" in config.R2_PUBLIC_URL or "xxxx" in config.R2_PUBLIC_URL:
-        logging.error("A variável R2_PUBLIC_URL no config.py precisa de ser definida!")
-        return
+    all_processed_files = list(PROCESSED_ASSETS_DIR.rglob("*.*"))
 
-    final_data_structure = {}
+    for file_path_local in all_processed_files:
+        if file_path_local.parent.name == "Thumbnails" or not file_path_local.is_file():
+            continue
 
-    for file_info in processed_files:
-        relative_path = Path(file_info["path"])
-        local_path = config.PROCESSED_ASSETS_DIR / relative_path
+        relative_path = file_path_local.relative_to(PROCESSED_ASSETS_DIR)
+        category = relative_path.parts[0] if len(relative_path.parts) > 1 else "geral"
         
-        category = relative_path.parts[0].lower() if len(relative_path.parts) > 1 else "outros"
-        
-        if category not in final_data_structure:
-            final_data_structure[category] = []
+        if category not in asset_catalog:
+            asset_catalog[category] = {"horizontal": [], "vertical": []}
 
-        file_name = relative_path.name
-        title_parts = relative_path.stem.split('_')
-        
-        pt_title = title_parts[0] if len(title_parts) > 0 else ""
-        en_title = title_parts[1] if len(title_parts) > 1 else pt_title
-        es_title = title_parts[2] if len(title_parts) > 2 else pt_title
-        
-        titles = {"pt": pt_title, "en": en_title, "es": es_title}
-        
-        url_path = str(relative_path).replace(Path(relative_path)._flavour.sep, '/')
-        full_url = f"{config.R2_PUBLIC_URL.rstrip('/')}/{url_path}"
-        
-        asset_data = {
-            "name": file_name,
-            "titles": titles,
-            "url": full_url
+        url_path = relative_path.as_posix()
+        asset_info = {
+            "path": url_path,
+            "url": f"{R2_PUBLIC_URL.rstrip('/')}/{url_path}"
         }
+
+        width, height = get_media_dimensions(file_path_local)
+        orientation = "horizontal"
+        if width is not None and height is not None and height > width:
+            orientation = "vertical"
         
-        file_ext = relative_path.suffix.lower()
-        is_media_file = file_ext in config.IMAGE_EXTENSIONS or file_ext in config.VIDEO_EXTENSIONS
+        if file_path_local.suffix.lower() in VIDEO_EXTENSIONS:
+            thumbnail_filename = f"{file_path_local.stem}_thumb.jpg"
+            asset_info["thumbnail_url"] = f"{R2_PUBLIC_URL.rstrip('/')}/Thumbnails/{thumbnail_filename}"
 
-        if is_media_file:
-            width, height = get_asset_dimensions(local_path)
-            if width and height:
-                asset_data["orientation"] = "horizontal" if width >= height else "vertical"
+        asset_catalog[category][orientation].append(asset_info)
 
-        if file_ext in config.VIDEO_EXTENSIONS:
-            thumb_name = f"{relative_path.stem}_thumb.jpg"
-            thumb_url_path = (Path(url_path).parent / thumb_name).as_posix()
-            asset_data["thumbnail_url"] = f"{config.R2_PUBLIC_URL.rstrip('/')}/{thumb_url_path}"
-        
-        final_data_structure[category].append(asset_data)
-
-    with open(config.JSON_OUTPUT_FILE, 'w', encoding='utf-8') as f:
-        json.dump(final_data_structure, f, ensure_ascii=False, indent=2)
+    final_data_structure = {"pt": asset_catalog}
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(final_data_structure, f, indent=4, ensure_ascii=False)
     
-    logging.info(f"'{config.JSON_OUTPUT_FILE.name}' gerado com sucesso com a estrutura final.")
+    logging.info(f"'{output_file}' gerado com sucesso com a estrutura final.")
 
+# --- FLUXO DE TRABALHO PRINCIPAL ---
 
 def main():
-    """Orquestra todo o pipeline de processamento de média."""
     logging.info("--- INÍCIO DO PIPELINE DE PROCESSAMENTO ---")
-    
-    config.LOCAL_ASSETS_DIR.mkdir(exist_ok=True)
-    config.PROCESSED_ASSETS_DIR.mkdir(exist_ok=True)
-    
-    rclone_handler.download_all_assets()
 
-    files_to_process = []
-    for root, _, files in os.walk(config.LOCAL_ASSETS_DIR):
-        for file in files:
-            if not file.startswith('.'):
-                files_to_process.append(Path(root) / file)
+    if LOCAL_ASSETS_DIR.exists(): shutil.rmtree(LOCAL_ASSETS_DIR)
+    if PROCESSED_ASSETS_DIR.exists(): shutil.rmtree(PROCESSED_ASSETS_DIR)
+    PROCESSED_ASSETS_DIR.mkdir(exist_ok=True)
+    THUMBNAILS_DIR.mkdir(exist_ok=True)
 
-    if not files_to_process:
-        logging.warning("Nenhum ficheiro encontrado para processar após o download.")
+    download_cmd = ["rclone", "copy", DRIVE_REMOTE_PATH, str(LOCAL_ASSETS_DIR), "--progress"]
+    if not run_rclone_command(download_cmd, "Download de ativos do Drive"):
+        logging.error("Pipeline interrompido devido a falha no download.")
         return
 
-    logging.info(f"Encontrados {len(files_to_process)} ficheiros na origem. Verificando contra os já processados...")
-    failed_files = []
-    successfully_processed = []
-    skipped_files = 0
+    all_local_files = [p for p in LOCAL_ASSETS_DIR.rglob("*") if p.is_file() and not p.name.startswith('.')]
+    logging.info(f"Encontrados {len(all_local_files)} ficheiros para processar.")
+    failure_count = 0
 
-    with tqdm(total=len(files_to_process), desc="A verificar ativos") as pbar:
-        for file_path in files_to_process:
-            relative_path = file_path.relative_to(config.LOCAL_ASSETS_DIR)
-            output_path = config.PROCESSED_ASSETS_DIR / relative_path
-            
-            pbar.set_description(f"Verificando {file_path.name}")
-
-            # --- LÓGICA DE OTIMIZAÇÃO PRINCIPAL ---
-            # Se o ficheiro de saída já existe, assume-se que foi processado
-            # corretamente numa execução anterior (graças à cache).
-            if output_path.exists():
-                skipped_files += 1
-                # Adicionamos na mesma à lista de sucesso para que apareça no data.json
-                successfully_processed.append({"path": str(relative_path)})
-                pbar.update(1)
-                continue
-
-            # Se não existe, processa-o
-            pbar.set_description(f"Processando {file_path.name}")
+    with tqdm(total=len(all_local_files), desc="Processando ficheiros") as pbar:
+        for input_path in all_local_files:
+            relative_path = input_path.relative_to(LOCAL_ASSETS_DIR)
+            output_path = PROCESSED_ASSETS_DIR / relative_path
             output_path.parent.mkdir(parents=True, exist_ok=True)
             
-            extension = file_path.suffix.lower()
-            success = False
+            file_ext = input_path.suffix.lower()
+            processed_successfully = False
 
-            if extension in config.IMAGE_EXTENSIONS:
-                success = image_processor.process_image(file_path, output_path)
-            elif extension in config.VIDEO_EXTENSIONS:
-                # A pasta de thumbnails é criada dentro do processador de vídeo
-                success = video_processor.apply_video_watermark(file_path, output_path)
-                if success:
-                    video_processor.generate_thumbnail(output_path)
-            else:
-                shutil.copy2(file_path, output_path)
-                success = True
+            try:
+                if file_ext in IMAGE_EXTENSIONS:
+                    with Image.open(input_path) as img:
+                        img = correct_image_orientation(img)
+                        img = apply_watermark_to_image(img)
+                        img.save(output_path, "JPEG", quality=90, optimize=True, progressive=True)
+                        processed_successfully = True
+                elif file_ext in VIDEO_EXTENSIONS:
+                    if process_video(input_path, output_path):
+                        processed_successfully = True
+                else:
+                    shutil.copy2(input_path, output_path)
+                    processed_successfully = True
+            except Exception as e:
+                logging.error(f"Erro inesperado ao processar {input_path.name}: {e}")
 
-            if success:
-                successfully_processed.append({"path": str(relative_path)})
-            else:
-                failed_files.append(str(relative_path))
-            
+            if not processed_successfully:
+                failure_count += 1
             pbar.update(1)
 
-    if skipped_files > 0:
-        logging.info(f"{skipped_files} ficheiros foram ignorados pois já estavam processados.")
+    generate_data_json("data.json")
 
-    rclone_handler.upload_assets()
-    rclone_handler.generate_r2_manifest_file()
-    generate_structured_json(successfully_processed)
-
-    if failed_files:
-        logging.error(f"{len(failed_files)} ficheiros falharam ao processar.")
-        with open(config.FAILED_FILES_LOG, 'w') as f:
-            f.write("\n".join(failed_files))
-
+    if failure_count > 0:
+        logging.warning(f"{failure_count} ficheiros falharam ao processar.")
+    
     logging.info("--- FIM DO PIPELINE ---")
 
 if __name__ == "__main__":
