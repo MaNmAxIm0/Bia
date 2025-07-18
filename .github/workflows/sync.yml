@@ -45,7 +45,14 @@ jobs:
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
-
+      
+       # --- PASSO DE DEPURAÇÃO ADICIONADO ---
+      - name: Verificar o conteúdo do rclone.conf
+        run: |
+          echo "--- Conteúdo do ficheiro rclone.conf criado no runner: ---"
+          cat ~/.config/rclone/rclone.conf
+          echo "--------------------------------------------------------"
+          
       - name: Sincronizar ficheiros do Google Drive
         run: rclone copy "Drive:Portfólio Bia" local_assets --progress
 
