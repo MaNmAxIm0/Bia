@@ -1,7 +1,7 @@
 name: Sincronizar, Processar e Aplicar Marca de Água
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Permite iniciar manualmente
   push:
     branches:
       - main
@@ -9,6 +9,7 @@ on:
 jobs:
   sync-and-process:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
@@ -21,22 +22,28 @@ jobs:
       - name: Instalar dependências do sistema e Python
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg libjpeg-dev zlib1g-dev
+          sudo apt-get install -y ffmpeg
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Instalar e configurar Rclone
-        env:
-          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+      - name: Instalar e Configurar Rclone
         run: |
           curl https://rclone.org/install.sh | sudo bash
+          echo "Criando diretório de configuração do rclone..."
           mkdir -p ~/.config/rclone
-          echo "${{ secrets.RCLONE_CONFIG_R2 }}" > ~/.config/rclone/rclone.conf
+          
+          # --- CORREÇÃO CRÍTICA ---
+          # Agora estamos a usar o nome de segredo correto: RCLONE_CONF
+          echo "Escrevendo configuração a partir do segredo RCLONE_CONF..."
+          echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
+          echo "Configuração do rclone concluída."
 
-      - name: Executar o pipeline de processamento
+      - name: Executar o Pipeline de Processamento
         run: python3 run_processing.py
 
-      - name: Sincronizar ficheiros processados para o R2
+      - name: Sincronizar Ficheiros Processados para o R2
         run: |
-          # A flag --exclude "*.log" impede que os ficheiros de log sejam enviados.
+          echo "Iniciando upload dos ficheiros processados..."
+          # A flag -v (verbose ) mostra os ficheiros que estão a ser transferidos.
           rclone sync processed_assets/ R2:bia-portfolio-assets-watermarked --exclude "*.log" -v
+          echo "Upload concluído."
