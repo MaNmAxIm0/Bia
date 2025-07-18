@@ -1,4 +1,6 @@
-name: Sincronizar, Processar e Aplicar Marca de Água
+# .github/workflows/main.yml
+
+name: Processar Ativos do Portfólio (Otimizado)
 
 on:
   workflow_dispatch:
@@ -7,36 +9,83 @@ on:
       - main
 
 jobs:
-  sync-and-process:
+  process-and-sync:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Configurar Python
+      - name: Configurar Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Instalar dependências do sistema e Python
+      # --- AÇÃO ESTRUTURAL: Caching de dependências ---
+      - name: Cache de dependências Pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Instalar dependências do sistema
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg libjpeg-dev zlib1g-dev
+          sudo apt-get install -y ffmpeg libjpeg-dev zlib1g-dev libimage-exiftool-perl
+
+      - name: Instalar dependências Python a partir do requirements.txt
+        run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Instalar e configurar Rclone
-        env:
-          RCLONE_CONF: ${{ secrets.rclone_conf }}
+      - name: Instalar e Configurar Rclone
         run: |
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
-          echo "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
+          echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
 
-      - name: Executar o pipeline de processamento
+      - name: Sincronizar ficheiros do Google Drive
+        run: rclone copy "Drive:Portfólio Bia" local_assets --progress
+
+      # --- AÇÃO IMEDIATA: Passo de Diagnóstico ---
+      - name: Diagnosticar ficheiros de imagem problemáticos
+        run: |
+          echo "--- A analisar ficheiros que podem estar corrompidos ---"
+          # Lista de ficheiros que falharam anteriormente para análise
+          FILES_TO_CHECK=("local_assets/Fotografias/270.JPG" "local_assets/Fotografias/364.JPG" )
+          for f in "${FILES_TO_CHECK[@]}"; do
+            if [ -f "$f" ]; then
+              echo "Analisando: $f"
+              echo "Tipo de ficheiro (file): $(file "$f")"
+              echo "Metadados (exiftool):"
+              exiftool "$f" || echo "exiftool falhou ao ler $f"
+              echo "-----------------------------------------------------"
+            else
+              echo "AVISO: Ficheiro de diagnóstico $f não encontrado."
+            fi
+          done
+
+      - name: Executar o Pipeline de Processamento
         run: python3 run_processing.py
 
       - name: Sincronizar ficheiros processados para o R2
         run: |
-          # CORREÇÃO: Aponta para o bucket de destino correto e exclui ficheiros.log
-          rclone sync processed_assets/ R2:bia-portfolio-assets --exclude "*.log" -v
+          rclone sync processed_assets/ R2:bia-portfolio-assets \
+            --exclude "Thumbnails/**" \
+            --exclude "quarantine/**" \
+            --exclude "*.log" \
+            -v
+
+      # --- AÇÃO ESTRUTURAL: Gestão de Falhas com Quarentena ---
+      - name: Mover ficheiros com falha para a quarentena
+        if: failure() # Executa este passo apenas se um passo anterior falhou
+        run: |
+          echo "Movendo ficheiros que falharam para a quarentena no R2..."
+          # O script Python cria um ficheiro failed_files.log com a lista de ficheiros a mover
+          if [ -f failed_files.log ]; then
+            rclone move processed_assets/ R2:bia-portfolio-assets/quarantine/ --files-from failed_files.log -v
+          else
+            echo "Nenhum ficheiro de log de falhas encontrado."
+          fi
