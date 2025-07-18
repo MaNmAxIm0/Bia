@@ -44,7 +44,12 @@ jobs:
         run: |
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
-          echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
+          # Usa 'cat << EOF' para escrever o conteúdo do segredo literalmente,
+          # preservando todas as aspas e caracteres especiais.
+          cat << EOF > ~/.config/rclone/rclone.conf
+          ${{ secrets.RCLONE_CONF }}
+          EOF
+
       
        # --- PASSO DE DEPURAÇÃO ADICIONADO ---
       - name: Verificar o conteúdo do rclone.conf
@@ -52,7 +57,7 @@ jobs:
           echo "--- Conteúdo do ficheiro rclone.conf criado no runner: ---"
           cat ~/.config/rclone/rclone.conf
           echo "--------------------------------------------------------"
-          
+
       - name: Sincronizar ficheiros do Google Drive
         run: rclone copy "Drive:Portfólio Bia" local_assets --progress
 
