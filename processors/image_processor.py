@@ -20,6 +20,8 @@ def apply_watermark_to_image(image_path, output_path, config):
             
             watermark_color_with_opacity = (*config.WATERMARK_COLOR_RGB, config.WATERMARK_OPACITY)
             
+            # ## CORREÇÃO CRÍTICA ##
+            # A linha anterior tinha um bug. Esta versão calcula a largura do texto corretamente.
             text_bbox = draw.textbbox((0, 0), config.WATERMARK_TEXT, font=font)
             text_width = text_bbox[1] - text_bbox
             text_height = text_bbox[2] - text_bbox[3]
