@@ -1,6 +1,6 @@
-# .github/workflows/main.yml
+# .github/workflows/sync.yml
 
-name: Processar Ativos do Portfólio (Otimizado)
+name: Processar e Sincronizar Portfólio
 
 on:
   workflow_dispatch:
@@ -21,22 +21,16 @@ jobs:
         with:
           python-version: '3.10'
 
-      # --- AÇÃO ESTRUTURAL: Caching de dependências ---
       - name: Cache de dependências Pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
 
-      - name: Instalar dependências do sistema
+      - name: Instalar dependências
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg libjpeg-dev zlib1g-dev libimage-exiftool-perl
-
-      - name: Instalar dependências Python a partir do requirements.txt
-        run: |
+          sudo apt-get install -y ffmpeg libimage-exiftool-perl
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
@@ -44,60 +38,23 @@ jobs:
         run: |
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone
-          # Usa 'cat << EOF' para escrever o conteúdo do segredo literalmente,
-          # preservando todas as aspas e caracteres especiais.
           cat << EOF > ~/.config/rclone/rclone.conf
           ${{ secrets.RCLONE_CONF }}
           EOF
 
-      
-       # --- PASSO DE DEPURAÇÃO ADICIONADO ---
-      - name: Verificar o conteúdo do rclone.conf
+      - name: Executar Pipeline Principal
+        run: python3 main.py
+
+      # --- AÇÃO 6: Commit e Push dos ficheiros gerados ---
+      - name: Fazer Commit dos Manifestos e Dados
         run: |
-          echo "--- Conteúdo do ficheiro rclone.conf criado no runner: ---"
-          cat ~/.config/rclone/rclone.conf
-          echo "--------------------------------------------------------"
-
-      - name: Sincronizar ficheiros do Google Drive
-        run: rclone copy "Drive:Portfólio Bia" local_assets --progress
-
-      # --- AÇÃO IMEDIATA: Passo de Diagnóstico ---
-      - name: Diagnosticar ficheiros de imagem problemáticos
-        run: |
-          echo "--- A analisar ficheiros que podem estar corrompidos ---"
-          # Lista de ficheiros que falharam anteriormente para análise
-          FILES_TO_CHECK=("local_assets/Fotografias/270.JPG" "local_assets/Fotografias/364.JPG" )
-          for f in "${FILES_TO_CHECK[@]}"; do
-            if [ -f "$f" ]; then
-              echo "Analisando: $f"
-              echo "Tipo de ficheiro (file): $(file "$f")"
-              echo "Metadados (exiftool):"
-              exiftool "$f" || echo "exiftool falhou ao ler $f"
-              echo "-----------------------------------------------------"
-            else
-              echo "AVISO: Ficheiro de diagnóstico $f não encontrado."
-            fi
-          done
-
-      - name: Executar o Pipeline de Processamento
-        run: python3 run_processing.py
-
-      - name: Sincronizar ficheiros processados para o R2
-        run: |
-          rclone sync processed_assets/ R2:bia-portfolio-assets \
-            --exclude "Thumbnails/**" \
-            --exclude "quarantine/**" \
-            --exclude "*.log" \
-            -v
-
-      # --- AÇÃO ESTRUTURAL: Gestão de Falhas com Quarentena ---
-      - name: Mover ficheiros com falha para a quarentena
-        if: failure() # Executa este passo apenas se um passo anterior falhou
-        run: |
-          echo "Movendo ficheiros que falharam para a quarentena no R2..."
-          # O script Python cria um ficheiro failed_files.log com a lista de ficheiros a mover
-          if [ -f failed_files.log ]; then
-            rclone move processed_assets/ R2:bia-portfolio-assets/quarantine/ --files-from failed_files.log -v
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add r2_file_manifest.txt data.json || echo "Nenhum ficheiro novo para adicionar."
+          # Commita apenas se houver alterações
+          if ! git diff --staged --quiet; then
+            git commit -m "CI: Atualiza manifestos e dados do portfólio"
+            git push
           else
-            echo "Nenhum ficheiro de log de falhas encontrado."
+            echo "Nenhuma alteração nos ficheiros de manifesto para commitar."
           fi
