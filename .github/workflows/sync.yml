@@ -29,6 +29,7 @@ jobs:
         with:
           path: /var/cache/apt/archives
           key: ${{ runner.os }}-apt-packages-${{ hashFiles('**/apt-packages.txt') }}
+          enableCrossOsArchive: true
 
       - name: Cache de dependências Pip
         uses: actions/cache@v4
