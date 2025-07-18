@@ -49,7 +49,7 @@ jobs:
       - name: Setup Rclone Config
         run: |
           mkdir -p ~/.config/rclone
-          echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
+          echo "${{ secrets.RCLONE_CONF }}" | base64 --decode > ~/.config/rclone/rclone.conf
 
       - name: Sync from Drive to Local
         run: |
