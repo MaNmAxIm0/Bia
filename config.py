@@ -1,7 +1,9 @@
 # config.py
 
 # --- Configurações Gerais de Diretórios ---
-SOURCE_RCLONE_PATH = "R2:bia-portfolio-assets"
+# --- CORREÇÃO --- A origem agora é o Google Drive
+# Substitua 'caminho/para/a/pasta' pelo caminho real da pasta no seu Google Drive
+SOURCE_RCLONE_PATH = "Drive:caminho/para/a/pasta" 
 DEST_RCLONE_PATH = "R2:bia-portfolio-assets-watermarked"
 LOCAL_DOWNLOAD_DIR = "local_assets"
 LOCAL_PROCESSED_DIR = "processed_assets"
@@ -22,13 +24,10 @@ MARGIN_RATIO = 0.02
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png']
 VIDEO_EXTENSIONS = ['.mp4', '.mov']
 
-# --- CORREÇÃO --- Adicionar padrões de exclusão para o Rclone aqui
-# Cada item nesta lista será passado para o rclone com a flag --exclude
+# Padrões de exclusão para o Rclone (pode manter ou ajustar)
 RCLONE_EXCLUDE_PATTERNS = [
-    "Thumbnails/**",
-    ".DS_Store",       # Exemplo: ignorar ficheiros do macOS
-    "*.tmp",           # Exemplo: ignorar ficheiros temporários
+    "*.tmp",
 ]
 
-# Padrões de exclusão para o processamento local (opcional, pode ser útil)
+# Padrões de exclusão para o processamento local
 LOCAL_EXCLUDE_FILENAMES = []
