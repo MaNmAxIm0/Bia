@@ -26,7 +26,8 @@ jobs:
       - name: Instalar e fazer cache de dependências Apt
         uses: awalsh128/cache-apt-pkgs-action@v1.5.0
         with:
-          packages: ffmpeg libimage-exiftool-perl
+          # --- ATUALIZADO: Adicionado libblas3 para corrigir erro do FFmpeg ---
+          packages: ffmpeg libimage-exiftool-perl libblas3
           version: 1.0
 
       - name: Cache para dependências Pip
@@ -52,29 +53,21 @@ jobs:
       - name: Executar Pipeline Principal
         run: python3 main.py
 
-      # --- CORREÇÃO DE LÓGICA ---
-      # PASSO 1: Fazer o upload de TODOS os ficheiros processados (imagens, vídeos, thumbnails )
+      # --- ATUALIZADO: Sincroniza para o R2, espelhando adições, alterações e eliminações ---
       - name: Sincronizar Ativos Processados para o R2
         run: |
-          echo "A sincronizar todos os ativos processados para o R2..."
-          rclone sync processed_assets/ R2:bia-portfolio-assets --progress -v
+          echo "A sincronizar todos os ativos processados para o R2 (incluindo eliminações )..."
+          # O comando 'sync' garante que o R2 é um espelho exato da pasta 'processed_assets'.
+          # A flag '--track-renames' otimiza a operação para ficheiros renomeados.
+          rclone sync processed_assets/ R2:bia-portfolio-assets --progress -v --track-renames
 
-      # PASSO 2: Gerar o manifesto DEPOIS do upload estar completo
       - name: Gerar Manifesto de Ficheiros do R2
         run: |
           echo "A gerar o manifesto de ficheiros a partir do R2..."
-          # O rclone_handler.py tem a função para isto, mas podemos chamá-la aqui
-          # para garantir a ordem. Ou, mais simples, executar o comando diretamente.
           rclone lsf -R R2:bia-portfolio-assets > r2_file_manifest.txt
 
-      # PASSO 3: Copiar os ficheiros de dados e manifesto para a raiz do R2
-      - name: Copiar data.json e Manifesto para a Raiz do R2
-        run: |
-          echo "A copiar data.json e r2_file_manifest.txt para a raiz do R2..."
-          rclone copyto data.json R2:bia-portfolio-assets/data.json --no-check-dest -v
-          rclone copyto r2_file_manifest.txt R2:bia-portfolio-assets/r2_file_manifest.txt --no-check-dest -v
+      # --- ATUALIZADO: O passo de cópia para o R2 foi removido ---
 
-      # PASSO 4: Fazer o commit dos ficheiros para o repositório Git
       - name: Fazer Commit e Push dos Ficheiros de Manifesto para o Git
         run: |
           git config --global user.name 'github-actions[bot]'

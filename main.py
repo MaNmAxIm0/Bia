@@ -5,13 +5,13 @@ import json
 from pathlib import Path
 from tqdm import tqdm
 import config
-import os
 from processors import image_processor, video_processor
 from utils import rclone_handler
 import shutil
 import sys
 import subprocess
 from PIL import Image
+import os # <-- CORREÇÃO: Importação do módulo 'os'
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
 
@@ -70,14 +70,19 @@ def generate_structured_json(processed_files: list):
             "url": full_url
         }
         
-        width, height = get_asset_dimensions(local_path)
-        if width and height:
-            asset_data["orientation"] = "horizontal" if width >= height else "vertical"
+        # --- ATUALIZADO: Só obter dimensões para imagens e vídeos ---
+        file_ext = relative_path.suffix.lower()
+        is_media_file = file_ext in config.IMAGE_EXTENSIONS or file_ext in config.VIDEO_EXTENSIONS
 
-        if any(url_path.lower().endswith(ext) for ext in config.VIDEO_EXTENSIONS):
+        if is_media_file:
+            width, height = get_asset_dimensions(local_path)
+            if width and height:
+                asset_data["orientation"] = "horizontal" if width >= height else "vertical"
+
+        if file_ext in config.VIDEO_EXTENSIONS:
             thumb_name = f"{relative_path.stem}_thumb.jpg"
-            thumb_path = Path(config.THUMBNAIL_DIR) / relative_path.parent / thumb_name
-            asset_data["thumbnail_url"] = f"{config.R2_PUBLIC_URL.rstrip('/')}/{str(thumb_path).replace(Path(thumb_path)._flavour.sep, '/')}"
+            thumb_url_path = (Path(url_path).parent / thumb_name).as_posix()
+            asset_data["thumbnail_url"] = f"{config.R2_PUBLIC_URL.rstrip('/')}/{thumb_url_path}"
         
         final_data_structure[category].append(asset_data)
 
@@ -95,14 +100,12 @@ def main():
     config.PROCESSED_ASSETS_DIR.mkdir(exist_ok=True)
     (config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR).mkdir(exist_ok=True)
     
-    # --- CORREÇÃO: Chama a função de download simplificada ---
     rclone_handler.download_all_assets()
 
-    # --- CORREÇÃO: Lógica de descoberta de ficheiros mais explícita ---
     files_to_process = []
     for root, _, files in os.walk(config.LOCAL_ASSETS_DIR):
         for file in files:
-            if not file.startswith('.'): # Ignora ficheiros ocultos como .DS_Store
+            if not file.startswith('.'):
                 files_to_process.append(Path(root) / file)
 
     if not files_to_process:
@@ -140,6 +143,7 @@ def main():
             
             pbar.update(1)
 
+    # A função upload_assets agora usa 'sync' para espelhar as eliminações
     rclone_handler.upload_assets()
     rclone_handler.generate_r2_manifest_file()
     generate_structured_json(successfully_processed)
