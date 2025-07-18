@@ -9,8 +9,87 @@ from processors import image_processor, video_processor
 from utils import rclone_handler
 import shutil
 import sys
+import subprocess
+from PIL import Image
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
+
+def get_asset_dimensions(file_path: Path) -> tuple:
+    """Obtém as dimensões (largura, altura) de um ficheiro de imagem ou vídeo."""
+    try:
+        # Primeiro, tenta abrir como imagem, que é mais rápido
+        with Image.open(file_path) as img:
+            return img.size
+    except Exception:
+        # Se falhar, tenta como vídeo
+        try:
+            cmd = [
+                'ffprobe', '-v', 'error', '-select_streams', 'v:0',
+                '-show_entries', 'stream=width,height', '-of', 'json', str(file_path)
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            video_data = json.loads(result.stdout)
+            width = video_data['streams'][0]['width']
+            height = video_data['streams'][0]['height']
+            return width, height
+        except Exception as e:
+            logging.warning(f"Não foi possível obter as dimensões para {file_path.name}: {e}")
+    return None, None
+
+def generate_structured_json(processed_files: list):
+    """Gera um ficheiro data.json estruturado por categoria, com títulos e orientação."""
+    logging.info("Gerando ficheiro de metadados data.json com estrutura completa...")
+    
+    if "<" in config.R2_PUBLIC_URL or "xxxx" in config.R2_PUBLIC_URL:
+        logging.error("A variável R2_PUBLIC_URL no config.py precisa de ser definida!")
+        return
+
+    final_data_structure = {}
+
+    for file_info in processed_files:
+        relative_path = Path(file_info["path"])
+        local_path = config.PROCESSED_ASSETS_DIR / relative_path
+        
+        category = relative_path.parts[0].lower() if len(relative_path.parts) > 1 else "outros"
+        
+        if category not in final_data_structure:
+            final_data_structure[category] = []
+
+        file_name = relative_path.name
+        title_parts = relative_path.stem.split('_')
+        
+        pt_title = title_parts[0] if len(title_parts) > 0 else ""
+        en_title = title_parts[1] if len(title_parts) > 1 else pt_title
+        es_title = title_parts[2] if len(title_parts) > 2 else pt_title
+        
+        titles = {"pt": pt_title, "en": en_title, "es": es_title}
+        
+        url_path = str(relative_path).replace(Path(relative_path)._flavour.sep, '/')
+        full_url = f"{config.R2_PUBLIC_URL.rstrip('/')}/{url_path}"
+        
+        asset_data = {
+            "name": file_name,
+            "titles": titles,
+            "url": full_url
+        }
+        
+        # Adiciona a orientação e o URL do thumbnail
+        width, height = get_asset_dimensions(local_path)
+        if width and height:
+            asset_data["orientation"] = "horizontal" if width >= height else "vertical"
+
+        if any(url_path.lower().endswith(ext) for ext in config.VIDEO_EXTENSIONS):
+            thumb_name = f"{relative_path.stem}_thumb.jpg"
+            thumb_path = Path(config.THUMBNAIL_DIR) / relative_path.parent / thumb_name
+            asset_data["thumbnail_url"] = f"{config.R2_PUBLIC_URL.rstrip('/')}/{str(thumb_path).replace(Path(thumb_path)._flavour.sep, '/')}"
+        
+        final_data_structure[category].append(asset_data)
+
+    with open(config.JSON_OUTPUT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(final_data_structure, f, ensure_ascii=False, indent=2)
+    
+    logging.info(f"'{config.JSON_OUTPUT_FILE.name}' gerado com sucesso com a estrutura final.")
+
 
 def main():
     """Orquestra todo o pipeline de processamento de média."""
@@ -18,22 +97,20 @@ def main():
     
     config.LOCAL_ASSETS_DIR.mkdir(exist_ok=True)
     config.PROCESSED_ASSETS_DIR.mkdir(exist_ok=True)
+    (config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR).mkdir(exist_ok=True)
     
-    # 1. Obter o estado atual do R2
     r2_manifest = rclone_handler.get_r2_manifest_as_dict()
-    
-    # 2. Descarregar apenas os ficheiros novos ou modificados
     rclone_handler.download_changed_assets(r2_manifest)
 
-    # 3. Processar apenas os ficheiros que foram descarregados
     files_to_process = [p for p in config.LOCAL_ASSETS_DIR.rglob('*') if p.is_file()]
     if not files_to_process:
         logging.info("Nenhum ficheiro para processar nesta execução.")
-        logging.info("--- FIM DO PIPELINE ---")
+        rclone_handler.generate_r2_manifest_file()
         return
 
     logging.info(f"Iniciando o processamento de {len(files_to_process)} ficheiros...")
     failed_files = []
+    successfully_processed = []
 
     with tqdm(total=len(files_to_process), desc="Processando ativos") as pbar:
         for file_path in files_to_process:
@@ -55,19 +132,16 @@ def main():
                 shutil.copy2(file_path, output_path)
                 success = True
 
-            if not success:
+            if success:
+                successfully_processed.append({"path": str(relative_path)})
+            else:
                 failed_files.append(str(relative_path))
             
             pbar.update(1)
 
-    # 4. Upload e geração de manifestos finais
     rclone_handler.upload_assets()
     rclone_handler.generate_r2_manifest_file()
-    
-    # A geração do data.json pode ser mais complexa, por agora fica como placeholder
-    logging.info("Gerando ficheiro de metadados data.json (placeholder)...")
-    with open(config.JSON_OUTPUT_FILE, 'w', encoding='utf-8') as f:
-        json.dump({"status": "processamento concluído"}, f, indent=2)
+    generate_structured_json(successfully_processed)
 
     if failed_files:
         logging.error(f"{len(failed_files)} ficheiros falharam ao processar.")

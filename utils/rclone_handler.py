@@ -5,6 +5,7 @@ import subprocess
 import shlex
 import config
 import json
+from pathlib import Path
 
 def run_rclone_command(command: list, operation_name: str) -> bool:
     """Executa um comando rclone e trata os erros de forma genérica."""
@@ -30,10 +31,7 @@ def get_r2_manifest_as_dict() -> dict:
         return {}
 
 def download_changed_assets(r2_manifest: dict):
-    """
-    Compara o Google Drive com o manifesto do R2 e descarrega apenas os ficheiros
-    novos ou modificados.
-    """
+    """Compara o Google Drive com o manifesto do R2 e descarrega apenas os ficheiros novos ou modificados."""
     logging.info("Comparando Drive com o manifesto R2 para encontrar alterações...")
     drive_command = ["rclone", "lsjson", config.DRIVE_REMOTE_PATH]
     try:
@@ -47,7 +45,6 @@ def download_changed_assets(r2_manifest: dict):
     for drive_file in drive_files:
         path = drive_file['Path']
         r2_file = r2_manifest.get(path)
-        # Descarrega se o ficheiro não existe no R2 ou se o tamanho for diferente
         if not r2_file or r2_file['Size'] != drive_file['Size']:
             files_to_download.append(path)
 
@@ -57,12 +54,10 @@ def download_changed_assets(r2_manifest: dict):
 
     logging.info(f"Encontrados {len(files_to_download)} ficheiros para descarregar.")
     
-    # Cria um ficheiro temporário com a lista de ficheiros a descarregar
     files_from_list_path = "files_to_download.txt"
     with open(files_from_list_path, 'w', encoding='utf-8') as f:
         f.write("\n".join(files_to_download))
 
-    # Usa --files-from para descarregar apenas os ficheiros listados
     download_command = [
         "rclone", "copy", config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR),
         "--files-from", files_from_list_path, "--progress"
@@ -70,8 +65,7 @@ def download_changed_assets(r2_manifest: dict):
     if not run_rclone_command(download_command, "Download de ficheiros alterados"):
         exit(1)
     
-    # Limpa o ficheiro temporário
-    config.Path(files_from_list_path).unlink()
+    Path(files_from_list_path).unlink()
 
 def upload_assets():
     """Faz o upload dos ficheiros processados para o R2."""
@@ -86,7 +80,8 @@ def upload_assets():
 def generate_r2_manifest_file():
     """Gera o ficheiro de manifesto r2_file_manifest.txt a partir do R2."""
     logging.info("Gerando ficheiro de manifesto do R2...")
-    command = ["rclone", "lsf", "--format", "p", config.R2_REMOTE_PATH]
+    # --- CORREÇÃO: Adicionada a flag -R para busca recursiva ---
+    command = ["rclone", "lsf", "-R", "--format", "p", config.R2_REMOTE_PATH]
     try:
         result = subprocess.run(command, check=True, capture_output=True, text=True, encoding='utf-8')
         with open(config.MANIFEST_OUTPUT_FILE, 'w', encoding='utf-8') as f:
