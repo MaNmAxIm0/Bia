@@ -4,14 +4,13 @@ import os
 import subprocess
 import logging
 import shlex
-import shutil  # Importado para copiar ficheiros que não serão processados
+import shutil  # Importado para copiar ficheiros
+from pathlib import Path  # Importado para uma gestão de caminhos moderna
 from tqdm import tqdm
 import sys
 
 # Importa as configurações e os processadores
 import config
-# A função apply_watermark_to_image é importada, mas o ficheiro não foi fornecido.
-# Se o ficheiro 'image_processor.py' existir, esta linha funcionará.
 # from processors.image_processor import apply_watermark_to_image
 from processors.video_processor import apply_watermark_to_video
 
@@ -25,11 +24,12 @@ logging.basicConfig(
 def setup_directories():
     """Cria os diretórios locais necessários se não existirem."""
     logging.info(f"A garantir que os diretórios '{config.LOCAL_DOWNLOAD_DIR}' e '{config.LOCAL_PROCESSED_DIR}' existem.")
-    os.makedirs(config.LOCAL_DOWNLOAD_DIR, exist_ok=True)
-    os.makedirs(config.LOCAL_PROCESSED_DIR, exist_ok=True)
+    # Usa Path para criar os diretórios
+    Path(config.LOCAL_DOWNLOAD_DIR).mkdir(exist_ok=True)
+    Path(config.LOCAL_PROCESSED_DIR).mkdir(exist_ok=True)
 
 def download_assets():
-    """Descarrega os ficheiros da origem definida no config.py para o diretório local."""
+    """Descarrega os ficheiros da origem (Google Drive) para o diretório local."""
     logging.info(f"A iniciar o download de ficheiros de '{config.SOURCE_RCLONE_PATH}'...")
     try:
         # --- CORREÇÃO --- O comando rclone foi preenchido corretamente.
@@ -44,72 +44,64 @@ def download_assets():
     except subprocess.CalledProcessError as e:
         logging.error("Falha no download dos ficheiros com rclone. O script será terminado.")
         logging.error(f"Rclone stderr: {e.stderr}")
-        exit(1)  # Termina o script se o download falhar
+        exit(1)
 
 def process_all_files():
     """Itera sobre os ficheiros descarregados, aplicando a marca de água ou copiando-os."""
     logging.info("A iniciar o processamento de todos os ficheiros descarregados...")
     
-    # --- CORREÇÃO --- A lista de ficheiros foi inicializada corretamente.
-    # Este código percorre o diretório de download e cria uma lista de todos os ficheiros.
-    file_list = [
-        os.path.join(root, file)
-        for root, _, files in os.walk(config.LOCAL_DOWNLOAD_DIR)
-        for file in files if not file.startswith('.')  # Ignora ficheiros ocultos
-    ]
+    # --- CORREÇÃO --- A lista de ficheiros foi inicializada usando Path.rglob.
+    # Este método é eficiente e retorna objetos Path diretamente.
+    source_dir = Path(config.LOCAL_DOWNLOAD_DIR)
+    all_files = [p for p in source_dir.rglob('*') if p.is_file() and not p.name.startswith('.')]
 
-    if not file_list:
-        logging.warning("Nenhum ficheiro encontrado para processar. Verifique se o download foi bem-sucedido e se a pasta de origem não está vazia.")
+    if not all_files:
+        logging.warning("Nenhum ficheiro encontrado para processar. Verifique se o download foi bem-sucedido.")
         return
 
     success_count = 0
     fail_count = 0
 
-    with tqdm(total=len(file_list), desc="A processar ficheiros", unit="file") as pbar:
-        for file_path in file_list:
-            filename = os.path.basename(file_path)
-            _, extension = os.path.splitext(filename.lower())
-            
-            relative_path = os.path.relpath(file_path, config.LOCAL_DOWNLOAD_DIR)
-            output_path = os.path.join(config.LOCAL_PROCESSED_DIR, relative_path)
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with tqdm(total=len(all_files), desc="A processar ficheiros", unit="file") as pbar:
+        for file_path in all_files:
+            relative_path = file_path.relative_to(source_dir)
+            output_path = Path(config.LOCAL_PROCESSED_DIR) / relative_path
+            output_path.parent.mkdir(parents=True, exist_ok=True)
 
-            processed = False
-            
-            # Verifica se o ficheiro deve ser ignorado com base nos padrões do config.py
-            if hasattr(config, 'EXCLUDE_PATTERNS') and any(filename.endswith(ext) for ext in config.EXCLUDE_PATTERNS):
+            extension = file_path.suffix.lower()
+
+            # Verifica se o ficheiro deve ser excluído
+            if hasattr(config, 'EXCLUDE_PATTERNS') and any(file_path.name.endswith(ext) for ext in config.EXCLUDE_PATTERNS):
                 pbar.update(1)
                 continue
 
             # Processa imagens (se a função estiver disponível)
             # if extension in config.IMAGE_EXTENSIONS:
-            #     if 'apply_watermark_to_image' in globals():
-            #         if apply_watermark_to_image(file_path, output_path, config):
-            #             success_count += 1
-            #         else:
-            #             fail_count += 1
-            #         processed = True
-
+            #     if 'apply_watermark_to_image' in globals() and apply_watermark_to_image(str(file_path), str(output_path), config):
+            #         success_count += 1
+            #     else:
+            #         fail_count += 1
+            
             # Processa vídeos
             if extension in config.VIDEO_EXTENSIONS:
-                if apply_watermark_to_video(file_path, output_path, config):
+                if apply_watermark_to_video(str(file_path), str(output_path), config):
                     success_count += 1
                 else:
                     fail_count += 1
-                processed = True
             
-            # --- MELHORIA --- Se não foi processado, copia o ficheiro diretamente.
-            if not processed:
+            # Se não for um tipo de ficheiro processável, apenas o copia
+            else:
                 try:
                     shutil.copy2(file_path, output_path)
-                    logging.info(f"Ficheiro '{filename}' com extensão não suportada. A copiar diretamente.")
+                    # O log para cópia pode ser verboso, então pode ser comentado se preferir
+                    # logging.info(f"Ficheiro '{file_path.name}' não processável. A copiar diretamente.")
                 except Exception as e:
-                    logging.error(f"Não foi possível copiar o ficheiro '{filename}': {e}")
+                    logging.error(f"Falha ao copiar '{file_path.name}'. Motivo: {e}")
                     fail_count += 1
-
+            
             pbar.update(1)
 
-    logging.info(f"Processamento concluído. Ficheiros com sucesso: {success_count}, Falhas: {fail_count}")
+    logging.info(f"Processamento concluído. Sucesso: {success_count}, Falhas: {fail_count}")
     if fail_count > 0:
         logging.warning("Alguns ficheiros não puderam ser processados. Verifique os logs de erro acima.")
 
@@ -119,4 +111,3 @@ if __name__ == "__main__":
     download_assets()
     process_all_files()
     logging.info("--- FIM DO PIPELINE DE PROCESSAMENTO ---")
-    logging.info("O upload dos ficheiros processados será gerido pelo passo seguinte no workflow.")
