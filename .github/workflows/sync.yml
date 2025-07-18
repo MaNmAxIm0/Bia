@@ -63,7 +63,17 @@ jobs:
         run: |
           # Sincroniza apenas os ficheiros processados com sucesso
           rclone sync ./processed_assets "R2:bia-portfolio-assets" -v --fast-list --checksum
-
+      
+      - name: Upload Logs as Artifact
+        if: always() # Executa sempre, mesmo que passos anteriores falhem
+        uses: actions/upload-artifact@v4
+        with:
+          name: processing-logs
+          path: |
+            success.log
+            failure.log
+          retention-days: 7
+          
       - name: Upload Failed Images as Artifact
         if: always() # Executa este passo mesmo que os passos anteriores falhem
         uses: actions/upload-artifact@v4
