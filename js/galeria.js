@@ -32,15 +32,8 @@ function renderNextBatch(containerId) {
         const itemClassName = classMap[state.type] || 'gallery';
         itemDiv.classList.add(`${itemClassName}-item`);
 
-        // Adiciona a classe de orientação para estilização CSS
-        if (item.orientation) {
-            itemDiv.classList.add(`orientation-${item.orientation}`);
-        }
-
-        const title = item.titles?.[lang] || item.titles?.pt || '';
+        const title = item.titles[lang] || item.titles.pt;
         const isVideo = state.type === 'videos';
-
-        // Usa a thumbnail_url para vídeos e a url principal para os outros.
         const previewImageUrl = isVideo ? item.thumbnail_url : item.url;
 
         const imageContainer = document.createElement('div');
@@ -74,6 +67,29 @@ function renderNextBatch(containerId) {
         itemDiv.addEventListener('click', () => {
             openLightbox(item.url, isVideo ? 'video' : 'image', title);
         });
+
+        // --- OTIMIZAÇÃO DE PRÉ-CARREGAMENTO DE VÍDEO ---
+        if (isVideo) {
+            itemDiv.addEventListener('mouseenter', () => {
+                // Ao passar o rato por cima, cria uma tag <link> para pré-carregar o vídeo
+                const preloadLink = document.createElement('link');
+                preloadLink.href = item.url;
+                preloadLink.rel = 'preload';
+                preloadLink.as = 'video';
+                // Adiciona um id único para o podermos remover depois
+                preloadLink.id = `preload-${item.titles.pt.replace(/\s/g, '')}`;
+                document.head.appendChild(preloadLink);
+            });
+
+            itemDiv.addEventListener('mouseleave', () => {
+                // Ao tirar o rato de cima, remove a tag para parar o pré-carregamento
+                const preloadLink = document.getElementById(`preload-${item.titles.pt.replace(/\s/g, '')}`);
+                if (preloadLink) {
+                    preloadLink.remove();
+                }
+            });
+        }
+        // --- FIM DA OTIMIZAÇÃO ---
 
         galleryContainer.appendChild(itemDiv);
     });

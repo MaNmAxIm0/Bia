@@ -142,31 +142,56 @@ def process_image(input_path: Path, output_path: Path, apply_watermark_flag: boo
         # Isto reduzirá drasticamente o tamanho dos ficheiros.
         img_to_save.save(output_path, "JPEG", quality=65, optimize=True, progressive=True)
 
+# Ficheiro: Bia/main.py (função process_video completa e corrigida)
+
 def process_video(input_path: Path, output_path: Path):
-    """Aplica marca de água a um vídeo e gera o seu thumbnail (sem marca de água)."""
-    # 1. Aplica marca de água ao vídeo principal
+    """
+    Aplica marca de água, comprime o vídeo para a web e gera um thumbnail inteligente.
+    """
     font_path_ffmpeg = str(config.WATERMARK_FONT_PATH).replace("\\", "/").replace(":", "\\\\:")
+    
     watermark_filter = (
         f"drawtext=fontfile='{font_path_ffmpeg}':text='{config.WATERMARK_TEXT}':"
-        f"fontsize=h*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
-        f"x=(w-text_w-w*{config.MARGIN_RATIO})+2:y=(h-text_h-h*{config.MARGIN_RATIO})+2,"
+        f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
+        f"x=(w-text_w-(min(w,h)*{config.MARGIN_RATIO}))+2:y=(h-text_h-(min(w,h)*{config.MARGIN_RATIO}))+2,"
         f"drawtext=fontfile='{font_path_ffmpeg}':text='{config.WATERMARK_TEXT}':"
-        f"fontsize=h*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=white@0.8:"
-        f"x=w-text_w-w*{config.MARGIN_RATIO}:y=h-text_h-h*{config.MARGIN_RATIO}"
+        f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=white@0.8:"
+        f"x=w-text_w-(min(w,h)*{config.MARGIN_RATIO}):y=h-text_h-(min(w,h)*{config.MARGIN_RATIO})"
     )
+
+    # --- Comando de compressão otimizado ---
     video_cmd = [
-        "ffmpeg", "-i", str(input_path), "-vf", watermark_filter,
-        "-codec:v", "libx264", "-preset", "medium", "-crf", "23",
-        "-codec:a", "copy", "-y", str(output_path)
+        "ffmpeg", "-i", str(input_path), "-vf", f"scale=-2:1080,{watermark_filter}",
+        "-codec:v", "libx264", "-preset", "medium", "-crf", "28",
+        "-codec:a", "aac", "-b:a", "128k", "-y", str(output_path)
     ]
     if not run_command(video_cmd, f"Processar vídeo {input_path.name}"):
-        return False # Aborta se o processamento do vídeo falhar
+        return False
 
-    # 2. Gera thumbnail a partir do VÍDEO ORIGINAL (sem marca de água)
-    thumb_output_path = config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR / f"{output_path.stem}_thumb.jpg"
-    thumb_cmd = ["ffmpeg", "-i", str(input_path), "-ss", config.THUMBNAIL_TIMESTAMP, "-vframes", "1", "-q:v", "2", "-y", str(thumb_output_path)]
-    if not run_command(thumb_cmd, f"Gerar thumbnail para {output_path.name}"):
-        return False # Aborta se a geração do thumbnail falhar
+    # --- LÓGICA DE THUMBNAIL INTELIGENTE ---
+    try:
+        # 1. Obter a duração do vídeo usando ffprobe
+        duration_cmd = [
+            "ffprobe", "-v", "error", "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1", str(input_path)
+        ]
+        result = subprocess.run(duration_cmd, capture_output=True, text=True, check=True)
+        duration = float(result.stdout)
+        
+        # 2. Calcular o timestamp (a 15% da duração, mas no mínimo a 1s)
+        thumbnail_timestamp = max(1.0, duration * 0.15)
+
+        # 3. Gerar o thumbnail usando o novo timestamp
+        thumb_output_path = config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR / f"{output_path.stem}_thumb.jpg"
+        thumb_cmd = [
+            "ffmpeg", "-i", str(input_path),
+            "-ss", str(thumbnail_timestamp), # Usa o timestamp calculado
+            "-vframes", "1", "-q:v", "2", "-y", str(thumb_output_path)
+        ]
+        run_command(thumb_cmd, f"Gerar thumbnail inteligente para {output_path.name}")
+    except Exception as e:
+        logging.error(f"FALHA ao gerar thumbnail inteligente para {input_path.name}: {e}")
+        return False
 
     return True
 
