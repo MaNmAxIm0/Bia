@@ -83,9 +83,16 @@ def process_image(input_path: Path, output_path: Path, apply_watermark_flag: boo
         
         img.save(output_path, "JPEG", quality=65, optimize=True, progressive=True)
 
+
 def process_video(input_path: Path, output_path: Path, apply_watermark_flag: bool):
-    """Processa um vídeo com uma sintaxe de filtro FFmpeg robusta e corrigida."""
-    
+    """
+    Processa um vídeo e gera a sua thumbnail, garantindo que todos os diretórios
+    de destino são criados previamente.
+    """
+    # --- 1. Processamento do Vídeo Principal ---
+    # Garante que o diretório de saída para o vídeo existe (ex: processed_assets/Vídeos/)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
     filter_complex = "scale=min(1920\\,iw):-2"
     
     if apply_watermark_flag:
@@ -107,39 +114,47 @@ def process_video(input_path: Path, output_path: Path, apply_watermark_flag: boo
         "-vf", filter_complex,
         "-c:v", "libx264", "-preset", "medium", "-crf", "28",
         "-c:a", "aac", "-b:a", "128k",
-        "-y",
-        str(output_path)
+        "-y", str(output_path)
     ]
     
     if not run_command(video_cmd, f"Processar vídeo {input_path.name}"):
         return False
 
-    # --- CORREÇÃO NA GERAÇÃO DE THUMBNAILS ---
+    # --- 2. Geração da Thumbnail (Lógica Corrigida) ---
     try:
+        # **CORREÇÃO:** Constrói o caminho da thumbnail na estrutura "plana" correta.
+        # Ex: processed_assets/Thumbnails/meu_video_thumb.jpg
+        thumb_path = config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR / f"{output_path.stem}_thumb.jpg"
+        
+        # **CORREÇÃO CRÍTICA:** Garante que o diretório de destino da thumbnail existe!
+        # Isto cria 'processed_assets/Thumbnails/' se ainda não existir.
+        thumb_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Obtém a duração do vídeo para escolher um bom momento para a thumbnail
         duration_cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(input_path)]
         result = subprocess.run(duration_cmd, capture_output=True, text=True, check=True)
         duration = float(result.stdout.strip())
         
-        # Lógica de timestamp melhorada para evitar valores negativos ou fora dos limites
-        ts = max(0, duration * 0.15)
+        # Lógica de timestamp para evitar erros em vídeos curtos
+        ts = max(0.1, duration * 0.15) # Garante que ts é sempre > 0
         if ts >= duration:
-            ts = duration / 2  # Se o vídeo for muito curto, usa o ponto médio
+            ts = duration / 2
 
-        thumb_path = config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR / f"{output_path.stem}_thumb.jpg"
-        
-        # Adicionada a flag '-update 1' para garantir que o FFmpeg cria um único ficheiro de imagem.
+        # Comando FFmpeg para extrair a thumbnail
         thumb_cmd = [
-            "ffmpeg", "-i", str(input_path), 
-            "-ss", str(ts), 
+            "ffmpeg", "-ss", str(ts), "-i", str(input_path), 
             "-vframes", "1", 
             "-q:v", "2",
-            "-update", "1", # Flag crucial para resolver o erro
             "-y", 
             str(thumb_path)
         ]
-        run_command(thumb_cmd, f"Gerar thumbnail para {output_path.name}")
+        
+        if not run_command(thumb_cmd, f"Gerar thumbnail para {output_path.name}"):
+            logging.warning(f"Não foi possível gerar thumbnail para {output_path.name}, mas o vídeo foi processado.")
+    
     except Exception as e:
-        logging.error(f"FALHA ao gerar thumbnail para {input_path.name}: {e}")
+        logging.error(f"FALHA CRÍTICA ao gerar thumbnail para {input_path.name}: {e}")
+        # Retorna False para que este ficheiro seja registado como uma falha.
         return False
         
     return True
