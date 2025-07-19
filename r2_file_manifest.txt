@@ -1,246 +1,253 @@
-2025-07-19 11:05:28 Fotografias/244.JPG
-2025-07-19 11:05:29 Fotografias/220.JPG
-2025-07-19 11:05:29 Fotografias/379.JPG
-2025-07-19 11:05:30 Fotografias/241.JPG
-2025-07-19 11:05:31 Fotografias/1752175859097.jpeg
-2025-07-19 11:05:31 Fotografias/271.JPG
-2025-07-19 11:05:31 Fotografias/409.JPG
-2025-07-19 11:05:32 Fotografias/304.JPG
-2025-07-19 11:05:32 Fotografias/360.JPG
-2025-07-19 11:05:33 Fotografias/357.JPG
-2025-07-19 11:05:34 Fotografias/235.JPG
-2025-07-19 11:05:34 Fotografias/408.JPG
-2025-07-19 11:05:35 Fotografias/308.JPG
-2025-07-19 11:05:36 Fotografias/1752175818077.jpeg
-2025-07-19 11:05:36 Fotografias/291.JPG
-2025-07-19 11:05:36 Fotografias/344.JPG
-2025-07-19 11:05:37 Fotografias/351.JPG
-2025-07-19 11:05:37 Fotografias/364.JPG
-2025-07-19 11:05:38 Fotografias/1752175823004.jpeg
-2025-07-19 11:05:38 Fotografias/1752175871513.jpeg
-2025-07-19 11:05:38 Fotografias/202.JPG
-2025-07-19 11:05:38 Fotografias/289.JPG
-2025-07-19 11:05:39 Fotografias/276.JPG
-2025-07-19 11:05:39 Fotografias/384.JPG
-2025-07-19 11:05:40 Fotografias/356.JPG
-2025-07-19 11:05:41 Fotografias/327.JPG
-2025-07-19 11:05:41 Fotografias/329.JPG
-2025-07-19 11:05:42 Fotografias/399.JPG
-2025-07-19 11:05:43 Fotografias/251.JPG
-2025-07-19 11:05:43 Fotografias/322.JPG
-2025-07-19 11:05:44 Fotografias/215.JPG
-2025-07-19 11:05:44 Fotografias/326.JPG
-2025-07-19 11:05:45 Fotografias/270.JPG
-2025-07-19 11:05:46 Fotografias/1752175868135.jpeg
-2025-07-19 11:05:46 Fotografias/369.JPG
-2025-07-19 11:05:46 Fotografias/401.JPG
-2025-07-19 11:05:47 Fotografias/343.JPG
-2025-07-19 11:05:47 Fotografias/385.JPG
-2025-07-19 11:05:48 Fotografias/265.JPG
-2025-07-19 11:05:49 Fotografias/222.JPG
-2025-07-19 11:05:49 Fotografias/363.JPG
-2025-07-19 11:05:50 Fotografias/266.JPG
-2025-07-19 11:05:50 Fotografias/380.JPG
-2025-07-19 11:05:51 Fotografias/268.JPG
-2025-07-19 11:05:52 Fotografias/297.JPG
-2025-07-19 11:05:53 Fotografias/217.JPG
-2025-07-19 11:05:53 Fotografias/300.JPG
-2025-07-19 11:05:54 Fotografias/346.JPG
-2025-07-19 11:05:54 Fotografias/366.JPG
-2025-07-19 11:05:55 Fotografias/1752175347552 (1).jpeg
-2025-07-19 11:05:55 Fotografias/370.JPG
-2025-07-19 11:05:56 Fotografias/257.JPG
-2025-07-19 11:05:56 Fotografias/396.JPG
-2025-07-19 11:05:57 Fotografias/262.JPG
-2025-07-19 11:05:58 Fotografias/284.JPG
-2025-07-19 11:05:58 Fotografias/376.JPG
-2025-07-19 11:05:59 Fotografias/1752175824542.jpeg
-2025-07-19 11:05:59 Fotografias/316.JPG
-2025-07-19 11:06:00 Fotografias/203.JPG
-2025-07-19 11:06:00 Fotografias/292.JPG
-2025-07-19 11:06:01 Fotografias/383.JPG
-2025-07-19 11:06:01 Fotografias/398.JPG
-2025-07-19 11:06:02 Fotografias/345.JPG
-2025-07-19 11:06:03 Fotografias/205.JPG
-2025-07-19 11:06:03 Fotografias/287.JPG
-2025-07-19 11:06:04 Fotografias/1752175504469.jpeg
-2025-07-19 11:06:04 Fotografias/325.JPG
-2025-07-19 11:06:04 Fotografias/352.JPG
-2025-07-19 11:06:05 Fotografias/224.JPG
-2025-07-19 11:06:06 Fotografias/331.JPG
-2025-07-19 11:06:06 Fotografias/362.JPG
-2025-07-19 11:06:07 Fotografias/263.JPG
-2025-07-19 11:06:07 Fotografias/391.JPG
-2025-07-19 11:06:08 Fotografias/405.JPG
-2025-07-19 11:06:09 Fotografias/319.JPG
-2025-07-19 11:06:09 Fotografias/361.JPG
-2025-07-19 11:06:10 Fotografias/317.JPG
-2025-07-19 11:06:10 Fotografias/318.JPG
-2025-07-19 11:06:11 Fotografias/307.JPG
-2025-07-19 11:06:12 Fotografias/1752175829900.jpeg
-2025-07-19 11:06:12 Fotografias/390.JPG
-2025-07-19 11:06:12 Fotografias/403.JPG
-2025-07-19 11:06:13 Fotografias/204.JPG
-2025-07-19 11:06:14 Fotografias/365.JPG
-2025-07-19 11:06:14 Fotografias/382.JPG
-2025-07-19 11:06:15 Fotografias/367.JPG
-2025-07-19 11:06:15 Fotografias/375.JPG
-2025-07-19 11:06:16 Fotografias/269.JPG
-2025-07-19 11:06:17 Fotografias/1752175504469 (1).jpeg
-2025-07-19 11:06:17 Fotografias/349.JPG
-2025-07-19 11:06:17 Fotografias/406.JPG
-2025-07-19 11:06:18 Fotografias/301.JPG
-2025-07-19 11:06:19 Fotografias/354.JPG
-2025-07-19 11:06:19 Fotografias/371.JPG
-2025-07-19 11:06:20 Fotografias/226.JPG
-2025-07-19 11:06:20 Fotografias/378.JPG
-2025-07-19 11:06:21 Fotografias/223.JPG
-2025-07-19 11:06:21 Fotografias/225.JPG
-2025-07-19 11:06:22 Fotografias/238.JPG
-2025-07-19 11:06:23 Fotografias/1752175864907.jpeg
-2025-07-19 11:06:23 Fotografias/264.JPG
-2025-07-19 11:06:23 Fotografias/290.JPG
-2025-07-19 11:06:24 Fotografias/299.JPG
-2025-07-19 11:06:25 Fotografias/394.JPG
-2025-07-19 11:06:25 Fotografias/404.JPG
-2025-07-19 11:06:26 Fotografias/324.JPG
-2025-07-19 11:06:26 Fotografias/395.JPG
-2025-07-19 11:06:27 Fotografias/1752175863478.jpeg
-2025-07-19 11:06:27 Fotografias/1752175866672.jpeg
-2025-07-19 11:06:27 Fotografias/232.JPG
-2025-07-19 11:06:27 Fotografias/272.JPG
-2025-07-19 11:06:28 Fotografias/243.JPG
-2025-07-19 11:06:28 Fotografias/256.JPG
-2025-07-19 11:06:29 Fotografias/323.JPG
-2025-07-19 11:06:30 Fotografias/211.JPG
-2025-07-19 11:06:30 Fotografias/305.JPG
-2025-07-19 11:06:31 Fotografias/1752175821045.jpeg
-2025-07-19 11:06:31 Fotografias/332.JPG
-2025-07-19 11:06:31 Fotografias/392.JPG
-2025-07-19 11:06:32 Fotografias/207.JPG
-2025-07-19 11:06:32 Fotografias/320.JPG
-2025-07-19 11:06:33 Fotografias/381.JPG
-2025-07-19 11:06:34 Fotografias/1752175818076.jpeg
-2025-07-19 11:06:34 Fotografias/330.JPG
-2025-07-19 11:06:34 Fotografias/373.JPG
-2025-07-19 11:06:35 Fotografias/1752175827836.jpeg
-2025-07-19 11:06:35 Fotografias/315.JPG
-2025-07-19 11:06:35 Fotografias/393.JPG
-2025-07-19 11:06:36 Fotografias/279.JPG
-2025-07-19 11:06:37 Fotografias/368.JPG
-2025-07-19 11:06:37 Fotografias/407.JPG
-2025-07-19 11:06:38 Fotografias/1752175826273.jpeg
-2025-07-19 11:06:38 Fotografias/1752175869738.jpeg
-2025-07-19 11:06:38 Fotografias/358.JPG
-2025-07-19 11:06:39 Fotografias/342.JPG
-2025-07-19 11:06:39 Fotografias/353.JPG
-2025-07-19 11:06:40 Fotografias/253.JPG
-2025-07-19 11:06:40 Fotografias/402.JPG
-2025-07-19 11:06:41 Fotografias/296.JPG
-2025-07-19 11:06:41 Fotografias/372.JPG
-2025-07-19 11:06:42 Fotografias/389.JPG
-2025-07-19 11:06:43 Fotografias/288.JPG
-2025-07-19 11:06:43 Fotografias/400.JPG
-2025-07-19 11:06:44 Fotografias/321.JPG
-2025-07-19 11:06:44 Fotografias/350.JPG
-2025-07-19 11:06:45 Fotografias/1752175859098.jpeg
-2025-07-19 11:06:45 Fotografias/283.JPG
-2025-07-19 11:06:46 Fotografias/348.JPG
-2025-07-19 11:06:47 Fotografias/298.JPG
-2025-07-19 11:06:47 Fotografias/397.JPG
-2025-07-19 11:06:48 Fotografias/328.JPG
-2025-07-19 11:06:48 Fotografias/359.JPG
-2025-07-19 11:06:49 Fotografias/1752175861657.jpeg
-2025-07-19 11:06:49 Fotografias/333.JPG
-2025-07-19 11:06:49 Fotografias/386.JPG
-2025-07-19 11:06:50 Capas/Apresentações.png
-2025-07-19 11:06:50 Capas/Contactos.png
-2025-07-19 11:06:50 Capas/Designs.png
-2025-07-19 11:06:50 Capas/Fotografias Verticais.png
-2025-07-19 11:06:50 Capas/Sobre mim.png
-2025-07-19 11:06:50 Capas/Vídeos Horizontais.png
-2025-07-19 11:06:50 Designs/1752175526372.jpeg
-2025-07-19 11:06:50 Designs/1752175789573.jpeg
-2025-07-19 11:06:50 Designs/A_MELHOR_PARCERIA_ESTA_A_CHEGAR_Video_para_dispositivos_moveis.png
-2025-07-19 11:06:50 Fotografias/221.JPG
-2025-07-19 11:06:50 Melhores/carousel_image_1.png
-2025-07-19 11:06:50 Melhores/carousel_image_2.png
-2025-07-19 11:06:50 Melhores/carousel_image_3.png
-2025-07-19 11:06:51 Designs/1.png
-2025-07-19 11:06:51 Designs/1752175324044.jpeg
-2025-07-19 11:06:51 Designs/1752175347552.jpeg
-2025-07-19 11:06:51 Designs/1752175520078.jpeg
-2025-07-19 11:06:51 Designs/1752175526373.jpeg
-2025-07-19 11:06:51 Designs/1752175537942.jpeg
-2025-07-19 11:06:51 Designs/1752175537943.jpeg
-2025-07-19 11:06:51 Designs/1752175723591.jpeg
-2025-07-19 11:06:51 Designs/1752175727078.jpeg
-2025-07-19 11:06:51 Designs/1752175747372.jpeg
-2025-07-19 11:06:51 Designs/1752175771401.jpeg
-2025-07-19 11:06:51 Designs/1752175776310.jpeg
-2025-07-19 11:06:51 Designs/1752175778783.jpeg
-2025-07-19 11:06:51 Designs/1752175780855.jpeg
-2025-07-19 11:06:51 Designs/1752175787917.jpeg
-2025-07-19 11:06:51 Designs/1752175793687 (1).jpeg
-2025-07-19 11:06:51 Designs/1752175793688.jpeg
-2025-07-19 11:06:51 Designs/1752175799102.jpeg
-2025-07-19 11:06:51 Designs/1752175849497.jpeg
-2025-07-19 11:06:51 Designs/1752175852138.jpeg
-2025-07-19 11:06:51 Designs/1752175896779.jpeg
-2025-07-19 11:06:51 Designs/2.png
-2025-07-19 11:06:51 Designs/3.png
-2025-07-19 11:06:51 Designs/6.png
-2025-07-19 11:06:51 Designs/Captura de ecrã 2025-02-19 203547.png
-2025-07-19 11:06:51 Designs/sara (1).png
-2025-07-19 11:06:52 Designs/1752175511130.jpeg
-2025-07-19 11:06:52 Designs/1752175511131.jpeg
-2025-07-19 11:06:52 Designs/1752175513806.jpeg
-2025-07-19 11:06:52 Designs/1752175515581.jpeg
-2025-07-19 11:06:52 Designs/1752175520079.jpeg
-2025-07-19 11:06:52 Designs/1752175532647.jpeg
-2025-07-19 11:06:52 Designs/1752175532648.jpeg
-2025-07-19 11:06:52 Designs/1752175543768 (1).jpeg
-2025-07-19 11:06:52 Designs/1752175543768.jpeg
-2025-07-19 11:06:52 Designs/1752175553095.jpeg
-2025-07-19 11:06:52 Designs/1752175751084.jpeg
-2025-07-19 11:06:52 Designs/1752175771401 (1).jpeg
-2025-07-19 11:06:52 Designs/1752175774316.jpeg
-2025-07-19 11:06:52 Designs/1752175784981 (1).jpeg
-2025-07-19 11:06:52 Designs/1752175784981.jpeg
-2025-07-19 11:06:52 Designs/1752175793687.jpeg
-2025-07-19 11:06:52 Designs/1752175795699.jpeg
-2025-07-19 11:06:52 Designs/1752175849497 (1).jpeg
-2025-07-19 11:06:52 Designs/1752175854226.jpeg
-2025-07-19 11:06:52 Designs/4.png
-2025-07-19 11:06:52 Designs/5.png
-2025-07-19 11:06:52 Designs/sara (2).png
-2025-07-19 11:07:25 Thumbnails/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p_thumb.jpg
-2025-07-19 11:07:25 Vídeos/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p.mp4
-2025-07-19 11:08:05 Thumbnails/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO_thumb.jpg
-2025-07-19 11:08:05 Vídeos/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO.mp4
-2025-07-19 11:08:33 Thumbnails/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor_thumb.jpg
-2025-07-19 11:08:33 Vídeos/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor.mp4
-2025-07-19 11:08:38 Thumbnails/Design_sem_nome_1_thumb.jpg
-2025-07-19 11:08:38 Vídeos/Design_sem_nome_1.mp4
-2025-07-19 11:08:42 Vídeos/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.mp4
-2025-07-19 11:08:43 Thumbnails/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio_thumb.jpg
-2025-07-19 11:08:43 Vídeos/highlights - 18026883509390937.mp4
-2025-07-19 11:08:44 Thumbnails/highlights - 18026883509390937_thumb.jpg
-2025-07-19 11:08:46 Thumbnails/highlights - 18057588424859151_thumb.jpg
-2025-07-19 11:08:46 Vídeos/highlights - 18057588424859151.mp4
-2025-07-19 11:09:12 Thumbnails/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖_thumb.jpg
-2025-07-19 11:09:12 Vídeos/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖.mp4
-2025-07-19 11:09:34 Thumbnails/E foi assim que terminámos o nosso último dia de campanha_thumb.jpg
-2025-07-19 11:09:34 Vídeos/E foi assim que terminámos o nosso último dia de campanha.mp4
-2025-07-19 11:09:35 Thumbnails/highlights - 17869451268147253_thumb.jpg
-2025-07-19 11:09:35 Vídeos/highlights - 17869451268147253.mp4
-2025-07-19 11:09:39 Thumbnails/highlights - 17941463183908702_thumb.jpg
-2025-07-19 11:09:39 Vídeos/highlights - 17941463183908702.mp4
-2025-07-19 11:09:40 Thumbnails/highlights - 17875946589196602_thumb.jpg
-2025-07-19 11:09:40 Vídeos/highlights - 17875946589196602.mp4
-2025-07-19 11:09:43 Thumbnails/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! _thumb.jpg
-2025-07-19 11:09:43 Vídeos/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! .mp4
-2025-07-19 11:10:51 Thumbnails/Design sem nome_thumb.jpg
-2025-07-19 11:10:51 Vídeos/Design sem nome.mp4
-2025-07-12 17:24:04 Apresentações/A crise da habitação em Portugal e a sua relação com os Direitos Humanos.pdf
-2025-07-10 21:13:20 Apresentações/Senegal.pdf
+Apresentações/A crise da habitação em Portugal e a sua relação com os Direitos Humanos.pdf
+Apresentações/Senegal.pdf
+Capas/Apresentações.png
+Capas/Contactos.png
+Capas/Designs.png
+Capas/Fotografias Verticais.png
+Capas/Sobre mim.png
+Capas/Vídeos Horizontais.png
+Designs/1.png
+Designs/1752175324044.jpeg
+Designs/1752175347552.jpeg
+Designs/1752175511130.jpeg
+Designs/1752175511131.jpeg
+Designs/1752175513806.jpeg
+Designs/1752175515581.jpeg
+Designs/1752175520078.jpeg
+Designs/1752175520079.jpeg
+Designs/1752175526372.jpeg
+Designs/1752175526373.jpeg
+Designs/1752175532647.jpeg
+Designs/1752175532648.jpeg
+Designs/1752175537942.jpeg
+Designs/1752175537943.jpeg
+Designs/1752175543768 (1).jpeg
+Designs/1752175543768.jpeg
+Designs/1752175553095.jpeg
+Designs/1752175723591.jpeg
+Designs/1752175727078.jpeg
+Designs/1752175747372.jpeg
+Designs/1752175751084.jpeg
+Designs/1752175771401 (1).jpeg
+Designs/1752175771401.jpeg
+Designs/1752175774316.jpeg
+Designs/1752175776310.jpeg
+Designs/1752175778783.jpeg
+Designs/1752175780855.jpeg
+Designs/1752175784981 (1).jpeg
+Designs/1752175784981.jpeg
+Designs/1752175787917.jpeg
+Designs/1752175789573.jpeg
+Designs/1752175793687 (1).jpeg
+Designs/1752175793687.jpeg
+Designs/1752175793688.jpeg
+Designs/1752175795699.jpeg
+Designs/1752175799102.jpeg
+Designs/1752175849497 (1).jpeg
+Designs/1752175849497.jpeg
+Designs/1752175852138.jpeg
+Designs/1752175854226.jpeg
+Designs/1752175896779.jpeg
+Designs/2.png
+Designs/3.png
+Designs/4.png
+Designs/5.png
+Designs/6.png
+Designs/A_MELHOR_PARCERIA_ESTA_A_CHEGAR_Video_para_dispositivos_moveis.png
+Designs/Captura de ecrã 2025-02-19 203547.png
+Designs/sara (1).png
+Designs/sara (2).png
+Fotografias/1752175347552 (1).jpeg
+Fotografias/1752175504469 (1).jpeg
+Fotografias/1752175504469.jpeg
+Fotografias/1752175818076.jpeg
+Fotografias/1752175818077.jpeg
+Fotografias/1752175821045.jpeg
+Fotografias/1752175823004.jpeg
+Fotografias/1752175824542.jpeg
+Fotografias/1752175826273.jpeg
+Fotografias/1752175827836.jpeg
+Fotografias/1752175829900.jpeg
+Fotografias/1752175859097.jpeg
+Fotografias/1752175859098.jpeg
+Fotografias/1752175861657.jpeg
+Fotografias/1752175863478.jpeg
+Fotografias/1752175864907.jpeg
+Fotografias/1752175866672.jpeg
+Fotografias/1752175868135.jpeg
+Fotografias/1752175869738.jpeg
+Fotografias/1752175871513.jpeg
+Fotografias/202.JPG
+Fotografias/203.JPG
+Fotografias/204.JPG
+Fotografias/205.JPG
+Fotografias/207.JPG
+Fotografias/211.JPG
+Fotografias/215.JPG
+Fotografias/217.JPG
+Fotografias/220.JPG
+Fotografias/221.JPG
+Fotografias/222.JPG
+Fotografias/223.JPG
+Fotografias/224.JPG
+Fotografias/225.JPG
+Fotografias/226.JPG
+Fotografias/232.JPG
+Fotografias/235.JPG
+Fotografias/238.JPG
+Fotografias/241.JPG
+Fotografias/243.JPG
+Fotografias/244.JPG
+Fotografias/251.JPG
+Fotografias/253.JPG
+Fotografias/256.JPG
+Fotografias/257.JPG
+Fotografias/262.JPG
+Fotografias/263.JPG
+Fotografias/264.JPG
+Fotografias/265.JPG
+Fotografias/266.JPG
+Fotografias/268.JPG
+Fotografias/269.JPG
+Fotografias/270.JPG
+Fotografias/271.JPG
+Fotografias/272.JPG
+Fotografias/276.JPG
+Fotografias/279.JPG
+Fotografias/283.JPG
+Fotografias/284.JPG
+Fotografias/287.JPG
+Fotografias/288.JPG
+Fotografias/289.JPG
+Fotografias/290.JPG
+Fotografias/291.JPG
+Fotografias/292.JPG
+Fotografias/296.JPG
+Fotografias/297.JPG
+Fotografias/298.JPG
+Fotografias/299.JPG
+Fotografias/300.JPG
+Fotografias/301.JPG
+Fotografias/304.JPG
+Fotografias/305.JPG
+Fotografias/307.JPG
+Fotografias/308.JPG
+Fotografias/315.JPG
+Fotografias/316.JPG
+Fotografias/317.JPG
+Fotografias/318.JPG
+Fotografias/319.JPG
+Fotografias/320.JPG
+Fotografias/321.JPG
+Fotografias/322.JPG
+Fotografias/323.JPG
+Fotografias/324.JPG
+Fotografias/325.JPG
+Fotografias/326.JPG
+Fotografias/327.JPG
+Fotografias/328.JPG
+Fotografias/329.JPG
+Fotografias/330.JPG
+Fotografias/331.JPG
+Fotografias/332.JPG
+Fotografias/333.JPG
+Fotografias/342.JPG
+Fotografias/343.JPG
+Fotografias/344.JPG
+Fotografias/345.JPG
+Fotografias/346.JPG
+Fotografias/348.JPG
+Fotografias/349.JPG
+Fotografias/350.JPG
+Fotografias/351.JPG
+Fotografias/352.JPG
+Fotografias/353.JPG
+Fotografias/354.JPG
+Fotografias/356.JPG
+Fotografias/357.JPG
+Fotografias/358.JPG
+Fotografias/359.JPG
+Fotografias/360.JPG
+Fotografias/361.JPG
+Fotografias/362.JPG
+Fotografias/363.JPG
+Fotografias/364.JPG
+Fotografias/365.JPG
+Fotografias/366.JPG
+Fotografias/367.JPG
+Fotografias/368.JPG
+Fotografias/369.JPG
+Fotografias/370.JPG
+Fotografias/371.JPG
+Fotografias/372.JPG
+Fotografias/373.JPG
+Fotografias/375.JPG
+Fotografias/376.JPG
+Fotografias/378.JPG
+Fotografias/379.JPG
+Fotografias/380.JPG
+Fotografias/381.JPG
+Fotografias/382.JPG
+Fotografias/383.JPG
+Fotografias/384.JPG
+Fotografias/385.JPG
+Fotografias/386.JPG
+Fotografias/389.JPG
+Fotografias/390.JPG
+Fotografias/391.JPG
+Fotografias/392.JPG
+Fotografias/393.JPG
+Fotografias/394.JPG
+Fotografias/395.JPG
+Fotografias/396.JPG
+Fotografias/397.JPG
+Fotografias/398.JPG
+Fotografias/399.JPG
+Fotografias/400.JPG
+Fotografias/401.JPG
+Fotografias/402.JPG
+Fotografias/403.JPG
+Fotografias/404.JPG
+Fotografias/405.JPG
+Fotografias/406.JPG
+Fotografias/407.JPG
+Fotografias/408.JPG
+Fotografias/409.JPG
+Melhores/carousel_image_1.png
+Melhores/carousel_image_2.png
+Melhores/carousel_image_3.png
+Thumbnails/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p_thumb.jpg
+Thumbnails/Design sem nome_thumb.jpg
+Thumbnails/Design_sem_nome_1_thumb.jpg
+Thumbnails/E foi assim que terminámos o nosso último dia de campanha_thumb.jpg
+Thumbnails/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖_thumb.jpg
+Thumbnails/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO_thumb.jpg
+Thumbnails/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio_thumb.jpg
+Thumbnails/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! _thumb.jpg
+Thumbnails/highlights - 17869451268147253_thumb.jpg
+Thumbnails/highlights - 17875946589196602_thumb.jpg
+Thumbnails/highlights - 17941463183908702_thumb.jpg
+Thumbnails/highlights - 18026883509390937_thumb.jpg
+Thumbnails/highlights - 18057588424859151_thumb.jpg
+Thumbnails/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor_thumb.jpg
+Vídeos/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p.mp4
+Vídeos/Design sem nome.mp4
+Vídeos/Design_sem_nome_1.mp4
+Vídeos/E foi assim que terminámos o nosso último dia de campanha.mp4
+Vídeos/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖.mp4
+Vídeos/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO.mp4
+Vídeos/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.mp4
+Vídeos/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! .mp4
+Vídeos/highlights - 17869451268147253.mp4
+Vídeos/highlights - 17875946589196602.mp4
+Vídeos/highlights - 17941463183908702.mp4
+Vídeos/highlights - 18026883509390937.mp4
+Vídeos/highlights - 18057588424859151.mp4
+Vídeos/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor.mp4
+Apresentações/
+Capas/
+Designs/
+Fotografias/
+Melhores/
+Thumbnails/
+Vídeos/
