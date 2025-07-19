@@ -80,27 +80,29 @@ def process_image(input_path: Path, output_path: Path, apply_watermark_flag: boo
         img.save(output_path, "JPEG", quality=65, optimize=True, progressive=True)
 
 def process_video(input_path: Path, output_path: Path, apply_watermark_flag: bool):
-    # --- CORREÇÃO DO FILTRO FFmpeg ---
-    # A cadeia de filtros é construída e depois passada como uma única string para evitar erros de parsing.
-    filter_complex_string = "scale='min(1920,iw)':-2"
+    """Processa um vídeo com uma sintaxe de filtro FFmpeg robusta."""
+    filter_complex = f"scale='min(1920,iw)':-2"
     
     if apply_watermark_flag:
-        font_path = str(config.WATERMARK_FONT_PATH).replace(":", "\\\\:")
+        # Escapar caracteres especiais para o filtro FFmpeg
+        font_path = str(config.WATERMARK_FONT_PATH).replace('\\', '/').replace(':', '\\:')
+        watermark_text = config.WATERMARK_TEXT.replace("'", "’")
+
         watermark_filter = (
-            f",drawtext=fontfile='{font_path}':text='{config.WATERMARK_TEXT}':"
+            f",drawtext=fontfile='{font_path}':text='{watermark_text}':"
             f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
             f"x=(w-text_w-(min(w,h)*{config.MARGIN_RATIO}))+2:y=(h-text_h-(min(w,h)*{config.MARGIN_RATIO}))+2,"
-            f"drawtext=fontfile='{font_path}':text='{config.WATERMARK_TEXT}':"
+            f"drawtext=fontfile='{font_path}':text='{watermark_text}':"
             f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=white@0.8:"
             f"x=w-text_w-(min(w,h)*{config.MARGIN_RATIO}):y=h-text_h-(min(w,h)*{config.MARGIN_RATIO})"
         )
-        filter_complex_string += watermark_filter
+        filter_complex += watermark_filter
 
     video_cmd = [
-        "ffmpeg", "-i", str(input_path), 
-        "-vf", filter_complex_string,  # O filtro é passado como uma única string
-        "-codec:v", "libx264", "-preset", "medium", "-crf", "28",
-        "-codec:a", "aac", "-b:a", "128k", "-y", str(output_path)
+        "ffmpeg", "-i", str(input_path),
+        "-vf", filter_complex,
+        "-c:v", "libx264", "-preset", "medium", "-crf", "28",
+        "-c:a", "aac", "-b:a", "128k", "-y", str(output_path)
     ]
     if not run_command(video_cmd, f"Processar vídeo {input_path.name}"):
         return False
