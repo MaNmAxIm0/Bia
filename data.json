@@ -1,1639 +1,2103 @@
 {
     "244.JPG": {
-        "pt": "244",
-        "es": "244",
-        "en": "244",
+        "titles": {
+            "pt": "244",
+            "en": "244",
+            "es": "244"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/244.JPG"
     },
     "379.JPG": {
-        "pt": "379",
-        "es": "379",
-        "en": "379",
+        "titles": {
+            "pt": "379",
+            "en": "379",
+            "es": "379"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/379.JPG"
     },
     "220.JPG": {
-        "pt": "220",
-        "es": "220",
-        "en": "220",
+        "titles": {
+            "pt": "220",
+            "en": "220",
+            "es": "220"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/220.JPG"
     },
     "241.JPG": {
-        "pt": "241",
-        "es": "241",
-        "en": "241",
+        "titles": {
+            "pt": "241",
+            "en": "241",
+            "es": "241"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/241.JPG"
     },
     "409.JPG": {
-        "pt": "409",
-        "es": "409",
-        "en": "409",
+        "titles": {
+            "pt": "409",
+            "en": "409",
+            "es": "409"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/409.JPG"
     },
     "1752175859097.jpeg": {
-        "pt": "1752175859097",
-        "es": "1752175859097",
-        "en": "1752175859097",
+        "titles": {
+            "pt": "1752175859097",
+            "en": "1752175859097",
+            "es": "1752175859097"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175859097.jpeg"
     },
     "271.JPG": {
-        "pt": "271",
-        "es": "271",
-        "en": "271",
+        "titles": {
+            "pt": "271",
+            "en": "271",
+            "es": "271"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/271.JPG"
     },
     "304.JPG": {
-        "pt": "304",
-        "es": "304",
-        "en": "304",
+        "titles": {
+            "pt": "304",
+            "en": "304",
+            "es": "304"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/304.JPG"
     },
     "360.JPG": {
-        "pt": "360",
-        "es": "360",
-        "en": "360",
+        "titles": {
+            "pt": "360",
+            "en": "360",
+            "es": "360"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/360.JPG"
     },
     "357.JPG": {
-        "pt": "357",
-        "es": "357",
-        "en": "357",
+        "titles": {
+            "pt": "357",
+            "en": "357",
+            "es": "357"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/357.JPG"
     },
     "408.JPG": {
-        "pt": "408",
-        "es": "408",
-        "en": "408",
+        "titles": {
+            "pt": "408",
+            "en": "408",
+            "es": "408"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/408.JPG"
     },
     "235.JPG": {
-        "pt": "235",
-        "es": "235",
-        "en": "235",
+        "titles": {
+            "pt": "235",
+            "en": "235",
+            "es": "235"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/235.JPG"
     },
     "308.JPG": {
-        "pt": "308",
-        "es": "308",
-        "en": "308",
+        "titles": {
+            "pt": "308",
+            "en": "308",
+            "es": "308"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/308.JPG"
     },
     "291.JPG": {
-        "pt": "291",
-        "es": "291",
-        "en": "291",
+        "titles": {
+            "pt": "291",
+            "en": "291",
+            "es": "291"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/291.JPG"
     },
     "344.JPG": {
-        "pt": "344",
-        "es": "344",
-        "en": "344",
+        "titles": {
+            "pt": "344",
+            "en": "344",
+            "es": "344"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/344.JPG"
     },
     "1752175818077.jpeg": {
-        "pt": "1752175818077",
-        "es": "1752175818077",
-        "en": "1752175818077",
+        "titles": {
+            "pt": "1752175818077",
+            "en": "1752175818077",
+            "es": "1752175818077"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175818077.jpeg"
     },
     "364.JPG": {
-        "pt": "364",
-        "es": "364",
-        "en": "364",
+        "titles": {
+            "pt": "364",
+            "en": "364",
+            "es": "364"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/364.JPG"
     },
     "351.JPG": {
-        "pt": "351",
-        "es": "351",
-        "en": "351",
+        "titles": {
+            "pt": "351",
+            "en": "351",
+            "es": "351"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/351.JPG"
     },
     "202.JPG": {
-        "pt": "202",
-        "es": "202",
-        "en": "202",
+        "titles": {
+            "pt": "202",
+            "en": "202",
+            "es": "202"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/202.JPG"
     },
     "1752175871513.jpeg": {
-        "pt": "1752175871513",
-        "es": "1752175871513",
-        "en": "1752175871513",
+        "titles": {
+            "pt": "1752175871513",
+            "en": "1752175871513",
+            "es": "1752175871513"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175871513.jpeg"
     },
     "1752175823004.jpeg": {
-        "pt": "1752175823004",
-        "es": "1752175823004",
-        "en": "1752175823004",
+        "titles": {
+            "pt": "1752175823004",
+            "en": "1752175823004",
+            "es": "1752175823004"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175823004.jpeg"
     },
     "289.JPG": {
-        "pt": "289",
-        "es": "289",
-        "en": "289",
+        "titles": {
+            "pt": "289",
+            "en": "289",
+            "es": "289"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/289.JPG"
     },
     "384.JPG": {
-        "pt": "384",
-        "es": "384",
-        "en": "384",
+        "titles": {
+            "pt": "384",
+            "en": "384",
+            "es": "384"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/384.JPG"
     },
     "276.JPG": {
-        "pt": "276",
-        "es": "276",
-        "en": "276",
+        "titles": {
+            "pt": "276",
+            "en": "276",
+            "es": "276"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/276.JPG"
     },
     "356.JPG": {
-        "pt": "356",
-        "es": "356",
-        "en": "356",
+        "titles": {
+            "pt": "356",
+            "en": "356",
+            "es": "356"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/356.JPG"
     },
     "327.JPG": {
-        "pt": "327",
-        "es": "327",
-        "en": "327",
+        "titles": {
+            "pt": "327",
+            "en": "327",
+            "es": "327"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/327.JPG"
     },
     "329.JPG": {
-        "pt": "329",
-        "es": "329",
-        "en": "329",
+        "titles": {
+            "pt": "329",
+            "en": "329",
+            "es": "329"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/329.JPG"
     },
     "399.JPG": {
-        "pt": "399",
-        "es": "399",
-        "en": "399",
+        "titles": {
+            "pt": "399",
+            "en": "399",
+            "es": "399"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/399.JPG"
     },
     "251.JPG": {
-        "pt": "251",
-        "es": "251",
-        "en": "251",
+        "titles": {
+            "pt": "251",
+            "en": "251",
+            "es": "251"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/251.JPG"
     },
     "322.JPG": {
-        "pt": "322",
-        "es": "322",
-        "en": "322",
+        "titles": {
+            "pt": "322",
+            "en": "322",
+            "es": "322"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/322.JPG"
     },
     "215.JPG": {
-        "pt": "215",
-        "es": "215",
-        "en": "215",
+        "titles": {
+            "pt": "215",
+            "en": "215",
+            "es": "215"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/215.JPG"
     },
     "326.JPG": {
-        "pt": "326",
-        "es": "326",
-        "en": "326",
+        "titles": {
+            "pt": "326",
+            "en": "326",
+            "es": "326"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/326.JPG"
     },
     "270.JPG": {
-        "pt": "270",
-        "es": "270",
-        "en": "270",
+        "titles": {
+            "pt": "270",
+            "en": "270",
+            "es": "270"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/270.JPG"
     },
     "369.JPG": {
-        "pt": "369",
-        "es": "369",
-        "en": "369",
+        "titles": {
+            "pt": "369",
+            "en": "369",
+            "es": "369"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/369.JPG"
     },
     "401.JPG": {
-        "pt": "401",
-        "es": "401",
-        "en": "401",
+        "titles": {
+            "pt": "401",
+            "en": "401",
+            "es": "401"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/401.JPG"
     },
     "1752175868135.jpeg": {
-        "pt": "1752175868135",
-        "es": "1752175868135",
-        "en": "1752175868135",
+        "titles": {
+            "pt": "1752175868135",
+            "en": "1752175868135",
+            "es": "1752175868135"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175868135.jpeg"
     },
     "343.JPG": {
-        "pt": "343",
-        "es": "343",
-        "en": "343",
+        "titles": {
+            "pt": "343",
+            "en": "343",
+            "es": "343"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/343.JPG"
     },
     "385.JPG": {
-        "pt": "385",
-        "es": "385",
-        "en": "385",
+        "titles": {
+            "pt": "385",
+            "en": "385",
+            "es": "385"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/385.JPG"
     },
     "265.JPG": {
-        "pt": "265",
-        "es": "265",
-        "en": "265",
+        "titles": {
+            "pt": "265",
+            "en": "265",
+            "es": "265"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/265.JPG"
     },
     "363.JPG": {
-        "pt": "363",
-        "es": "363",
-        "en": "363",
+        "titles": {
+            "pt": "363",
+            "en": "363",
+            "es": "363"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/363.JPG"
     },
     "222.JPG": {
-        "pt": "222",
-        "es": "222",
-        "en": "222",
+        "titles": {
+            "pt": "222",
+            "en": "222",
+            "es": "222"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/222.JPG"
     },
     "380.JPG": {
-        "pt": "380",
-        "es": "380",
-        "en": "380",
+        "titles": {
+            "pt": "380",
+            "en": "380",
+            "es": "380"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/380.JPG"
     },
     "266.JPG": {
-        "pt": "266",
-        "es": "266",
-        "en": "266",
+        "titles": {
+            "pt": "266",
+            "en": "266",
+            "es": "266"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/266.JPG"
     },
     "268.JPG": {
-        "pt": "268",
-        "es": "268",
-        "en": "268",
+        "titles": {
+            "pt": "268",
+            "en": "268",
+            "es": "268"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/268.JPG"
     },
     "297.JPG": {
-        "pt": "297",
-        "es": "297",
-        "en": "297",
+        "titles": {
+            "pt": "297",
+            "en": "297",
+            "es": "297"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/297.JPG"
     },
     "217.JPG": {
-        "pt": "217",
-        "es": "217",
-        "en": "217",
+        "titles": {
+            "pt": "217",
+            "en": "217",
+            "es": "217"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/217.JPG"
     },
     "300.JPG": {
-        "pt": "300",
-        "es": "300",
-        "en": "300",
+        "titles": {
+            "pt": "300",
+            "en": "300",
+            "es": "300"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/300.JPG"
     },
     "366.JPG": {
-        "pt": "366",
-        "es": "366",
-        "en": "366",
+        "titles": {
+            "pt": "366",
+            "en": "366",
+            "es": "366"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/366.JPG"
     },
     "346.JPG": {
-        "pt": "346",
-        "es": "346",
-        "en": "346",
+        "titles": {
+            "pt": "346",
+            "en": "346",
+            "es": "346"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/346.JPG"
     },
     "370.JPG": {
-        "pt": "370",
-        "es": "370",
-        "en": "370",
+        "titles": {
+            "pt": "370",
+            "en": "370",
+            "es": "370"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/370.JPG"
     },
     "1752175347552 (1).jpeg": {
-        "pt": "1752175347552 (1)",
-        "es": "1752175347552 (1)",
-        "en": "1752175347552 (1)",
+        "titles": {
+            "pt": "1752175347552 (1)",
+            "en": "1752175347552 (1)",
+            "es": "1752175347552 (1)"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175347552 (1).jpeg"
     },
     "396.JPG": {
-        "pt": "396",
-        "es": "396",
-        "en": "396",
+        "titles": {
+            "pt": "396",
+            "en": "396",
+            "es": "396"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/396.JPG"
     },
     "257.JPG": {
-        "pt": "257",
-        "es": "257",
-        "en": "257",
+        "titles": {
+            "pt": "257",
+            "en": "257",
+            "es": "257"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/257.JPG"
     },
     "262.JPG": {
-        "pt": "262",
-        "es": "262",
-        "en": "262",
+        "titles": {
+            "pt": "262",
+            "en": "262",
+            "es": "262"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/262.JPG"
     },
     "284.JPG": {
-        "pt": "284",
-        "es": "284",
-        "en": "284",
+        "titles": {
+            "pt": "284",
+            "en": "284",
+            "es": "284"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/284.JPG"
     },
     "376.JPG": {
-        "pt": "376",
-        "es": "376",
-        "en": "376",
+        "titles": {
+            "pt": "376",
+            "en": "376",
+            "es": "376"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/376.JPG"
     },
     "316.JPG": {
-        "pt": "316",
-        "es": "316",
-        "en": "316",
+        "titles": {
+            "pt": "316",
+            "en": "316",
+            "es": "316"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/316.JPG"
     },
     "1752175824542.jpeg": {
-        "pt": "1752175824542",
-        "es": "1752175824542",
-        "en": "1752175824542",
+        "titles": {
+            "pt": "1752175824542",
+            "en": "1752175824542",
+            "es": "1752175824542"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175824542.jpeg"
     },
     "292.JPG": {
-        "pt": "292",
-        "es": "292",
-        "en": "292",
+        "titles": {
+            "pt": "292",
+            "en": "292",
+            "es": "292"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/292.JPG"
     },
     "203.JPG": {
-        "pt": "203",
-        "es": "203",
-        "en": "203",
+        "titles": {
+            "pt": "203",
+            "en": "203",
+            "es": "203"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/203.JPG"
     },
     "398.JPG": {
-        "pt": "398",
-        "es": "398",
-        "en": "398",
+        "titles": {
+            "pt": "398",
+            "en": "398",
+            "es": "398"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/398.JPG"
     },
     "383.JPG": {
-        "pt": "383",
-        "es": "383",
-        "en": "383",
+        "titles": {
+            "pt": "383",
+            "en": "383",
+            "es": "383"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/383.JPG"
     },
     "345.JPG": {
-        "pt": "345",
-        "es": "345",
-        "en": "345",
+        "titles": {
+            "pt": "345",
+            "en": "345",
+            "es": "345"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/345.JPG"
     },
     "287.JPG": {
-        "pt": "287",
-        "es": "287",
-        "en": "287",
+        "titles": {
+            "pt": "287",
+            "en": "287",
+            "es": "287"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/287.JPG"
     },
     "205.JPG": {
-        "pt": "205",
-        "es": "205",
-        "en": "205",
+        "titles": {
+            "pt": "205",
+            "en": "205",
+            "es": "205"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/205.JPG"
     },
     "325.JPG": {
-        "pt": "325",
-        "es": "325",
-        "en": "325",
+        "titles": {
+            "pt": "325",
+            "en": "325",
+            "es": "325"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/325.JPG"
     },
     "1752175504469.jpeg": {
-        "pt": "1752175504469",
-        "es": "1752175504469",
-        "en": "1752175504469",
+        "titles": {
+            "pt": "1752175504469",
+            "en": "1752175504469",
+            "es": "1752175504469"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175504469.jpeg"
     },
     "352.JPG": {
-        "pt": "352",
-        "es": "352",
-        "en": "352",
+        "titles": {
+            "pt": "352",
+            "en": "352",
+            "es": "352"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/352.JPG"
     },
     "224.JPG": {
-        "pt": "224",
-        "es": "224",
-        "en": "224",
+        "titles": {
+            "pt": "224",
+            "en": "224",
+            "es": "224"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/224.JPG"
     },
     "331.JPG": {
-        "pt": "331",
-        "es": "331",
-        "en": "331",
+        "titles": {
+            "pt": "331",
+            "en": "331",
+            "es": "331"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/331.JPG"
     },
     "362.JPG": {
-        "pt": "362",
-        "es": "362",
-        "en": "362",
+        "titles": {
+            "pt": "362",
+            "en": "362",
+            "es": "362"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/362.JPG"
     },
     "391.JPG": {
-        "pt": "391",
-        "es": "391",
-        "en": "391",
+        "titles": {
+            "pt": "391",
+            "en": "391",
+            "es": "391"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/391.JPG"
     },
     "263.JPG": {
-        "pt": "263",
-        "es": "263",
-        "en": "263",
+        "titles": {
+            "pt": "263",
+            "en": "263",
+            "es": "263"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/263.JPG"
     },
     "405.JPG": {
-        "pt": "405",
-        "es": "405",
-        "en": "405",
+        "titles": {
+            "pt": "405",
+            "en": "405",
+            "es": "405"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/405.JPG"
     },
     "361.JPG": {
-        "pt": "361",
-        "es": "361",
-        "en": "361",
+        "titles": {
+            "pt": "361",
+            "en": "361",
+            "es": "361"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/361.JPG"
     },
     "319.JPG": {
-        "pt": "319",
-        "es": "319",
-        "en": "319",
+        "titles": {
+            "pt": "319",
+            "en": "319",
+            "es": "319"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/319.JPG"
     },
     "318.JPG": {
-        "pt": "318",
-        "es": "318",
-        "en": "318",
+        "titles": {
+            "pt": "318",
+            "en": "318",
+            "es": "318"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/318.JPG"
     },
     "317.JPG": {
-        "pt": "317",
-        "es": "317",
-        "en": "317",
+        "titles": {
+            "pt": "317",
+            "en": "317",
+            "es": "317"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/317.JPG"
     },
     "307.JPG": {
-        "pt": "307",
-        "es": "307",
-        "en": "307",
+        "titles": {
+            "pt": "307",
+            "en": "307",
+            "es": "307"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/307.JPG"
     },
     "390.JPG": {
-        "pt": "390",
-        "es": "390",
-        "en": "390",
+        "titles": {
+            "pt": "390",
+            "en": "390",
+            "es": "390"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/390.JPG"
     },
     "1752175829900.jpeg": {
-        "pt": "1752175829900",
-        "es": "1752175829900",
-        "en": "1752175829900",
+        "titles": {
+            "pt": "1752175829900",
+            "en": "1752175829900",
+            "es": "1752175829900"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175829900.jpeg"
     },
     "403.JPG": {
-        "pt": "403",
-        "es": "403",
-        "en": "403",
+        "titles": {
+            "pt": "403",
+            "en": "403",
+            "es": "403"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/403.JPG"
     },
     "204.JPG": {
-        "pt": "204",
-        "es": "204",
-        "en": "204",
+        "titles": {
+            "pt": "204",
+            "en": "204",
+            "es": "204"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/204.JPG"
     },
     "365.JPG": {
-        "pt": "365",
-        "es": "365",
-        "en": "365",
+        "titles": {
+            "pt": "365",
+            "en": "365",
+            "es": "365"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/365.JPG"
     },
     "382.JPG": {
-        "pt": "382",
-        "es": "382",
-        "en": "382",
+        "titles": {
+            "pt": "382",
+            "en": "382",
+            "es": "382"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/382.JPG"
     },
     "367.JPG": {
-        "pt": "367",
-        "es": "367",
-        "en": "367",
+        "titles": {
+            "pt": "367",
+            "en": "367",
+            "es": "367"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/367.JPG"
     },
     "375.JPG": {
-        "pt": "375",
-        "es": "375",
-        "en": "375",
+        "titles": {
+            "pt": "375",
+            "en": "375",
+            "es": "375"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/375.JPG"
     },
     "269.JPG": {
-        "pt": "269",
-        "es": "269",
-        "en": "269",
+        "titles": {
+            "pt": "269",
+            "en": "269",
+            "es": "269"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/269.JPG"
     },
     "406.JPG": {
-        "pt": "406",
-        "es": "406",
-        "en": "406",
+        "titles": {
+            "pt": "406",
+            "en": "406",
+            "es": "406"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/406.JPG"
     },
     "1752175504469 (1).jpeg": {
-        "pt": "1752175504469 (1)",
-        "es": "1752175504469 (1)",
-        "en": "1752175504469 (1)",
+        "titles": {
+            "pt": "1752175504469 (1)",
+            "en": "1752175504469 (1)",
+            "es": "1752175504469 (1)"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175504469 (1).jpeg"
     },
     "349.JPG": {
-        "pt": "349",
-        "es": "349",
-        "en": "349",
+        "titles": {
+            "pt": "349",
+            "en": "349",
+            "es": "349"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/349.JPG"
     },
     "301.JPG": {
-        "pt": "301",
-        "es": "301",
-        "en": "301",
+        "titles": {
+            "pt": "301",
+            "en": "301",
+            "es": "301"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/301.JPG"
     },
     "354.JPG": {
-        "pt": "354",
-        "es": "354",
-        "en": "354",
+        "titles": {
+            "pt": "354",
+            "en": "354",
+            "es": "354"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/354.JPG"
     },
     "371.JPG": {
-        "pt": "371",
-        "es": "371",
-        "en": "371",
+        "titles": {
+            "pt": "371",
+            "en": "371",
+            "es": "371"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/371.JPG"
     },
     "226.JPG": {
-        "pt": "226",
-        "es": "226",
-        "en": "226",
+        "titles": {
+            "pt": "226",
+            "en": "226",
+            "es": "226"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/226.JPG"
     },
     "378.JPG": {
-        "pt": "378",
-        "es": "378",
-        "en": "378",
+        "titles": {
+            "pt": "378",
+            "en": "378",
+            "es": "378"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/378.JPG"
     },
     "223.JPG": {
-        "pt": "223",
-        "es": "223",
-        "en": "223",
+        "titles": {
+            "pt": "223",
+            "en": "223",
+            "es": "223"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/223.JPG"
     },
     "225.JPG": {
-        "pt": "225",
-        "es": "225",
-        "en": "225",
+        "titles": {
+            "pt": "225",
+            "en": "225",
+            "es": "225"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/225.JPG"
     },
     "238.JPG": {
-        "pt": "238",
-        "es": "238",
-        "en": "238",
+        "titles": {
+            "pt": "238",
+            "en": "238",
+            "es": "238"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/238.JPG"
     },
     "290.JPG": {
-        "pt": "290",
-        "es": "290",
-        "en": "290",
+        "titles": {
+            "pt": "290",
+            "en": "290",
+            "es": "290"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/290.JPG"
     },
     "264.JPG": {
-        "pt": "264",
-        "es": "264",
-        "en": "264",
+        "titles": {
+            "pt": "264",
+            "en": "264",
+            "es": "264"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/264.JPG"
     },
     "1752175864907.jpeg": {
-        "pt": "1752175864907",
-        "es": "1752175864907",
-        "en": "1752175864907",
+        "titles": {
+            "pt": "1752175864907",
+            "en": "1752175864907",
+            "es": "1752175864907"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175864907.jpeg"
     },
     "299.JPG": {
-        "pt": "299",
-        "es": "299",
-        "en": "299",
+        "titles": {
+            "pt": "299",
+            "en": "299",
+            "es": "299"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/299.JPG"
     },
     "394.JPG": {
-        "pt": "394",
-        "es": "394",
-        "en": "394",
+        "titles": {
+            "pt": "394",
+            "en": "394",
+            "es": "394"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/394.JPG"
     },
     "404.JPG": {
-        "pt": "404",
-        "es": "404",
-        "en": "404",
+        "titles": {
+            "pt": "404",
+            "en": "404",
+            "es": "404"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/404.JPG"
     },
     "395.JPG": {
-        "pt": "395",
-        "es": "395",
-        "en": "395",
+        "titles": {
+            "pt": "395",
+            "en": "395",
+            "es": "395"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/395.JPG"
     },
     "324.JPG": {
-        "pt": "324",
-        "es": "324",
-        "en": "324",
+        "titles": {
+            "pt": "324",
+            "en": "324",
+            "es": "324"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/324.JPG"
     },
     "272.JPG": {
-        "pt": "272",
-        "es": "272",
-        "en": "272",
+        "titles": {
+            "pt": "272",
+            "en": "272",
+            "es": "272"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/272.JPG"
     },
     "1752175866672.jpeg": {
-        "pt": "1752175866672",
-        "es": "1752175866672",
-        "en": "1752175866672",
+        "titles": {
+            "pt": "1752175866672",
+            "en": "1752175866672",
+            "es": "1752175866672"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175866672.jpeg"
     },
     "232.JPG": {
-        "pt": "232",
-        "es": "232",
-        "en": "232",
+        "titles": {
+            "pt": "232",
+            "en": "232",
+            "es": "232"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/232.JPG"
     },
     "1752175863478.jpeg": {
-        "pt": "1752175863478",
-        "es": "1752175863478",
-        "en": "1752175863478",
+        "titles": {
+            "pt": "1752175863478",
+            "en": "1752175863478",
+            "es": "1752175863478"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175863478.jpeg"
     },
     "256.JPG": {
-        "pt": "256",
-        "es": "256",
-        "en": "256",
+        "titles": {
+            "pt": "256",
+            "en": "256",
+            "es": "256"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/256.JPG"
     },
     "243.JPG": {
-        "pt": "243",
-        "es": "243",
-        "en": "243",
+        "titles": {
+            "pt": "243",
+            "en": "243",
+            "es": "243"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/243.JPG"
     },
     "323.JPG": {
-        "pt": "323",
-        "es": "323",
-        "en": "323",
+        "titles": {
+            "pt": "323",
+            "en": "323",
+            "es": "323"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/323.JPG"
     },
     "305.JPG": {
-        "pt": "305",
-        "es": "305",
-        "en": "305",
+        "titles": {
+            "pt": "305",
+            "en": "305",
+            "es": "305"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/305.JPG"
     },
     "211.JPG": {
-        "pt": "211",
-        "es": "211",
-        "en": "211",
+        "titles": {
+            "pt": "211",
+            "en": "211",
+            "es": "211"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/211.JPG"
     },
     "392.JPG": {
-        "pt": "392",
-        "es": "392",
-        "en": "392",
+        "titles": {
+            "pt": "392",
+            "en": "392",
+            "es": "392"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/392.JPG"
     },
     "332.JPG": {
-        "pt": "332",
-        "es": "332",
-        "en": "332",
+        "titles": {
+            "pt": "332",
+            "en": "332",
+            "es": "332"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/332.JPG"
     },
     "1752175821045.jpeg": {
-        "pt": "1752175821045",
-        "es": "1752175821045",
-        "en": "1752175821045",
+        "titles": {
+            "pt": "1752175821045",
+            "en": "1752175821045",
+            "es": "1752175821045"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175821045.jpeg"
     },
     "207.JPG": {
-        "pt": "207",
-        "es": "207",
-        "en": "207",
+        "titles": {
+            "pt": "207",
+            "en": "207",
+            "es": "207"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/207.JPG"
     },
     "320.JPG": {
-        "pt": "320",
-        "es": "320",
-        "en": "320",
+        "titles": {
+            "pt": "320",
+            "en": "320",
+            "es": "320"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/320.JPG"
     },
     "381.JPG": {
-        "pt": "381",
-        "es": "381",
-        "en": "381",
+        "titles": {
+            "pt": "381",
+            "en": "381",
+            "es": "381"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/381.JPG"
     },
     "373.JPG": {
-        "pt": "373",
-        "es": "373",
-        "en": "373",
+        "titles": {
+            "pt": "373",
+            "en": "373",
+            "es": "373"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/373.JPG"
     },
     "330.JPG": {
-        "pt": "330",
-        "es": "330",
-        "en": "330",
+        "titles": {
+            "pt": "330",
+            "en": "330",
+            "es": "330"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/330.JPG"
     },
     "1752175818076.jpeg": {
-        "pt": "1752175818076",
-        "es": "1752175818076",
-        "en": "1752175818076",
+        "titles": {
+            "pt": "1752175818076",
+            "en": "1752175818076",
+            "es": "1752175818076"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175818076.jpeg"
     },
     "393.JPG": {
-        "pt": "393",
-        "es": "393",
-        "en": "393",
+        "titles": {
+            "pt": "393",
+            "en": "393",
+            "es": "393"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/393.JPG"
     },
     "315.JPG": {
-        "pt": "315",
-        "es": "315",
-        "en": "315",
+        "titles": {
+            "pt": "315",
+            "en": "315",
+            "es": "315"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/315.JPG"
     },
     "1752175827836.jpeg": {
-        "pt": "1752175827836",
-        "es": "1752175827836",
-        "en": "1752175827836",
+        "titles": {
+            "pt": "1752175827836",
+            "en": "1752175827836",
+            "es": "1752175827836"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175827836.jpeg"
     },
     "279.JPG": {
-        "pt": "279",
-        "es": "279",
-        "en": "279",
+        "titles": {
+            "pt": "279",
+            "en": "279",
+            "es": "279"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/279.JPG"
     },
     "407.JPG": {
-        "pt": "407",
-        "es": "407",
-        "en": "407",
+        "titles": {
+            "pt": "407",
+            "en": "407",
+            "es": "407"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/407.JPG"
     },
     "368.JPG": {
-        "pt": "368",
-        "es": "368",
-        "en": "368",
+        "titles": {
+            "pt": "368",
+            "en": "368",
+            "es": "368"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/368.JPG"
     },
     "358.JPG": {
-        "pt": "358",
-        "es": "358",
-        "en": "358",
+        "titles": {
+            "pt": "358",
+            "en": "358",
+            "es": "358"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/358.JPG"
     },
     "1752175826273.jpeg": {
-        "pt": "1752175826273",
-        "es": "1752175826273",
-        "en": "1752175826273",
+        "titles": {
+            "pt": "1752175826273",
+            "en": "1752175826273",
+            "es": "1752175826273"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175826273.jpeg"
     },
     "1752175869738.jpeg": {
-        "pt": "1752175869738",
-        "es": "1752175869738",
-        "en": "1752175869738",
+        "titles": {
+            "pt": "1752175869738",
+            "en": "1752175869738",
+            "es": "1752175869738"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175869738.jpeg"
     },
     "342.JPG": {
-        "pt": "342",
-        "es": "342",
-        "en": "342",
+        "titles": {
+            "pt": "342",
+            "en": "342",
+            "es": "342"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/342.JPG"
     },
     "353.JPG": {
-        "pt": "353",
-        "es": "353",
-        "en": "353",
+        "titles": {
+            "pt": "353",
+            "en": "353",
+            "es": "353"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/353.JPG"
     },
     "402.JPG": {
-        "pt": "402",
-        "es": "402",
-        "en": "402",
+        "titles": {
+            "pt": "402",
+            "en": "402",
+            "es": "402"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/402.JPG"
     },
     "253.JPG": {
-        "pt": "253",
-        "es": "253",
-        "en": "253",
+        "titles": {
+            "pt": "253",
+            "en": "253",
+            "es": "253"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/253.JPG"
     },
     "372.JPG": {
-        "pt": "372",
-        "es": "372",
-        "en": "372",
+        "titles": {
+            "pt": "372",
+            "en": "372",
+            "es": "372"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/372.JPG"
     },
     "296.JPG": {
-        "pt": "296",
-        "es": "296",
-        "en": "296",
+        "titles": {
+            "pt": "296",
+            "en": "296",
+            "es": "296"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/296.JPG"
     },
     "389.JPG": {
-        "pt": "389",
-        "es": "389",
-        "en": "389",
+        "titles": {
+            "pt": "389",
+            "en": "389",
+            "es": "389"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/389.JPG"
     },
     "400.JPG": {
-        "pt": "400",
-        "es": "400",
-        "en": "400",
+        "titles": {
+            "pt": "400",
+            "en": "400",
+            "es": "400"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/400.JPG"
     },
     "288.JPG": {
-        "pt": "288",
-        "es": "288",
-        "en": "288",
+        "titles": {
+            "pt": "288",
+            "en": "288",
+            "es": "288"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/288.JPG"
     },
     "350.JPG": {
-        "pt": "350",
-        "es": "350",
-        "en": "350",
+        "titles": {
+            "pt": "350",
+            "en": "350",
+            "es": "350"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/350.JPG"
     },
     "321.JPG": {
-        "pt": "321",
-        "es": "321",
-        "en": "321",
+        "titles": {
+            "pt": "321",
+            "en": "321",
+            "es": "321"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/321.JPG"
     },
     "1752175859098.jpeg": {
-        "pt": "1752175859098",
-        "es": "1752175859098",
-        "en": "1752175859098",
+        "titles": {
+            "pt": "1752175859098",
+            "en": "1752175859098",
+            "es": "1752175859098"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175859098.jpeg"
     },
     "283.JPG": {
-        "pt": "283",
-        "es": "283",
-        "en": "283",
+        "titles": {
+            "pt": "283",
+            "en": "283",
+            "es": "283"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/283.JPG"
     },
     "348.JPG": {
-        "pt": "348",
-        "es": "348",
-        "en": "348",
+        "titles": {
+            "pt": "348",
+            "en": "348",
+            "es": "348"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/348.JPG"
     },
     "298.JPG": {
-        "pt": "298",
-        "es": "298",
-        "en": "298",
+        "titles": {
+            "pt": "298",
+            "en": "298",
+            "es": "298"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/298.JPG"
     },
     "397.JPG": {
-        "pt": "397",
-        "es": "397",
-        "en": "397",
+        "titles": {
+            "pt": "397",
+            "en": "397",
+            "es": "397"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/397.JPG"
     },
     "328.JPG": {
-        "pt": "328",
-        "es": "328",
-        "en": "328",
+        "titles": {
+            "pt": "328",
+            "en": "328",
+            "es": "328"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/328.JPG"
     },
     "359.JPG": {
-        "pt": "359",
-        "es": "359",
-        "en": "359",
+        "titles": {
+            "pt": "359",
+            "en": "359",
+            "es": "359"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/359.JPG"
     },
     "386.JPG": {
-        "pt": "386",
-        "es": "386",
-        "en": "386",
+        "titles": {
+            "pt": "386",
+            "en": "386",
+            "es": "386"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/386.JPG"
     },
     "333.JPG": {
-        "pt": "333",
-        "es": "333",
-        "en": "333",
+        "titles": {
+            "pt": "333",
+            "en": "333",
+            "es": "333"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/333.JPG"
     },
     "1752175861657.jpeg": {
-        "pt": "1752175861657",
-        "es": "1752175861657",
-        "en": "1752175861657",
+        "titles": {
+            "pt": "1752175861657",
+            "en": "1752175861657",
+            "es": "1752175861657"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/1752175861657.jpeg"
     },
     "221.JPG": {
-        "pt": "221",
-        "es": "221",
-        "en": "221",
+        "titles": {
+            "pt": "221",
+            "en": "221",
+            "es": "221"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/221.JPG"
     },
     "Vídeos Horizontais.png": {
-        "pt": "Vídeos Horizontais",
-        "es": "Vídeos Horizontais",
-        "en": "Vídeos Horizontais",
+        "titles": {
+            "pt": "Vídeos Horizontais",
+            "en": "Vídeos Horizontais",
+            "es": "Vídeos Horizontais"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Vídeos Horizontais.png"
     },
     "Contactos.png": {
-        "pt": "Contactos",
-        "es": "Contactos",
-        "en": "Contactos",
+        "titles": {
+            "pt": "Contactos",
+            "en": "Contactos",
+            "es": "Contactos"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Contactos.png"
     },
     "Fotografias Verticais.png": {
-        "pt": "Fotografias Verticais",
-        "es": "Fotografias Verticais",
-        "en": "Fotografias Verticais",
+        "titles": {
+            "pt": "Fotografias Verticais",
+            "en": "Fotografias Verticais",
+            "es": "Fotografias Verticais"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Fotografias Verticais.png"
     },
     "Sobre mim.png": {
-        "pt": "Sobre mim",
-        "es": "Sobre mim",
-        "en": "Sobre mim",
+        "titles": {
+            "pt": "Sobre mim",
+            "en": "Sobre mim",
+            "es": "Sobre mim"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Sobre mim.png"
     },
     "Designs.png": {
-        "pt": "Designs",
-        "es": "Designs",
-        "en": "Designs",
+        "titles": {
+            "pt": "Designs",
+            "en": "Designs",
+            "es": "Designs"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Designs.png"
     },
     "Apresentações.png": {
-        "pt": "Apresentações",
-        "es": "Apresentações",
-        "en": "Apresentações",
+        "titles": {
+            "pt": "Apresentações",
+            "en": "Apresentações",
+            "es": "Apresentações"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Capas/Apresentações.png"
     },
     "carousel_image_2.png": {
-        "pt": "carousel",
-        "es": "image",
-        "en": "2",
+        "titles": {
+            "pt": "carousel",
+            "en": "image",
+            "es": "2"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Melhores/carousel_image_2.png"
     },
     "carousel_image_1.png": {
-        "pt": "carousel",
-        "es": "image",
-        "en": "1",
+        "titles": {
+            "pt": "carousel",
+            "en": "image",
+            "es": "1"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Melhores/carousel_image_1.png"
     },
     "carousel_image_3.png": {
-        "pt": "carousel",
-        "es": "image",
-        "en": "3",
+        "titles": {
+            "pt": "carousel",
+            "en": "image",
+            "es": "3"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Melhores/carousel_image_3.png"
     },
     "1752175789573.jpeg": {
-        "pt": "1752175789573",
-        "es": "1752175789573",
-        "en": "1752175789573",
+        "titles": {
+            "pt": "1752175789573",
+            "en": "1752175789573",
+            "es": "1752175789573"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175789573.jpeg"
     },
     "1752175526372.jpeg": {
-        "pt": "1752175526372",
-        "es": "1752175526372",
-        "en": "1752175526372",
+        "titles": {
+            "pt": "1752175526372",
+            "en": "1752175526372",
+            "es": "1752175526372"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175526372.jpeg"
     },
     "A_MELHOR_PARCERIA_ESTA_A_CHEGAR_Video_para_dispositivos_moveis.png": {
-        "pt": "A",
-        "es": "MELHOR",
-        "en": "PARCERIA",
+        "titles": {
+            "pt": "A",
+            "en": "MELHOR",
+            "es": "PARCERIA"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/A_MELHOR_PARCERIA_ESTA_A_CHEGAR_Video_para_dispositivos_moveis.png"
     },
     "1752175723591.jpeg": {
-        "pt": "1752175723591",
-        "es": "1752175723591",
-        "en": "1752175723591",
+        "titles": {
+            "pt": "1752175723591",
+            "en": "1752175723591",
+            "es": "1752175723591"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175723591.jpeg"
     },
     "3.png": {
-        "pt": "3",
-        "es": "3",
-        "en": "3",
+        "titles": {
+            "pt": "3",
+            "en": "3",
+            "es": "3"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/3.png"
     },
     "1752175776310.jpeg": {
-        "pt": "1752175776310",
-        "es": "1752175776310",
-        "en": "1752175776310",
+        "titles": {
+            "pt": "1752175776310",
+            "en": "1752175776310",
+            "es": "1752175776310"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175776310.jpeg"
     },
     "2.png": {
-        "pt": "2",
-        "es": "2",
-        "en": "2",
+        "titles": {
+            "pt": "2",
+            "en": "2",
+            "es": "2"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/2.png"
     },
     "1752175537942.jpeg": {
-        "pt": "1752175537942",
-        "es": "1752175537942",
-        "en": "1752175537942",
+        "titles": {
+            "pt": "1752175537942",
+            "en": "1752175537942",
+            "es": "1752175537942"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175537942.jpeg"
     },
     "sara (1).png": {
-        "pt": "sara (1)",
-        "es": "sara (1)",
-        "en": "sara (1)",
+        "titles": {
+            "pt": "sara (1)",
+            "en": "sara (1)",
+            "es": "sara (1)"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/sara (1).png"
     },
     "Captura de ecrã 2025-02-19 203547.png": {
-        "pt": "Captura de ecrã 2025-02-19 203547",
-        "es": "Captura de ecrã 2025-02-19 203547",
-        "en": "Captura de ecrã 2025-02-19 203547",
+        "titles": {
+            "pt": "Captura de ecrã 2025-02-19 203547",
+            "en": "Captura de ecrã 2025-02-19 203547",
+            "es": "Captura de ecrã 2025-02-19 203547"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/Captura de ecrã 2025-02-19 203547.png"
     },
     "1752175347552.jpeg": {
-        "pt": "1752175347552",
-        "es": "1752175347552",
-        "en": "1752175347552",
+        "titles": {
+            "pt": "1752175347552",
+            "en": "1752175347552",
+            "es": "1752175347552"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175347552.jpeg"
     },
     "1752175526373.jpeg": {
-        "pt": "1752175526373",
-        "es": "1752175526373",
-        "en": "1752175526373",
+        "titles": {
+            "pt": "1752175526373",
+            "en": "1752175526373",
+            "es": "1752175526373"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175526373.jpeg"
     },
     "1752175771401.jpeg": {
-        "pt": "1752175771401",
-        "es": "1752175771401",
-        "en": "1752175771401",
+        "titles": {
+            "pt": "1752175771401",
+            "en": "1752175771401",
+            "es": "1752175771401"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175771401.jpeg"
     },
     "1752175780855.jpeg": {
-        "pt": "1752175780855",
-        "es": "1752175780855",
-        "en": "1752175780855",
+        "titles": {
+            "pt": "1752175780855",
+            "en": "1752175780855",
+            "es": "1752175780855"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175780855.jpeg"
     },
     "1.png": {
-        "pt": "1",
-        "es": "1",
-        "en": "1",
+        "titles": {
+            "pt": "1",
+            "en": "1",
+            "es": "1"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1.png"
     },
     "1752175520078.jpeg": {
-        "pt": "1752175520078",
-        "es": "1752175520078",
-        "en": "1752175520078",
+        "titles": {
+            "pt": "1752175520078",
+            "en": "1752175520078",
+            "es": "1752175520078"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175520078.jpeg"
     },
     "1752175747372.jpeg": {
-        "pt": "1752175747372",
-        "es": "1752175747372",
-        "en": "1752175747372",
+        "titles": {
+            "pt": "1752175747372",
+            "en": "1752175747372",
+            "es": "1752175747372"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175747372.jpeg"
     },
     "1752175537943.jpeg": {
-        "pt": "1752175537943",
-        "es": "1752175537943",
-        "en": "1752175537943",
+        "titles": {
+            "pt": "1752175537943",
+            "en": "1752175537943",
+            "es": "1752175537943"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175537943.jpeg"
     },
     "1752175787917.jpeg": {
-        "pt": "1752175787917",
-        "es": "1752175787917",
-        "en": "1752175787917",
+        "titles": {
+            "pt": "1752175787917",
+            "en": "1752175787917",
+            "es": "1752175787917"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175787917.jpeg"
     },
     "1752175793688.jpeg": {
-        "pt": "1752175793688",
-        "es": "1752175793688",
-        "en": "1752175793688",
+        "titles": {
+            "pt": "1752175793688",
+            "en": "1752175793688",
+            "es": "1752175793688"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175793688.jpeg"
     },
     "1752175849497.jpeg": {
-        "pt": "1752175849497",
-        "es": "1752175849497",
-        "en": "1752175849497",
+        "titles": {
+            "pt": "1752175849497",
+            "en": "1752175849497",
+            "es": "1752175849497"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175849497.jpeg"
     },
     "1752175793687 (1).jpeg": {
-        "pt": "1752175793687 (1)",
-        "es": "1752175793687 (1)",
-        "en": "1752175793687 (1)",
+        "titles": {
+            "pt": "1752175793687 (1)",
+            "en": "1752175793687 (1)",
+            "es": "1752175793687 (1)"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175793687 (1).jpeg"
     },
     "1752175852138.jpeg": {
-        "pt": "1752175852138",
-        "es": "1752175852138",
-        "en": "1752175852138",
+        "titles": {
+            "pt": "1752175852138",
+            "en": "1752175852138",
+            "es": "1752175852138"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175852138.jpeg"
     },
     "1752175896779.jpeg": {
-        "pt": "1752175896779",
-        "es": "1752175896779",
-        "en": "1752175896779",
+        "titles": {
+            "pt": "1752175896779",
+            "en": "1752175896779",
+            "es": "1752175896779"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175896779.jpeg"
     },
     "1752175778783.jpeg": {
-        "pt": "1752175778783",
-        "es": "1752175778783",
-        "en": "1752175778783",
+        "titles": {
+            "pt": "1752175778783",
+            "en": "1752175778783",
+            "es": "1752175778783"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175778783.jpeg"
     },
     "6.png": {
-        "pt": "6",
-        "es": "6",
-        "en": "6",
+        "titles": {
+            "pt": "6",
+            "en": "6",
+            "es": "6"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/6.png"
     },
     "1752175799102.jpeg": {
-        "pt": "1752175799102",
-        "es": "1752175799102",
-        "en": "1752175799102",
+        "titles": {
+            "pt": "1752175799102",
+            "en": "1752175799102",
+            "es": "1752175799102"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175799102.jpeg"
     },
     "1752175324044.jpeg": {
-        "pt": "1752175324044",
-        "es": "1752175324044",
-        "en": "1752175324044",
+        "titles": {
+            "pt": "1752175324044",
+            "en": "1752175324044",
+            "es": "1752175324044"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175324044.jpeg"
     },
     "1752175727078.jpeg": {
-        "pt": "1752175727078",
-        "es": "1752175727078",
-        "en": "1752175727078",
+        "titles": {
+            "pt": "1752175727078",
+            "en": "1752175727078",
+            "es": "1752175727078"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175727078.jpeg"
     },
     "1752175515581.jpeg": {
-        "pt": "1752175515581",
-        "es": "1752175515581",
-        "en": "1752175515581",
+        "titles": {
+            "pt": "1752175515581",
+            "en": "1752175515581",
+            "es": "1752175515581"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175515581.jpeg"
     },
     "1752175849497 (1).jpeg": {
-        "pt": "1752175849497 (1)",
-        "es": "1752175849497 (1)",
-        "en": "1752175849497 (1)",
+        "titles": {
+            "pt": "1752175849497 (1)",
+            "en": "1752175849497 (1)",
+            "es": "1752175849497 (1)"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175849497 (1).jpeg"
     },
     "5.png": {
-        "pt": "5",
-        "es": "5",
-        "en": "5",
+        "titles": {
+            "pt": "5",
+            "en": "5",
+            "es": "5"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/5.png"
     },
     "1752175784981.jpeg": {
-        "pt": "1752175784981",
-        "es": "1752175784981",
-        "en": "1752175784981",
+        "titles": {
+            "pt": "1752175784981",
+            "en": "1752175784981",
+            "es": "1752175784981"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175784981.jpeg"
     },
     "4.png": {
-        "pt": "4",
-        "es": "4",
-        "en": "4",
+        "titles": {
+            "pt": "4",
+            "en": "4",
+            "es": "4"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/4.png"
     },
     "1752175513806.jpeg": {
-        "pt": "1752175513806",
-        "es": "1752175513806",
-        "en": "1752175513806",
+        "titles": {
+            "pt": "1752175513806",
+            "en": "1752175513806",
+            "es": "1752175513806"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175513806.jpeg"
     },
     "1752175532647.jpeg": {
-        "pt": "1752175532647",
-        "es": "1752175532647",
-        "en": "1752175532647",
+        "titles": {
+            "pt": "1752175532647",
+            "en": "1752175532647",
+            "es": "1752175532647"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175532647.jpeg"
     },
     "1752175774316.jpeg": {
-        "pt": "1752175774316",
-        "es": "1752175774316",
-        "en": "1752175774316",
+        "titles": {
+            "pt": "1752175774316",
+            "en": "1752175774316",
+            "es": "1752175774316"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175774316.jpeg"
     },
     "1752175795699.jpeg": {
-        "pt": "1752175795699",
-        "es": "1752175795699",
-        "en": "1752175795699",
+        "titles": {
+            "pt": "1752175795699",
+            "en": "1752175795699",
+            "es": "1752175795699"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175795699.jpeg"
     },
     "1752175784981 (1).jpeg": {
-        "pt": "1752175784981 (1)",
-        "es": "1752175784981 (1)",
-        "en": "1752175784981 (1)",
+        "titles": {
+            "pt": "1752175784981 (1)",
+            "en": "1752175784981 (1)",
+            "es": "1752175784981 (1)"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175784981 (1).jpeg"
     },
     "1752175543768.jpeg": {
-        "pt": "1752175543768",
-        "es": "1752175543768",
-        "en": "1752175543768",
+        "titles": {
+            "pt": "1752175543768",
+            "en": "1752175543768",
+            "es": "1752175543768"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175543768.jpeg"
     },
     "1752175751084.jpeg": {
-        "pt": "1752175751084",
-        "es": "1752175751084",
-        "en": "1752175751084",
+        "titles": {
+            "pt": "1752175751084",
+            "en": "1752175751084",
+            "es": "1752175751084"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175751084.jpeg"
     },
     "1752175543768 (1).jpeg": {
-        "pt": "1752175543768 (1)",
-        "es": "1752175543768 (1)",
-        "en": "1752175543768 (1)",
+        "titles": {
+            "pt": "1752175543768 (1)",
+            "en": "1752175543768 (1)",
+            "es": "1752175543768 (1)"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175543768 (1).jpeg"
     },
     "1752175854226.jpeg": {
-        "pt": "1752175854226",
-        "es": "1752175854226",
-        "en": "1752175854226",
+        "titles": {
+            "pt": "1752175854226",
+            "en": "1752175854226",
+            "es": "1752175854226"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175854226.jpeg"
     },
     "1752175553095.jpeg": {
-        "pt": "1752175553095",
-        "es": "1752175553095",
-        "en": "1752175553095",
+        "titles": {
+            "pt": "1752175553095",
+            "en": "1752175553095",
+            "es": "1752175553095"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175553095.jpeg"
     },
     "1752175511130.jpeg": {
-        "pt": "1752175511130",
-        "es": "1752175511130",
-        "en": "1752175511130",
+        "titles": {
+            "pt": "1752175511130",
+            "en": "1752175511130",
+            "es": "1752175511130"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175511130.jpeg"
     },
     "1752175511131.jpeg": {
-        "pt": "1752175511131",
-        "es": "1752175511131",
-        "en": "1752175511131",
+        "titles": {
+            "pt": "1752175511131",
+            "en": "1752175511131",
+            "es": "1752175511131"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175511131.jpeg"
     },
     "1752175771401 (1).jpeg": {
-        "pt": "1752175771401 (1)",
-        "es": "1752175771401 (1)",
-        "en": "1752175771401 (1)",
+        "titles": {
+            "pt": "1752175771401 (1)",
+            "en": "1752175771401 (1)",
+            "es": "1752175771401 (1)"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175771401 (1).jpeg"
     },
     "1752175520079.jpeg": {
-        "pt": "1752175520079",
-        "es": "1752175520079",
-        "en": "1752175520079",
+        "titles": {
+            "pt": "1752175520079",
+            "en": "1752175520079",
+            "es": "1752175520079"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175520079.jpeg"
     },
     "1752175793687.jpeg": {
-        "pt": "1752175793687",
-        "es": "1752175793687",
-        "en": "1752175793687",
+        "titles": {
+            "pt": "1752175793687",
+            "en": "1752175793687",
+            "es": "1752175793687"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175793687.jpeg"
     },
     "1752175532648.jpeg": {
-        "pt": "1752175532648",
-        "es": "1752175532648",
-        "en": "1752175532648",
+        "titles": {
+            "pt": "1752175532648",
+            "en": "1752175532648",
+            "es": "1752175532648"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175532648.jpeg"
     },
     "sara (2).png": {
-        "pt": "sara (2)",
-        "es": "sara (2)",
-        "en": "sara (2)",
+        "titles": {
+            "pt": "sara (2)",
+            "en": "sara (2)",
+            "es": "sara (2)"
+        },
         "orientation": "vertical",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/sara (2).png"
     },
     "A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p.mp4": {
-        "pt": "A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p",
-        "es": "A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p",
-        "en": "A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p",
+            "en": "A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p",
+            "es": "A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p_thumb.jpg"
     },
     "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO.mp4": {
-        "pt": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO",
-        "es": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO",
-        "en": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO",
+            "en": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO",
+            "es": "Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO_thumb.jpg"
     },
     "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor.mp4": {
-        "pt": "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor",
-        "es": "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor",
-        "en": "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor",
+            "en": "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor",
+            "es": "É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor_thumb.jpg"
     },
     "Design_sem_nome_1.mp4": {
-        "pt": "Design",
-        "es": "sem",
-        "en": "nome",
+        "titles": {
+            "pt": "Design",
+            "en": "sem",
+            "es": "nome"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/Design_sem_nome_1.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/Design_sem_nome_1_thumb.jpg"
     },
     "SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.mp4": {
-        "pt": "SnapInsta.to",
-        "es": "AQNAQdz8jImZ2eL",
-        "en": "4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio",
+        "titles": {
+            "pt": "SnapInsta.to",
+            "en": "AQNAQdz8jImZ2eL",
+            "es": "4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio_thumb.jpg"
     },
     "highlights - 18026883509390937.mp4": {
-        "pt": "highlights - 18026883509390937",
-        "es": "highlights - 18026883509390937",
-        "en": "highlights - 18026883509390937",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "highlights - 18026883509390937",
+            "en": "highlights - 18026883509390937",
+            "es": "highlights - 18026883509390937"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights - 18026883509390937.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/highlights - 18026883509390937_thumb.jpg"
     },
     "highlights - 18057588424859151.mp4": {
-        "pt": "highlights - 18057588424859151",
-        "es": "highlights - 18057588424859151",
-        "en": "highlights - 18057588424859151",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "highlights - 18057588424859151",
+            "en": "highlights - 18057588424859151",
+            "es": "highlights - 18057588424859151"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights - 18057588424859151.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/highlights - 18057588424859151_thumb.jpg"
     },
     "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖.mp4": {
-        "pt": "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖",
-        "es": "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖",
-        "en": "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖",
+            "en": "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖",
+            "es": "Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖_thumb.jpg"
     },
     "E foi assim que terminámos o nosso último dia de campanha.mp4": {
-        "pt": "E foi assim que terminámos o nosso último dia de campanha",
-        "es": "E foi assim que terminámos o nosso último dia de campanha",
-        "en": "E foi assim que terminámos o nosso último dia de campanha",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "E foi assim que terminámos o nosso último dia de campanha",
+            "en": "E foi assim que terminámos o nosso último dia de campanha",
+            "es": "E foi assim que terminámos o nosso último dia de campanha"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/E foi assim que terminámos o nosso último dia de campanha.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/E foi assim que terminámos o nosso último dia de campanha_thumb.jpg"
     },
     "highlights - 17869451268147253.mp4": {
-        "pt": "highlights - 17869451268147253",
-        "es": "highlights - 17869451268147253",
-        "en": "highlights - 17869451268147253",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "highlights - 17869451268147253",
+            "en": "highlights - 17869451268147253",
+            "es": "highlights - 17869451268147253"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights - 17869451268147253.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/highlights - 17869451268147253_thumb.jpg"
     },
     "highlights - 17941463183908702.mp4": {
-        "pt": "highlights - 17941463183908702",
-        "es": "highlights - 17941463183908702",
-        "en": "highlights - 17941463183908702",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "highlights - 17941463183908702",
+            "en": "highlights - 17941463183908702",
+            "es": "highlights - 17941463183908702"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights - 17941463183908702.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/highlights - 17941463183908702_thumb.jpg"
     },
     "highlights - 17875946589196602.mp4": {
-        "pt": "highlights - 17875946589196602",
-        "es": "highlights - 17875946589196602",
-        "en": "highlights - 17875946589196602",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "highlights - 17875946589196602",
+            "en": "highlights - 17875946589196602",
+            "es": "highlights - 17875946589196602"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/highlights - 17875946589196602.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/highlights - 17875946589196602_thumb.jpg"
     },
     "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! .mp4": {
-        "pt": "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! ",
-        "es": "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! ",
-        "en": "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! ",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! ",
+            "en": "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! ",
+            "es": "Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! "
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! .mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! _thumb.jpg"
     },
     "Design sem nome.mp4": {
-        "pt": "Design sem nome",
-        "es": "Design sem nome",
-        "en": "Design sem nome",
-        "orientation": "vertical",
+        "titles": {
+            "pt": "Design sem nome",
+            "en": "Design sem nome",
+            "es": "Design sem nome"
+        },
+        "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Vídeos/Design sem nome.mp4",
         "thumbnail_url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Thumbnails/Design sem nome_thumb.jpg"
     },
     "A crise da habitação em Portugal e a sua relação com os Direitos Humanos.pdf": {
-        "pt": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos",
-        "es": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos",
-        "en": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos",
+        "titles": {
+            "pt": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos",
+            "en": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos",
+            "es": "A crise da habitação em Portugal e a sua relação com os Direitos Humanos"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Apresentações/A crise da habitação em Portugal e a sua relação com os Direitos Humanos.pdf"
     },
     "Senegal.pdf": {
-        "pt": "Senegal",
-        "es": "Senegal",
-        "en": "Senegal",
+        "titles": {
+            "pt": "Senegal",
+            "en": "Senegal",
+            "es": "Senegal"
+        },
         "orientation": "horizontal",
         "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Apresentações/Senegal.pdf"
     }
