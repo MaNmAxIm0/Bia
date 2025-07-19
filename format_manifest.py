@@ -9,36 +9,51 @@ def format_rclone_manifest(input_json_str: str, output_file_path: str):
     e guarda-o num ficheiro de texto.
     """
     try:
-        # Lê a string JSON de entrada
         files_data = json.loads(input_json_str)
-        
-        # Define o fuso horário de Lisboa para a conversão
         lisbon_tz = pytz.timezone('Europe/Lisbon')
         
         manifest_lines = []
         for item in files_data:
-            # Ignora as entradas que são diretórios
             if item.get('IsDir', False):
                 continue
             
-            # Extrai a data de modificação e o caminho
             mod_time_str = item.get('ModTime')
             path = item.get('Path')
             
             if mod_time_str and path:
+                # --- CORREÇÃO: Truncar a data para microssegundos ---
+                # O rclone pode devolver até 9 dígitos (nanossegundos).
+                # O datetime do Python só aceita 6 (microssegundos).
+                # Esta linha garante que a data é sempre compatível.
+                if '.' in mod_time_str:
+                    main_part, fractional_part = mod_time_str.split('.', 1)
+                    # O 'Z' ou fuso horário vem depois da parte fracionária
+                    if 'Z' in fractional_part:
+                        fraction, timezone = fractional_part.split('Z', 1)
+                        fraction = fraction[:6] # Limita a 6 dígitos
+                        mod_time_str = f"{main_part}.{fraction}Z"
+                    elif '+' in fractional_part:
+                        fraction, timezone = fractional_part.split('+', 1)
+                        fraction = fraction[:6]
+                        mod_time_str = f"{main_part}.{fraction}+{timezone}"
+                    elif '-' in fractional_part:
+                        fraction, timezone = fractional_part.split('-', 1)
+                        fraction = fraction[:6]
+                        mod_time_str = f"{main_part}.{fraction}-{timezone}"
+
                 # Converte a data UTC do rclone para um objeto datetime
                 mod_time_utc = datetime.fromisoformat(mod_time_str.replace('Z', '+00:00'))
+                
                 # Converte para o fuso horário de Lisboa
                 mod_time_lisbon = mod_time_utc.astimezone(lisbon_tz)
+                
                 # Formata a data e hora no formato desejado
                 formatted_time = mod_time_lisbon.strftime('%Y-%m-%d %H:%M:%S')
                 
                 manifest_lines.append(f"{formatted_time} {path}")
         
-        # Ordena as linhas alfabeticamente pelo caminho do ficheiro
         manifest_lines.sort(key=lambda line: line.split(' ', 1)[1])
         
-        # Escreve o resultado no ficheiro de saída
         with open(output_file_path, 'w', encoding='utf-8') as f:
             f.write('\n'.join(manifest_lines))
             
@@ -52,7 +67,6 @@ def format_rclone_manifest(input_json_str: str, output_file_path: str):
         sys.exit(1)
 
 if __name__ == '__main__':
-    # Lê o JSON a partir da entrada padrão (stdin)
     input_json = sys.stdin.read()
     output_file = "r2_file_manifest.txt"
     format_rclone_manifest(input_json, output_file)
