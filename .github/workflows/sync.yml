@@ -1,9 +1,6 @@
 name: Sincronizar e Processar Ativos do Portfólio
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:

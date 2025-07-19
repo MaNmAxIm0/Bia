@@ -36,3 +36,4 @@ THUMBNAIL_TIMESTAMP = "00:00:02"
 # --- Filtros de Ficheiros ---
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png']
 VIDEO_EXTENSIONS = ['.mp4', '.mov', '.avi']
+PDF_EXTENSIONS = ['.pdf'] 

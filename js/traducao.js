@@ -35,7 +35,7 @@ export const translations = {
         short_film_title: 'Curta-metragem "O Regresso"',
         short_film_description: 'Uma narrativa visual emocionante e envolvente.',
         
-        // Página Inicial - Secções Atualizadas (CHAVES QUE FALTAVAM)
+        // Página Inicial - Secções Atualizadas
         my_works: 'Meus Trabalhos',
         view_gallery: 'Ver Galeria',
         horizontal_photos_title: 'Fotografias Horizontais',
@@ -141,7 +141,7 @@ export const translations = {
         short_film_title: 'Short Film "The Return"',
         short_film_description: 'An emotional and engaging visual narrative.',
 
-        // Home Page - Updated Sections (MISSING KEYS)
+        // Home Page - Updated Sections
         my_works: 'My Works',
         view_gallery: 'View Gallery',
         horizontal_photos_title: 'Horizontal Photos',
@@ -247,7 +247,7 @@ export const translations = {
         short_film_title: 'Cortometraje "El Regreso"',
         short_film_description: 'Una narrativa visual emocionante y cautivadora.',
 
-        // Página de Inicio - Secciones Actualizadas (CLAVES QUE FALTABAN)
+        // Página de Inicio - Secciones Actualizadas
         my_works: 'Mis Trabajos',
         view_gallery: 'Ver Galería',
         horizontal_photos_title: 'Fotografías Horizontales',
@@ -320,4 +320,3 @@ export const translations = {
         marketing_desc: 'Utilizadas para mostrar anuncios relevantes a los usuarios.'
     }
 };
-

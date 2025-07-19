@@ -1,7 +1,4 @@
-// ==========================================================================
-// FICHEIRO PRINCIPAL (VERSÃO FINAL COM BASE NO SEU FICHEIRO)
-// Corrige os links do cabeçalho e mantém as funções de carregamento de conteúdo.
-// ==========================================================================
+// Ficheiro: principal.js (Versão Final e Corrigida)
 
 import { initCarousel } from './carrossel.js';
 import { loadGalleryContent, loadPresentations } from './galeria.js';
@@ -26,15 +23,23 @@ const pageMap = {
 };
 
 function getSourcePageFile() {
-    const currentPageFile = window.location.pathname.split('/').pop();
-    if (window.location.pathname.includes('/pt/')) return currentPageFile;
-    for (const ptFile in pageMap) {
-        if (Object.values(pageMap[ptFile]).includes(currentPageFile)) return ptFile;
+    const pathSegments = window.location.pathname.split('/');
+    const currentPageFile = pathSegments.pop() || 'index.html'; // Garante que há sempre um ficheiro
+
+    // Se a página estiver numa pasta de idioma, encontramos o ficheiro PT correspondente
+    if (pathSegments.some(seg => ['en', 'es'].includes(seg))) {
+        for (const ptFile in pageMap) {
+            if (Object.values(pageMap[ptFile]).includes(currentPageFile)) {
+                return ptFile;
+            }
+        }
     }
-    return 'index.html';
+    // Se já estiver em /pt/ ou na raiz, o nome do ficheiro é o correto
+    return currentPageFile;
 }
 
-// --- FUNÇÕES DE CARREGAMENTO DE CONTEÚDO DINÂMICO (DO SEU FICHEIRO) ---
+
+// --- FUNÇÕES DE CARREGAMENTO DE CONTEÚDO DINÂMICO ---
 
 async function loadDynamicCarousel() {
     const slidesContainer = document.getElementById('dynamic-carousel-slides');
@@ -43,8 +48,10 @@ async function loadDynamicCarousel() {
 
     try {
         const response = await fetch(`${getBasePath()}/data.json`);
+        if (!response.ok) throw new Error('Failed to fetch carousel data');
         const data = await response.json();
-        const carouselItems = data.carousel || [];
+        
+        const carouselItems = Object.values(data).filter(item => item.url && item.url.includes('/Melhores/'));
 
         if (carouselItems.length === 0) {
             carouselSection.style.display = 'none';
@@ -52,17 +59,27 @@ async function loadDynamicCarousel() {
         }
 
         slidesContainer.innerHTML = '';
+        const lang = getCurrentLanguage();
         carouselItems.forEach(item => {
             const slideDiv = document.createElement('div');
             slideDiv.className = 'carousel-slide';
-            const title = item.titles[getCurrentLanguage()] || item.titles.pt;
-            const description = item.descriptions?.[getCurrentLanguage()] || item.descriptions?.pt || '';
+            
+            // --- CORREÇÃO APLICADA AQUI ---
+            const title = item.titles?.[lang] || item.titles?.pt || '';
+            // Lê a descrição do data.json, em vez de a deixar vazia
+            const description = item.descriptions?.[lang] || item.descriptions?.pt || ''; 
+            
             slideDiv.innerHTML = `
                 <img src="${item.url}" alt="${title}" loading="lazy">
-                <div class="carousel-caption"><h2>${title}</h2><p>${description}</p></div>`;
+                <div class="carousel-caption">
+                    <h2>${title}</h2>
+                    <p>${description}</p>
+                </div>`;
             slidesContainer.appendChild(slideDiv);
         });
+        
         initCarousel(carouselSection);
+
     } catch (error) {
         console.error('Erro ao carregar dados do carrossel:', error);
         carouselSection.style.display = 'none';
@@ -76,8 +93,10 @@ async function loadWorkCards() {
 
     try {
         const response = await fetch(`${getBasePath()}/data.json`);
+        if (!response.ok) throw new Error('Failed to fetch work cards data');
         const data = await response.json();
-        const covers = data.covers || [];
+        
+        const covers = Object.values(data).filter(item => item.url && item.url.includes('/Capas/'));
 
         const workCardsData = [
             { pageKey: 'fotos-horizontais.html', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'fotografias' },
@@ -92,7 +111,8 @@ async function loadWorkCards() {
         workCardsData.forEach(cardData => {
             const cardDiv = document.createElement('div');
             cardDiv.className = 'work-item';
-            const cover = covers.find(c => c.name.toLowerCase().includes(cardData.coverKey));
+            
+            const cover = covers.find(c => c.titles.pt.toLowerCase().includes(cardData.coverKey));
             const coverUrl = cover ? cover.url : `${getBasePath()}/imagens/placeholder.png`;
             const targetFile = pageMap[cardData.pageKey]?.[getCurrentLanguage()] || cardData.pageKey;
 
@@ -100,30 +120,50 @@ async function loadWorkCards() {
                 <img src="${coverUrl}" alt="${getTranslation(cardData.titleKey)}">
                 <h3>${getTranslation(cardData.titleKey)}</h3>
                 <p>${getTranslation(cardData.descKey)}</p>
-                <a href="${targetFile}" class="btn">${getTranslation('view_gallery')} <i class="fas fa-arrow-right"></i></a>`;
+                <a href="../${getCurrentLanguage()}/${targetFile}" class="btn">${getTranslation('view_gallery')} <i class="fas fa-arrow-right"></i></a>`;
             gridContainer.appendChild(cardDiv);
         });
     } catch (error) {
         console.error('Erro ao carregar os cartões de trabalho:', error);
+        gridContainer.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', 'trabalhos')}</p>`;
     }
 }
 
 async function loadPagePreviews() {
     const previewContainer = document.querySelector('.section-preview-grid');
     if (!previewContainer) return;
+
     try {
         const response = await fetch(`${getBasePath()}/data.json`);
+        if (!response.ok) throw new Error('Failed to fetch page previews data');
         const data = await response.json();
-        const covers = data.covers || [];
-
-        const aboutMeImg = previewContainer.querySelector('a[href="sobre-mim.html"] img');
-        const contactImg = previewContainer.querySelector('a[href="contactos.html"] img');
         
-        const aboutCover = covers.find(c => c.name.toLowerCase().includes('sobre mim'));
-        const contactCover = covers.find(c => c.name.toLowerCase().includes('contactos'));
+        // Filtra apenas os itens que são capas
+        const covers = Object.values(data).filter(item => item.url && item.url.includes('/Capas/'));
 
-        if (aboutMeImg && aboutCover) aboutMeImg.src = aboutCover.url;
-        if (contactImg && contactCover) contactImg.src = contactCover.url;
+        // Encontra os links no HTML
+        const aboutMeLink = previewContainer.querySelector('a[href*="sobre-mim"], a[href*="about-me"]');
+        const contactLink = previewContainer.querySelector('a[href*="contactos"], a[href*="contacts"]');
+        
+        if (aboutMeLink) {
+            // Procura uma capa cujo título em português inclua "sobre mim"
+            const aboutCover = covers.find(c => c.titles.pt.toLowerCase().includes('sobre mim'));
+            if (aboutCover) {
+                aboutMeLink.querySelector('img').src = aboutCover.url;
+            } else {
+                console.warn("Capa para 'Sobre Mim' não encontrada no data.json");
+            }
+        }
+        
+        if (contactLink) {
+            // Procura uma capa cujo título em português inclua "contactos"
+            const contactCover = covers.find(c => c.titles.pt.toLowerCase().includes('contactos'));
+            if (contactCover) {
+                contactLink.querySelector('img').src = contactCover.url;
+            } else {
+                console.warn("Capa para 'Contactos' não encontrada no data.json");
+            }
+        }
     } catch (error) {
         console.error("Erro ao carregar imagens de preview:", error);
     }
@@ -133,10 +173,11 @@ async function loadPagePreviews() {
 // --- FUNÇÕES DE INICIALIZAÇÃO DE PÁGINA E EVENTOS ---
 
 function setupHeader() {
-    // --- Lógica do Menu ---
     const menuToggle = document.querySelector('.menu-toggle');
     const navLinks = document.querySelector('.nav-links');
-    if (menuToggle) menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+    }
 
     document.querySelectorAll('.main-nav .dropdown > a').forEach(toggle => {
         toggle.addEventListener('click', (event) => {
@@ -147,7 +188,6 @@ function setupHeader() {
         });
     });
 
-    // --- Lógica do Seletor de Idioma ---
     const dropdown = document.querySelector('.language-dropdown');
     if (!dropdown) return;
 
@@ -164,17 +204,14 @@ function setupHeader() {
     });
     document.addEventListener('click', () => dropdown.classList.remove('open'));
 
-    // --- CORREÇÃO DOS LINKS ---
     const sourceFile = getSourcePageFile();
 
-    // 1. Atualiza os links de navegação principais (ex: Sobre Mim, Designs)
     document.querySelectorAll('a[data-page-key]').forEach(link => {
         const pageKey = link.dataset.pageKey;
         const targetFile = pageMap[pageKey]?.[lang] || pageKey;
-        link.href = `../${lang}/${targetFile}`; // Constrói o link correto
+        link.href = `../${lang}/${targetFile}`;
     });
     
-    // 2. Atualiza os links dentro do seletor de idiomas
     document.querySelectorAll('.lang-option').forEach(link => {
         const linkLang = link.dataset.lang;
         const targetFile = pageMap[sourceFile]?.[linkLang] || sourceFile;
@@ -182,7 +219,6 @@ function setupHeader() {
         if (linkLang === lang) link.classList.add('active');
     });
 
-    // 3. Destaca o link da página atual no menu
     document.querySelectorAll('a[data-page-key]').forEach(link => {
         if (link.dataset.pageKey === sourceFile) {
             link.classList.add('active');
@@ -193,11 +229,11 @@ function setupHeader() {
 }
 
 function onPageLoad() {
-    const pathLang = window.location.pathname.split('/')[2] || 'pt';
-    setLanguage(pathLang);
+    const pathSegments = window.location.pathname.split('/');
+    const lang = pathSegments.find(seg => ['pt', 'en', 'es'].includes(seg)) || 'pt';
+    setLanguage(lang);
     applyTranslations();
 
-    // Condicional para só executar na página inicial
     if (document.querySelector('.hero-carousel')) {
         loadDynamicCarousel();
         loadWorkCards();
@@ -212,24 +248,28 @@ function onPageLoad() {
         'designs': { id: 'design-gallery', type: 'designs' },
         'apresentacoes': { id: 'presentation-gallery', type: 'apresentacoes' }
     };
-    const pageKey = getSourcePageFile().replace('.html', '');
-    const galleryInfo = galleryIdMap[pageKey];
+    
+    const pageKey = getSourcePageFile().replace('.html', '').replace(/-(horizontal|vertical)$/, '');
+    const galleryInfo = galleryIdMap[pageKey] || Object.values(galleryIdMap).find(g => window.location.pathname.includes(g.id.split('-gallery')[0]));
+
     if (galleryInfo) {
-        if (galleryInfo.type === 'apresentacoes') loadPresentations();
-        else loadGalleryContent(galleryInfo.type, galleryInfo.id, galleryInfo.orientation || null);
+        if (galleryInfo.type === 'apresentacoes') {
+            loadPresentations();
+        } else {
+            loadGalleryContent(galleryInfo.type, galleryInfo.id, galleryInfo.orientation || null);
+        }
     }
 }
 
 // --- INICIALIZAÇÃO GERAL ---
 document.addEventListener('DOMContentLoaded', onPageLoad);
 
-// Observador para configurar o cabeçalho assim que ele for injetado
 const observer = new MutationObserver((mutations, obs) => {
     const header = document.querySelector('.main-header');
-    if (header) {
-        setupHeader(); // Chama a função única que configura tudo no cabeçalho
-        applyTranslations(); // Garante que o conteúdo injetado também é traduzido
-        obs.disconnect(); // Para de observar depois de o trabalho estar feito
+    if (header && header.innerHTML.trim() !== '') {
+        setupHeader();
+        applyTranslations();
+        obs.disconnect();
     }
 });
 observer.observe(document.body, { childList: true, subtree: true });
