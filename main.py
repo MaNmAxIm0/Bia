@@ -6,14 +6,14 @@ from PIL import Image, ImageOps, ImageDraw, ImageFont
 from tqdm import tqdm
 import shutil
 from pathlib import Path
+from datetime import datetime
+import pytz
 
 # --- CONFIGURAÇÃO ---
-# Os caminhos são agora lidos a partir das variáveis de ambiente
 DRIVE_REMOTE_PATH = os.getenv("DRIVE_REMOTE_FULL_PATH")
 R2_BUCKET_PATH = os.getenv("R2_REMOTE_FULL_PATH")
-R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "https://pub-xxxxxxxxxxxxxxxxxxxxxxxx.r2.dev" )
+R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev" )
 
-# Configurações locais e de processamento
 LOCAL_ASSETS_DIR = Path("local_assets")
 PROCESSED_ASSETS_DIR = Path("processed_assets")
 THUMBNAILS_DIR = PROCESSED_ASSETS_DIR / "Thumbnails"
@@ -23,9 +23,27 @@ FONT_PATH = Path("fonts/Montserrat-Medium.ttf")
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png']
 VIDEO_EXTENSIONS = ['.mp4', '.mov', '.avi']
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
+# --- CONFIGURAÇÃO DE LOGGING COM FUSO HORÁRIO DE LISBOA ---
+def setup_logging():
+    """Configura o logging para usar o fuso horário de Lisboa."""
+    log_formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
 
-# --- FUNÇÕES AUXILIARES ---
+    def custom_time(*args):
+        return datetime.now(pytz.timezone('Europe/Lisbon')).timetuple()
+
+    logging.Formatter.converter = custom_time
+    
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(log_formatter)
+    if not root_logger.handlers:
+        root_logger.addHandler(console_handler)
+
+setup_logging()
+
+# --- FUNÇÕES AUXILIARES E DE PROCESSAMENTO ---
+# **CORREÇÃO: Todas as funções são definidas aqui, ANTES de serem usadas pela função main()**
 
 def run_rclone_command(command: list, operation_name: str) -> bool:
     """Executa um comando rclone de forma segura e regista o resultado."""
@@ -55,8 +73,6 @@ def get_media_dimensions(file_path: Path) -> tuple:
     except Exception as e:
         logging.warning(f"Não foi possível obter as dimensões para {file_path.name}: {e}")
     return None, None
-
-# --- FUNÇÕES DE PROCESSAMENTO ---
 
 def correct_image_orientation(img: Image.Image) -> Image.Image:
     """Verifica e corrige a orientação da imagem com base nos metadados EXIF."""
@@ -120,45 +136,47 @@ def process_video(input_path: Path, output_path: Path) -> bool:
         logging.error(f"FFmpeg falhou ao gerar thumbnail para '{input_path.name}': {e.stderr.strip()}")
         return True
 
-# --- GERAÇÃO DE METADATOS ---
-
 def generate_data_json(output_file: str):
-    """Gera um ficheiro data.json que cataloga todos os ativos por categoria e orientação."""
-    logging.info("Gerando ficheiro de metadados data.json com estrutura completa...")
+    """Gera um ficheiro data.json com a estrutura detalhada por ficheiro."""
+    logging.info("Gerando ficheiro de metadados data.json com a nova estrutura...")
     if not R2_PUBLIC_URL or "xxxx" in R2_PUBLIC_URL:
-        logging.warning("A variável de ambiente R2_PUBLIC_URL não foi definida! Os URLs no data.json estarão incorretos.")
+        logging.warning("A variável de ambiente R2_PUBLIC_URL não foi definida!")
 
-    asset_catalog = {}
+    final_data_structure = {}
     all_processed_files = [p for p in PROCESSED_ASSETS_DIR.rglob("*") if p.is_file()]
 
     for file_path_local in all_processed_files:
         if file_path_local.parent.name == "Thumbnails":
             continue
 
-        relative_path = file_path_local.relative_to(PROCESSED_ASSETS_DIR)
-        category = relative_path.parts[0] if len(relative_path.parts) > 1 else "geral"
+        filename = file_path_local.name
+        stem = file_path_local.stem
         
-        if category not in asset_catalog:
-            asset_catalog[category] = {"horizontal": [], "vertical": []}
-
-        url_path = relative_path.as_posix()
-        asset_info = {
-            "path": url_path,
-            "url": f"{R2_PUBLIC_URL.rstrip('/')}/{url_path}"
-        }
+        parts = stem.split('_')
+        title_pt = parts[0] if len(parts) > 0 else stem
+        title_es = parts[1] if len(parts) > 1 else title_pt
+        title_en = parts[2] if len(parts) > 2 else title_pt
 
         width, height = get_media_dimensions(file_path_local)
         orientation = "horizontal"
         if width is not None and height is not None and height > width:
             orientation = "vertical"
-        
+
+        relative_path = file_path_local.relative_to(PROCESSED_ASSETS_DIR)
+        url_path = relative_path.as_posix()
+        full_url = f"{R2_PUBLIC_URL.rstrip('/')}/{url_path}"
+
+        asset_info = {
+            "pt": title_pt, "es": title_es, "en": title_en,
+            "orientation": orientation, "url": full_url
+        }
+
         if file_path_local.suffix.lower() in VIDEO_EXTENSIONS:
-            thumbnail_filename = f"{file_path_local.stem}_thumb.jpg"
+            thumbnail_filename = f"{stem}_thumb.jpg"
             asset_info["thumbnail_url"] = f"{R2_PUBLIC_URL.rstrip('/')}/Thumbnails/{thumbnail_filename}"
 
-        asset_catalog[category][orientation].append(asset_info)
+        final_data_structure[filename] = asset_info
 
-    final_data_structure = {"pt": asset_catalog}
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(final_data_structure, f, indent=4, ensure_ascii=False)
     
@@ -171,7 +189,7 @@ def main():
     logging.info("--- INÍCIO DO PIPELINE DE PROCESSAMENTO ---")
     
     if not DRIVE_REMOTE_PATH or not R2_BUCKET_PATH:
-        logging.error("As variáveis de ambiente DRIVE_REMOTE_FULL_PATH e R2_REMOTE_FULL_PATH não estão definidas. Verifique a configuração do seu workflow.")
+        logging.error("As variáveis de ambiente DRIVE_REMOTE_FULL_PATH e R2_REMOTE_FULL_PATH não estão definidas.")
         exit(1)
 
     LOCAL_ASSETS_DIR.mkdir(exist_ok=True)
@@ -188,10 +206,11 @@ def main():
     if not all_local_files:
         logging.info("Nenhum ficheiro novo ou modificado para processar.")
     else:
-        logging.info(f"Encontrados {len(all_local_files)} ficheiros novos ou modificados para processar.")
+        logging.info(f"Encontrados {len(all_local_files)} ficheiros na origem. Verificando contra a cache...")
 
     failure_count = 0
-    with tqdm(total=len(all_local_files), desc="Processando novos ativos") as pbar:
+    processed_count = 0
+    with tqdm(total=len(all_local_files), desc="Processando ativos") as pbar:
         for input_path in all_local_files:
             relative_path = input_path.relative_to(LOCAL_ASSETS_DIR)
             output_path = PROCESSED_ASSETS_DIR / relative_path
@@ -199,7 +218,9 @@ def main():
             if output_path.exists():
                 pbar.update(1)
                 continue
-
+            
+            processed_count += 1
+            pbar.set_description(f"Processando {input_path.name}")
             output_path.parent.mkdir(parents=True, exist_ok=True)
             file_ext = input_path.suffix.lower()
             processed_successfully = False
@@ -224,6 +245,7 @@ def main():
                 failure_count += 1
             pbar.update(1)
 
+    logging.info(f"Processamento concluído. {processed_count} ficheiros foram processados nesta execução.")
     generate_data_json("data.json")
 
     if failure_count > 0:
