@@ -1,4 +1,4 @@
-# main.py (Versão Final com Correções de FFmpeg e Sincronização)
+# main.py (Versão Final com Correção Definitiva de FFmpeg e Sincronização)
 
 import os
 import subprocess
@@ -85,13 +85,14 @@ def process_image(input_path: Path, output_path: Path, apply_watermark_flag: boo
 
 def process_video(input_path: Path, output_path: Path, apply_watermark_flag: bool):
     """Processa um vídeo com uma sintaxe de filtro FFmpeg robusta e corrigida."""
-    # **CORREÇÃO DEFINITIVA DO ERRO FFmpeg**
-    # Escapa os caracteres especiais para o shell
-    font_path = str(config.WATERMARK_FONT_PATH).replace("'", "'\\''")
-    watermark_text = config.WATERMARK_TEXT.replace("'", "'\\''")
-
-    filter_complex = f"scale='min(1920,iw)':-2"
+    filter_complex = "scale='min(1920,iw)':-2"
+    
     if apply_watermark_flag:
+        # **CÓDIGO ESSENCIAL REINTRODUZIDO E CORRIGIDO**
+        # Escapa os caracteres especiais para o filtro FFmpeg
+        font_path = str(config.WATERMARK_FONT_PATH).replace(":", "\\\\:")
+        watermark_text = config.WATERMARK_TEXT.replace("'", "’") 
+
         watermark_filter = (
             f",drawtext=fontfile='{font_path}':text='{watermark_text}':"
             f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
@@ -134,8 +135,6 @@ def main():
     if not run_command(["rclone", "sync", config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "--progress", "-v"], "Sincronizar Google Drive"):
         return
     
-    # **CORREÇÃO DE SINCRONIZAÇÃO**
-    # Adiciona --use-server-modtime para que as datas dos ficheiros no R2 sejam preservadas
     if not run_command(["rclone", "sync", config.R2_REMOTE_PATH, str(config.PROCESSED_ASSETS_DIR), "--progress", "-v", "--use-server-modtime"], "Sincronizar R2 para local"):
         return
 
@@ -182,7 +181,7 @@ def main():
         ext = source_path.suffix.lower()
         if ext in ['.gdoc', '.gsheet', '.gslides']:
             try:
-                with open(source_path, 'r') as f: url = json.load(f)['url']
+                with open(source_path, 'r', encoding='utf-8') as f: url = json.load(f)['url']
                 if "presentation" in url: url = url.replace("/edit", "/embed?start=false&loop=false&delayms=3000")
                 final_data[source_path.stem] = {"titles": {"pt": source_path.stem, "en": source_path.stem, "es": source_path.stem}, "orientation": "horizontal", "url": url, "is_external": True}
             except Exception: continue
@@ -199,8 +198,6 @@ def main():
     with open(config.JSON_OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(final_data, f, indent=4, ensure_ascii=False)
 
-    # **CORREÇÃO DO MANIFESTO**
-    # Garante que os ficheiros são sempre criados, mesmo que vazios
     with open(config.R2_FILE_MANIFEST, 'w', encoding='utf-8') as f:
         f.write(f"Última sincronização: {datetime.now(pytz.timezone('Europe/Lisbon')).strftime('%Y-%m-%d %H:%M:%S %Z')}\n\n")
         if manifest_entries:
@@ -217,7 +214,7 @@ def main():
             f.write("Nenhum ficheiro falhou o processamento.\n")
 
     run_command(["rclone", "sync", str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "--progress", "-v"], "Sincronizar para R2")
-    logging.info("--- WORKFLOW CONCLÍDO ---")
+    logging.info("--- WORKFLOW CONCLUÍDO ---")
 
 if __name__ == "__main__":
     main()
