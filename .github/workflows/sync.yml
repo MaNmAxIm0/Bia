@@ -10,10 +10,16 @@ jobs:
   sync-and-process:
     runs-on: ubuntu-latest
     
-    # Centraliza os nomes dos remotes como variáveis de ambiente
     env:
+      # --- AJUSTE AQUI SE NECESSÁRIO ---
+      # Estes nomes devem corresponder aos nomes entre [ ] no seu rclone.conf
+      DRIVE_REMOTE_NAME: "Drive"
+      R2_REMOTE_NAME: "R2"
+      
+      # Variáveis de ambiente completas para serem usadas nos passos
       DRIVE_REMOTE_FULL_PATH: "Drive:Portfólio Bia"
       R2_REMOTE_FULL_PATH: "R2:bia-portfolio-assets"
+      R2_PUBLIC_URL: "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
 
     steps:
       - name: Checkout do repositório
@@ -28,15 +34,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt' ) }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
       - name: Instalar e fazer cache de dependências Apt
         uses: awalsh128/cache-apt-pkgs-action@v1.5.0
         with:
-          packages: ffmpeg libimage-exiftool-perl zlib1g-dev libjpeg-dev libblas3 libopenblas-dev
-          version: 1.2
+          packages: ffmpeg libimage-exiftool-perl libblas3
+          version: 1.0
 
       - name: Instalar dependências Python
         run: pip install -r requirements.txt
@@ -44,25 +50,24 @@ jobs:
       - name: Instalar rclone
         run: curl https://rclone.org/install.sh | sudo bash
 
-      - name: Configurar rclone
-        env:
-          RCLONE_CONFIG_BASE64: ${{ secrets.RCLONE_CONFIG_BASE64 }}
+      - name: Configurar rclone a partir de segredo Base64
+        # Usa base64 para garantir que o ficheiro de configuração é escrito perfeitamente
         run: |
           mkdir -p ~/.config/rclone
-          echo "$RCLONE_CONFIG_BASE64" | base64 -d > ~/.config/rclone/rclone.conf
+          echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 --decode > ~/.config/rclone/rclone.conf
           
       - name: Executar script de processamento principal
         run: python3 main.py
 
-      - name: Sincronizar Ativos Principais para o R2 (excluindo Thumbnails)
+      - name: Sincronizar Ativos Principais para o R2 (excluindo Thumbnails )
         run: |
           echo "A sincronizar ativos principais para ${{ env.R2_REMOTE_FULL_PATH }}..."
-          rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} --exclude "/Thumbnails/**" --progress
+          rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} --exclude "/Thumbnails/**" --progress -v
 
-      - name: Sincronizar Apenas as Thumbnails para a Raiz
+      - name: Sincronizar Apenas as Thumbnails
         run: |
           echo "A sincronizar Thumbnails para ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails..."
-          rclone sync processed_assets/Thumbnails/ ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails --progress
+          rclone sync processed_assets/Thumbnails/ ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails --progress -v
 
       - name: Gerar Manifesto de Ficheiros do R2
         run: rclone lsf -R ${{ env.R2_REMOTE_FULL_PATH }} > r2_file_manifest.txt
@@ -71,7 +76,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data.json r2_file_manifest.txt
+          git add data.json r2_file_manifest.txt || echo "Nenhum ficheiro de manifesto para adicionar."
           if git diff-index --quiet HEAD; then
             echo "Nenhuma alteração nos ficheiros de manifesto para fazer commit."
           else
