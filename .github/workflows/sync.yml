@@ -10,9 +10,8 @@ jobs:
   sync-and-process:
     runs-on: ubuntu-latest
     
-    # --- CORREÇÃO 2: Adicionar permissões de escrita ---
     permissions:
-      contents: write # Permite que o 'git push' funcione
+      contents: write
 
     env:
       DRIVE_REMOTE_NAME: "Drive"
@@ -38,7 +37,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      # --- CORREÇÃO 1: Garantir que as bibliotecas são encontradas ---
+      # --- CORREÇÃO: Estratégia de Cache Simplificada e Robusta ---
+      - name: Cache para Ativos Processados
+        id: processed-assets-cache
+        uses: actions/cache@v4
+        with:
+          path: processed_assets
+          # Usamos uma chave estática para garantir que a cache é sempre encontrada.
+          # A lógica de sincronização tratará das atualizações.
+          key: ${{ runner.os }}-processed-assets-v1
+          restore-keys: |
+            ${{ runner.os }}-processed-assets-v1
+
       - name: Atualizar sistema e instalar dependências Apt
         run: |
           sudo apt-get update -y
@@ -46,7 +56,10 @@ jobs:
           sudo ldconfig
 
       - name: Instalar dependências Python
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          # Adiciona pytz que é usado pelo format_manifest.py
+          pip install pytz
 
       - name: Instalar rclone
         run: curl https://rclone.org/install.sh | sudo bash
@@ -59,24 +72,36 @@ jobs:
       - name: Executar script de processamento principal
         run: python3 main.py
 
-      - name: Sincronizar Ativos Principais para o R2 (excluindo Thumbnails )
+      # --- CORREÇÃO: Flags para Sincronização Inteligente ---
+      - name: Sincronizar Ativos Principais para o R2
         run: |
           echo "A sincronizar ativos principais para ${{ env.R2_REMOTE_FULL_PATH }}..."
-          rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} --exclude "/Thumbnails/**" --progress -v
+          # --update: Não substitui ficheiros mais recentes no destino.
+          # --use-server-modtime: Usa a data do R2 como referência, evitando atualizações de metadados.
+          rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} \
+            --exclude "/Thumbnails/**" \
+            --update \
+            --use-server-modtime \
+            --progress -v
 
       - name: Sincronizar Apenas as Thumbnails
         run: |
           echo "A sincronizar Thumbnails para ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails..."
-          rclone sync processed_assets/Thumbnails/ ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails --progress -v
+          rclone sync processed_assets/Thumbnails/ ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails \
+            --update \
+            --use-server-modtime \
+            --progress -v
 
       - name: Gerar Manifesto de Ficheiros do R2
-        run: rclone lsf -R ${{ env.R2_REMOTE_FULL_PATH }} > r2_file_manifest.txt
+        run: |
+          echo "A gerar o manifesto de ficheiros a partir do R2 com 'rclone lsjson'..."
+          rclone lsjson -R ${{ env.R2_REMOTE_FULL_PATH }} | python3 format_manifest.py
 
       - name: Fazer Commit e Push dos Ficheiros de Manifesto para o Git
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data.json r2_file_manifest.txt || echo "Nenhum ficheiro de manifesto para adicionar."
+          git add data.json r2_file_manifest.txt format_manifest.py || echo "Nenhum ficheiro para adicionar."
           if git diff-index --quiet HEAD; then
             echo "Nenhuma alteração nos ficheiros de manifesto para fazer commit."
           else
