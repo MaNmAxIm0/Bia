@@ -1,4 +1,4 @@
-# main.py (Versão Definitiva, Segura e Otimizada)
+# main.py (Versão Definitiva com Correção do FFmpeg)
 
 import os
 import subprocess
@@ -55,14 +55,14 @@ def get_media_orientation(file_path: Path) -> str:
     return "horizontal"
 
 # --- 3. FUNÇÕES DE PROCESSAMENTO ---
-def process_image(input_path: Path, output_path: Path, apply_watermark: bool):
+def process_image(input_path: Path, output_path: Path, apply_watermark_flag: bool):
     """Processa uma imagem: otimiza, comprime e aplica marca de água se necessário."""
     with Image.open(input_path) as img:
         img = ImageOps.exif_transpose(img)
         if max(img.size) > 2048:
             img.thumbnail((2048, 2048), Image.Resampling.LANCZOS)
         
-        if apply_watermark:
+        if apply_watermark_flag:
             image_rgba = img.convert("RGBA")
             draw = ImageDraw.Draw(image_rgba)
             font_size = int(max(image_rgba.size) * config.IMG_WATERMARK_FONT_RATIO)
@@ -84,24 +84,25 @@ def process_image(input_path: Path, output_path: Path, apply_watermark: bool):
         
         img.save(output_path, "JPEG", quality=65, optimize=True, progressive=True)
 
-def process_video(input_path: Path, output_path: Path, apply_watermark: bool):
+def process_video(input_path: Path, output_path: Path, apply_watermark_flag: bool):
     """Processa um vídeo: otimiza, comprime, gera thumbnail e aplica marca de água se necessário."""
-    filters = ["scale='min(1920,iw)':'-2'"] # Redimensiona para 1080p no máximo
-    if apply_watermark:
-        # Corrigir o problema da f-string com barra invertida
-        font_path_escaped = str(config.WATERMARK_FONT_PATH).replace(':', '\\\\:')
+    filter_chain = ["scale='min(1920,iw)':-2"] 
+    if apply_watermark_flag:
+        # Escapa o caminho da fonte e constrói a string do filtro da marca de água
+        font_path = str(config.WATERMARK_FONT_PATH).replace("'", r"\'")
         watermark_filter = (
-            f"drawtext=fontfile='{font_path_escaped}':text='{config.WATERMARK_TEXT}':"
+            f"drawtext=fontfile='{font_path}':text='{config.WATERMARK_TEXT}':"
             f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
             f"x=(w-text_w-(min(w,h)*{config.MARGIN_RATIO}))+2:y=(h-text_h-(min(w,h)*{config.MARGIN_RATIO}))+2,"
-            f"drawtext=fontfile='{font_path_escaped}':text='{config.WATERMARK_TEXT}':"
+            f"drawtext=fontfile='{font_path}':text='{config.WATERMARK_TEXT}':"
             f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=white@0.8:"
             f"x=w-text_w-(min(w,h)*{config.MARGIN_RATIO}):y=h-text_h-(min(w,h)*{config.MARGIN_RATIO})"
         )
-        filters.append(watermark_filter)
+        filter_chain.append(watermark_filter)
 
     video_cmd = [
-        "ffmpeg", "-i", str(input_path), "-vf", ",".join(filters),
+        "ffmpeg", "-i", str(input_path), 
+        "-vf", ",".join(filter_chain), # Junta os filtros com uma vírgula
         "-codec:v", "libx264", "-preset", "medium", "-crf", "28",
         "-codec:a", "aac", "-b:a", "128k", "-y", str(output_path)
     ]
@@ -125,19 +126,14 @@ def main():
     setup_logging()
     logging.info("--- INÍCIO DO WORKFLOW DE SINCRONIZAÇÃO ---")
 
-    # Garante que as pastas existem
     for path in [config.LOCAL_ASSETS_DIR, config.PROCESSED_ASSETS_DIR, config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR]:
         path.mkdir(exist_ok=True)
 
-    # Passo 1: Sincronizar Drive -> Local (Apenas transfere o que é novo/diferente)
     if not run_command(["rclone", "sync", config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "--progress", "-v"], "Sincronizar Google Drive"):
         return
-
-    # Passo 2: Sincronizar R2 -> Processed (Traz o estado atual do R2, incluindo thumbnails)
     if not run_command(["rclone", "sync", config.R2_REMOTE_PATH, str(config.PROCESSED_ASSETS_DIR), "--progress", "-v"], "Sincronizar R2"):
         return
 
-    # Passo 3: Limpar ficheiros órfãos (que existem no R2/Processed mas já não no Drive)
     drive_stems = {p.stem for p in config.LOCAL_ASSETS_DIR.rglob("*.*")}
     for proc_file in list(config.PROCESSED_ASSETS_DIR.rglob("*.*")):
         if config.THUMBNAIL_DIR.name in proc_file.parts:
@@ -146,8 +142,7 @@ def main():
         elif proc_file.stem not in drive_stems:
             proc_file.unlink(); logging.info(f"Apagado ficheiro órfão: {proc_file.name}")
 
-    # Passo 4: Processar ficheiros novos ou alterados
-    final_data, manifest_entries = {}, []
+    manifest_entries = []
     for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
         relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
         output_path = config.PROCESSED_ASSETS_DIR / relative_path
@@ -161,24 +156,24 @@ def main():
         parent_folder = relative_path.parts[0] if len(relative_path.parts) > 1 else ""
         should_apply_watermark = parent_folder not in ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name]
 
-        if ext in config.PDF_EXTENSIONS or ext in [".gdoc", ".gsheet", ".gslides"]:
-            if ext not in [".gdoc", ".gsheet", ".gslides"]: shutil.copy2(input_path, output_path)
+        if ext in config.PDF_EXTENSIONS or ext in ['.gdoc', '.gsheet', '.gslides']:
+            if ext not in ['.gdoc', '.gsheet', '.gslides']: shutil.copy2(input_path, output_path)
         elif ext in config.IMAGE_EXTENSIONS:
-            process_image(input_path, output_path, apply_watermark=should_apply_watermark)
+            process_image(input_path, output_path, apply_watermark_flag=should_apply_watermark)
         elif ext in config.VIDEO_EXTENSIONS:
-            process_video(input_path, output_path, apply_watermark=should_apply_watermark)
+            if not process_video(input_path, output_path, apply_watermark_flag=should_apply_watermark):
+                continue
         else:
             continue
         
         manifest_entries.append(f"{relative_path.as_posix()} - {datetime.now().isoformat()}")
 
-    # Passo 5: Gerar data.json a partir do estado final do Drive
+    final_data = {}
     for source_path in list(config.LOCAL_ASSETS_DIR.rglob("*.*")):
         relative_path = source_path.relative_to(config.LOCAL_ASSETS_DIR)
         ext = source_path.suffix.lower()
 
-        if ext in [".gdoc", ".gsheet", ".gslides"]:
-            # Lógica para links do Google
+        if ext in ['.gdoc', '.gsheet', '.gslides']:
             try:
                 with open(source_path, 'r') as f: url = json.load(f)['url']
                 if "presentation" in url: url = url.replace("/edit", "/embed?start=false&loop=false&delayms=3000")
@@ -197,12 +192,10 @@ def main():
     with open(config.JSON_OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(final_data, f, indent=4, ensure_ascii=False)
 
-    # Passo 6: Gerar o manifesto de ficheiros sincronizados
     with open(config.R2_FILE_MANIFEST, 'w', encoding='utf-8') as f:
         f.write(f"Última sincronização: {datetime.now(pytz.timezone('Europe/Lisbon')).strftime('%Y-%m-%d %H:%M:%S %Z')}\n\n")
         f.write("\n".join(manifest_entries))
 
-    # Passo 7: Sincronizar o resultado final -> R2
     run_command(["rclone", "sync", str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "--progress", "-v"], "Sincronizar para R2")
 
     logging.info("--- WORKFLOW CONCLUÍDO ---")

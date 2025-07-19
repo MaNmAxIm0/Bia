@@ -14,7 +14,7 @@ THUMBNAIL_DIR = Path("Thumbnails") # Nome da pasta para os thumbnails
 
 # --- Geração de Ficheiros ---
 JSON_OUTPUT_FILE = Path("data.json")
-MANIFEST_OUTPUT_FILE = Path("r2_file_manifest.txt")
+R2_FILE_MANIFEST = "r2_manifest.txt"
 FAILED_FILES_LOG = Path("failed_files.log")
 
 # --- Configurações da Marca de Água ---
