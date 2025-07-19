@@ -88,11 +88,13 @@ def process_video(input_path: Path, output_path: Path, apply_watermark: bool):
     """Processa um vídeo: otimiza, comprime, gera thumbnail e aplica marca de água se necessário."""
     filters = ["scale='min(1920,iw)':'-2'"] # Redimensiona para 1080p no máximo
     if apply_watermark:
+        # Corrigir o problema da f-string com barra invertida
+        font_path_escaped = str(config.WATERMARK_FONT_PATH).replace(':', '\\\\:')
         watermark_filter = (
-            f"drawtext=fontfile='{str(config.WATERMARK_FONT_PATH).replace(':', r'\\\\:')}':text='{config.WATERMARK_TEXT}':"
+            f"drawtext=fontfile='{font_path_escaped}':text='{config.WATERMARK_TEXT}':"
             f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
             f"x=(w-text_w-(min(w,h)*{config.MARGIN_RATIO}))+2:y=(h-text_h-(min(w,h)*{config.MARGIN_RATIO}))+2,"
-            f"drawtext=fontfile='{str(config.WATERMARK_FONT_PATH).replace(':', r'\\\\:')}':text='{config.WATERMARK_TEXT}':"
+            f"drawtext=fontfile='{font_path_escaped}':text='{config.WATERMARK_TEXT}':"
             f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=white@0.8:"
             f"x=w-text_w-(min(w,h)*{config.MARGIN_RATIO}):y=h-text_h-(min(w,h)*{config.MARGIN_RATIO})"
         )
@@ -159,8 +161,8 @@ def main():
         parent_folder = relative_path.parts[0] if len(relative_path.parts) > 1 else ""
         should_apply_watermark = parent_folder not in ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name]
 
-        if ext in config.PDF_EXTENSIONS or ext in ['.gdoc', '.gsheet', '.gslides']:
-            if ext not in ['.gdoc', '.gsheet', '.gslides']: shutil.copy2(input_path, output_path)
+        if ext in config.PDF_EXTENSIONS or ext in [".gdoc", ".gsheet", ".gslides"]:
+            if ext not in [".gdoc", ".gsheet", ".gslides"]: shutil.copy2(input_path, output_path)
         elif ext in config.IMAGE_EXTENSIONS:
             process_image(input_path, output_path, apply_watermark=should_apply_watermark)
         elif ext in config.VIDEO_EXTENSIONS:
@@ -175,7 +177,7 @@ def main():
         relative_path = source_path.relative_to(config.LOCAL_ASSETS_DIR)
         ext = source_path.suffix.lower()
 
-        if ext in ['.gdoc', '.gsheet', '.gslides']:
+        if ext in [".gdoc", ".gsheet", ".gslides"]:
             # Lógica para links do Google
             try:
                 with open(source_path, 'r') as f: url = json.load(f)['url']
