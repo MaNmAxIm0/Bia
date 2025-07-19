@@ -29,8 +29,8 @@ jobs:
       - name: Instalar e fazer cache de dependências Apt
         uses: awalsh128/cache-apt-pkgs-action@v1.5.0
         with:
-          packages: ffmpeg libimage-exiftool-perl zlib1g-dev libjpeg-dev libblas3
-          version: 1.1 # Versão incrementada para garantir a atualização do cache
+          packages: ffmpeg libimage-exiftool-perl zlib1g-dev libjpeg-dev libblas3 libopenblas-dev
+          version: 1.2 # Versão incrementada para garantir a atualização do cache
 
       - name: Instalar dependências Python
         run: pip install -r requirements.txt
@@ -50,15 +50,18 @@ jobs:
 
       - name: Sincronizar Ativos Principais para o R2 (excluindo Thumbnails)
         run: |
+          # IMPORTANTE: Substitua "R2" abaixo pelo nome exato do seu remoto R2
           echo "A sincronizar ativos principais (Vídeos, Fotografias, etc.) para o R2..."
           rclone sync processed_assets/ R2:bia-portfolio-assets --exclude "/Thumbnails/**" --progress
 
       - name: Sincronizar Apenas as Thumbnails para a Raiz
         run: |
+          # IMPORTANTE: Substitua "R2" abaixo pelo nome exato do seu remoto R2
           echo "A sincronizar Thumbnails para a pasta 'Thumbnails' na raiz do R2..."
           rclone sync processed_assets/Thumbnails/ R2:bia-portfolio-assets/Thumbnails --progress
 
       - name: Gerar Manifesto de Ficheiros do R2
+        # IMPORTANTE: Substitua "R2" abaixo pelo nome exato do seu remoto R2
         run: rclone lsf -R R2:bia-portfolio-assets > r2_file_manifest.txt
 
       - name: Fazer Commit e Push dos Ficheiros de Manifesto para o Git

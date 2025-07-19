@@ -8,9 +8,16 @@ import shutil
 from pathlib import Path
 
 # --- CONFIGURAÇÃO ---
+# Nomes dos remotes no ficheiro rclone.conf
+DRIVE_REMOTE_NAME = "Drive"
+R2_REMOTE_NAME = "R2"
+
+# URL público do seu bucket R2
 R2_PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
-DRIVE_REMOTE_PATH = "Drive:Portfólio Bia"
-R2_REMOTE_PATH = "R2:bia-portfolio-assets"
+
+# O resto do script usa os nomes definidos acima para construir os caminhos
+DRIVE_REMOTE_PATH = f"{DRIVE_REMOTE_NAME}:Portfólio Bia"
+R2_BUCKET_PATH = f"{R2_REMOTE_NAME}:bia-portfolio-assets"
 LOCAL_ASSETS_DIR = Path("local_assets" )
 PROCESSED_ASSETS_DIR = Path("processed_assets")
 THUMBNAILS_DIR = PROCESSED_ASSETS_DIR / "Thumbnails"
@@ -60,7 +67,7 @@ def correct_image_orientation(img: Image.Image) -> Image.Image:
     try:
         return ImageOps.exif_transpose(img)
     except Exception as e:
-        logging.warning(f"Não foi possível aplicar a transposição EXIF para uma imagem: {e}")
+        logging.warning(f"Não foi possível aplicar a transposição EXIF: {e}")
         return img
 
 def apply_watermark_to_image(base_image: Image.Image) -> Image.Image:
@@ -130,7 +137,7 @@ def generate_data_json(output_file: str):
     all_processed_files = list(PROCESSED_ASSETS_DIR.rglob("*.*"))
 
     for file_path_local in all_processed_files:
-        if file_path_local.parent.name == "Thumbnails" or not file_path_local.is_file():
+        if file_path_local.is_dir() or file_path_local.parent.name == "Thumbnails":
             continue
 
         relative_path = file_path_local.relative_to(PROCESSED_ASSETS_DIR)
@@ -165,28 +172,41 @@ def generate_data_json(output_file: str):
 # --- FLUXO DE TRABALHO PRINCIPAL ---
 
 def main():
+    """Orquestra todo o pipeline de processamento de média."""
     logging.info("--- INÍCIO DO PIPELINE DE PROCESSAMENTO ---")
 
-    if LOCAL_ASSETS_DIR.exists(): shutil.rmtree(LOCAL_ASSETS_DIR)
-    if PROCESSED_ASSETS_DIR.exists(): shutil.rmtree(PROCESSED_ASSETS_DIR)
+    # A lógica de cache do GitHub Actions tratará de manter os ficheiros processados.
+    # Apenas garantimos que as pastas existem.
+    LOCAL_ASSETS_DIR.mkdir(exist_ok=True)
     PROCESSED_ASSETS_DIR.mkdir(exist_ok=True)
     THUMBNAILS_DIR.mkdir(exist_ok=True)
 
-    download_cmd = ["rclone", "copy", DRIVE_REMOTE_PATH, str(LOCAL_ASSETS_DIR), "--progress"]
-    if not run_rclone_command(download_cmd, "Download de ativos do Drive"):
-        logging.error("Pipeline interrompido devido a falha no download.")
+    # Usamos 'sync' para descarregar apenas ficheiros novos/modificados e remover os apagados.
+    sync_cmd = ["rclone", "sync", DRIVE_REMOTE_PATH, str(LOCAL_ASSETS_DIR), "--progress"]
+    if not run_rclone_command(sync_cmd, "Sincronização de ativos do Drive"):
+        logging.error("Pipeline interrompido devido a falha na sincronização do Drive.")
         return
 
     all_local_files = [p for p in LOCAL_ASSETS_DIR.rglob("*") if p.is_file() and not p.name.startswith('.')]
-    logging.info(f"Encontrados {len(all_local_files)} ficheiros para processar.")
-    failure_count = 0
+    
+    if not all_local_files:
+        logging.info("Nenhum ficheiro novo ou modificado para processar.")
+    else:
+        logging.info(f"Encontrados {len(all_local_files)} ficheiros novos ou modificados para processar.")
 
-    with tqdm(total=len(all_local_files), desc="Processando ficheiros") as pbar:
+    failure_count = 0
+    with tqdm(total=len(all_local_files), desc="Processando novos ativos") as pbar:
         for input_path in all_local_files:
             relative_path = input_path.relative_to(LOCAL_ASSETS_DIR)
             output_path = PROCESSED_ASSETS_DIR / relative_path
-            output_path.parent.mkdir(parents=True, exist_ok=True)
             
+            # Lógica de cache: se o ficheiro já existe, não o reprocessamos.
+            # Esta verificação é redundante se o sync local for perfeito, mas é uma segurança extra.
+            if output_path.exists():
+                pbar.update(1)
+                continue
+
+            output_path.parent.mkdir(parents=True, exist_ok=True)
             file_ext = input_path.suffix.lower()
             processed_successfully = False
 
