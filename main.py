@@ -85,21 +85,25 @@ def process_image(input_path: Path, output_path: Path, apply_watermark_flag: boo
 
 def process_video(input_path: Path, output_path: Path, apply_watermark_flag: bool):
     """Processa um vídeo com uma sintaxe de filtro FFmpeg robusta e corrigida."""
-    filter_complex = "scale='min(1920,iw)':-2"
+    
+    # A cadeia de filtros é construída de forma mais limpa, sem aspas internas desnecessárias.
+    filter_complex = "scale=min(1920\\,iw):-2" # Escapar a vírgula para o scale
     
     if apply_watermark_flag:
-        # **CÓDIGO ESSENCIAL REINTRODUZIDO E CORRIGIDO**
-        # Escapa os caracteres especiais para o filtro FFmpeg
-        font_path = str(config.WATERMARK_FONT_PATH).replace(":", "\\\\:")
-        watermark_text = config.WATERMARK_TEXT.replace("'", "’") 
+        # Escapar caracteres especiais para o FFmpeg
+        # O FFmpeg requer que os dois pontos ':' e as barras invertidas '\' no caminho do Windows sejam escapados.
+        font_path = str(config.WATERMARK_FONT_PATH).replace('\\', '\\\\').replace(':', '\\:')
+        watermark_text = config.WATERMARK_TEXT.replace("'", "’") # Substituir aspas para evitar conflitos
 
+        # Construção do filtro de marca de água (sombra primeiro, depois o texto principal)
+        # A sintaxe foi simplificada para maior compatibilidade.
         watermark_filter = (
             f",drawtext=fontfile='{font_path}':text='{watermark_text}':"
-            f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
-            f"x='(w-text_w-(min(w,h)*{config.MARGIN_RATIO}))+2':y='(h-text_h-(min(w,h)*{config.MARGIN_RATIO}))+2',"
+            f"fontsize=min(w\\,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
+            f"x=(w-text_w-(min(w\\,h)*{config.MARGIN_RATIO}))+2:y=(h-text_h-(min(w\\,h)*{config.MARGIN_RATIO}))+2,"
             f"drawtext=fontfile='{font_path}':text='{watermark_text}':"
-            f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=white@0.8:"
-            f"x='w-text_w-(min(w,h)*{config.MARGIN_RATIO})':y='h-text_h-(min(w,h)*{config.MARGIN_RATIO})'"
+            f"fontsize=min(w\\,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=white@0.8:"
+            f"x=w-text_w-(min(w\\,h)*{config.MARGIN_RATIO}):y=h-text_h-(min(w\\,h)*{config.MARGIN_RATIO})"
         )
         filter_complex += watermark_filter
 
@@ -107,23 +111,29 @@ def process_video(input_path: Path, output_path: Path, apply_watermark_flag: boo
         "ffmpeg", "-i", str(input_path),
         "-vf", filter_complex,
         "-c:v", "libx264", "-preset", "medium", "-crf", "28",
-        "-c:a", "aac", "-b:a", "128k", "-y", str(output_path)
+        "-c:a", "aac", "-b:a", "128k",
+        "-y", # Sobrescrever o ficheiro de saída se já existir
+        str(output_path)
     ]
+    
     if not run_command(video_cmd, f"Processar vídeo {input_path.name}"):
         return False
 
+    # A lógica para gerar a thumbnail permanece a mesma
     try:
         duration_cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(input_path)]
         result = subprocess.run(duration_cmd, capture_output=True, text=True, check=True)
-        duration = float(result.stdout)
-        ts = max(1.0, duration * 0.15)
+        duration = float(result.stdout.strip())
+        # Garante que o timestamp para a thumbnail está dentro da duração do vídeo
+        ts = min(max(1.0, duration * 0.15), duration - 1)
         thumb_path = config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR / f"{output_path.stem}_thumb.jpg"
         thumb_cmd = ["ffmpeg", "-i", str(input_path), "-ss", str(ts), "-vframes", "1", "-q:v", "2", "-y", str(thumb_path)]
         run_command(thumb_cmd, f"Gerar thumbnail para {output_path.name}")
     except Exception as e:
-        logging.error(f"FALHA ao gerar thumbnail: {e}"); return False
+        logging.error(f"FALHA ao gerar thumbnail para {input_path.name}: {e}")
+        return False
+        
     return True
-
 # --- 4. FLUXO PRINCIPAL ---
 def main():
     setup_logging()
@@ -135,6 +145,7 @@ def main():
     if not run_command(["rclone", "sync", config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "--progress", "-v"], "Sincronizar Google Drive"):
         return
     
+    # Adiciona --use-server-modtime para preservar as datas originais e evitar reprocessamento desnecessário
     if not run_command(["rclone", "sync", config.R2_REMOTE_PATH, str(config.PROCESSED_ASSETS_DIR), "--progress", "-v", "--use-server-modtime"], "Sincronizar R2 para local"):
         return
 
