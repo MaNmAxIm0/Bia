@@ -10,16 +10,15 @@ jobs:
   sync-and-process:
     runs-on: ubuntu-latest
     
+    # --- CORREÇÃO 2: Adicionar permissões de escrita ---
+    permissions:
+      contents: write # Permite que o 'git push' funcione
+
     env:
-      # Nomes dos remotes que devem corresponder aos do rclone.conf
       DRIVE_REMOTE_NAME: "Drive"
       R2_REMOTE_NAME: "R2"
-      
-      # Paths completos para usar nos comandos rclone
       DRIVE_REMOTE_FULL_PATH: "Drive:Portfólio Bia"
       R2_REMOTE_FULL_PATH: "R2:bia-portfolio-assets"
-      
-      # URL público para gerar os links no data.json
       R2_PUBLIC_URL: "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
 
     steps:
@@ -39,11 +38,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Instalar e fazer cache de dependências Apt
-        uses: awalsh128/cache-apt-pkgs-action@v1.5.0
-        with:
-          packages: ffmpeg libimage-exiftool-perl libblas3
-          version: 1.0
+      # --- CORREÇÃO 1: Garantir que as bibliotecas são encontradas ---
+      - name: Atualizar sistema e instalar dependências Apt
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ffmpeg libimage-exiftool-perl libblas3
+          sudo ldconfig
 
       - name: Instalar dependências Python
         run: pip install -r requirements.txt
@@ -52,9 +52,6 @@ jobs:
         run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Configurar rclone a partir de segredo Base64
-        # --- CORREÇÃO DEFINITIVA ---
-        # Usa base64 para garantir que o ficheiro de configuração é escrito perfeitamente,
-        # evitando a interpretação de caracteres especiais pela shell.
         run: |
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 --decode > ~/.config/rclone/rclone.conf
