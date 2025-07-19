@@ -9,6 +9,12 @@ on:
 jobs:
   sync-and-process:
     runs-on: ubuntu-latest
+    
+    # Centraliza os nomes dos remotes como variáveis de ambiente
+    env:
+      DRIVE_REMOTE_FULL_PATH: "Drive:Portfólio Bia"
+      R2_REMOTE_FULL_PATH: "R2:bia-portfolio-assets"
+
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
@@ -30,7 +36,7 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@v1.5.0
         with:
           packages: ffmpeg libimage-exiftool-perl zlib1g-dev libjpeg-dev libblas3 libopenblas-dev
-          version: 1.2 # Versão incrementada para garantir a atualização do cache
+          version: 1.2
 
       - name: Instalar dependências Python
         run: pip install -r requirements.txt
@@ -43,26 +49,23 @@ jobs:
           RCLONE_CONFIG_BASE64: ${{ secrets.RCLONE_CONFIG_BASE64 }}
         run: |
           mkdir -p ~/.config/rclone
-          echo "${{ secrets.RCLONE_CONFIG_BASE64 }}" | base64 -d > ~/.config/rclone/rclone.conf
+          echo "$RCLONE_CONFIG_BASE64" | base64 -d > ~/.config/rclone/rclone.conf
           
       - name: Executar script de processamento principal
         run: python3 main.py
 
       - name: Sincronizar Ativos Principais para o R2 (excluindo Thumbnails)
         run: |
-          # IMPORTANTE: Substitua "R2" abaixo pelo nome exato do seu remoto R2
-          echo "A sincronizar ativos principais (Vídeos, Fotografias, etc.) para o R2..."
-          rclone sync processed_assets/ R2:bia-portfolio-assets --exclude "/Thumbnails/**" --progress
+          echo "A sincronizar ativos principais para ${{ env.R2_REMOTE_FULL_PATH }}..."
+          rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} --exclude "/Thumbnails/**" --progress
 
       - name: Sincronizar Apenas as Thumbnails para a Raiz
         run: |
-          # IMPORTANTE: Substitua "R2" abaixo pelo nome exato do seu remoto R2
-          echo "A sincronizar Thumbnails para a pasta 'Thumbnails' na raiz do R2..."
-          rclone sync processed_assets/Thumbnails/ R2:bia-portfolio-assets/Thumbnails --progress
+          echo "A sincronizar Thumbnails para ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails..."
+          rclone sync processed_assets/Thumbnails/ ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails --progress
 
       - name: Gerar Manifesto de Ficheiros do R2
-        # IMPORTANTE: Substitua "R2" abaixo pelo nome exato do seu remoto R2
-        run: rclone lsf -R R2:bia-portfolio-assets > r2_file_manifest.txt
+        run: rclone lsf -R ${{ env.R2_REMOTE_FULL_PATH }} > r2_file_manifest.txt
 
       - name: Fazer Commit e Push dos Ficheiros de Manifesto para o Git
         run: |

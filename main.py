@@ -8,17 +8,13 @@ import shutil
 from pathlib import Path
 
 # --- CONFIGURAÇÃO ---
-# Nomes dos remotes no ficheiro rclone.conf
-DRIVE_REMOTE_NAME = "Drive"
-R2_REMOTE_NAME = "R2"
+# Os caminhos são agora lidos a partir das variáveis de ambiente
+DRIVE_REMOTE_PATH = os.getenv("DRIVE_REMOTE_FULL_PATH")
+R2_BUCKET_PATH = os.getenv("R2_REMOTE_FULL_PATH")
+R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "https://pub-xxxxxxxxxxxxxxxxxxxxxxxx.r2.dev" )
 
-# URL público do seu bucket R2
-R2_PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
-
-# O resto do script usa os nomes definidos acima para construir os caminhos
-DRIVE_REMOTE_PATH = f"{DRIVE_REMOTE_NAME}:Portfólio Bia"
-R2_BUCKET_PATH = f"{R2_REMOTE_NAME}:bia-portfolio-assets"
-LOCAL_ASSETS_DIR = Path("local_assets" )
+# Configurações locais e de processamento
+LOCAL_ASSETS_DIR = Path("local_assets")
 PROCESSED_ASSETS_DIR = Path("processed_assets")
 THUMBNAILS_DIR = PROCESSED_ASSETS_DIR / "Thumbnails"
 WATERMARK_TEXT = "© Beatriz Rodrigues"
@@ -129,15 +125,14 @@ def process_video(input_path: Path, output_path: Path) -> bool:
 def generate_data_json(output_file: str):
     """Gera um ficheiro data.json que cataloga todos os ativos por categoria e orientação."""
     logging.info("Gerando ficheiro de metadados data.json com estrutura completa...")
-    if "xxxx" in R2_PUBLIC_URL:
-        logging.warning("A variável R2_PUBLIC_URL não foi definida! Os URLs no data.json estarão incorretos.")
+    if not R2_PUBLIC_URL or "xxxx" in R2_PUBLIC_URL:
+        logging.warning("A variável de ambiente R2_PUBLIC_URL não foi definida! Os URLs no data.json estarão incorretos.")
 
     asset_catalog = {}
-    
-    all_processed_files = list(PROCESSED_ASSETS_DIR.rglob("*.*"))
+    all_processed_files = [p for p in PROCESSED_ASSETS_DIR.rglob("*") if p.is_file()]
 
     for file_path_local in all_processed_files:
-        if file_path_local.is_dir() or file_path_local.parent.name == "Thumbnails":
+        if file_path_local.parent.name == "Thumbnails":
             continue
 
         relative_path = file_path_local.relative_to(PROCESSED_ASSETS_DIR)
@@ -174,14 +169,15 @@ def generate_data_json(output_file: str):
 def main():
     """Orquestra todo o pipeline de processamento de média."""
     logging.info("--- INÍCIO DO PIPELINE DE PROCESSAMENTO ---")
+    
+    if not DRIVE_REMOTE_PATH or not R2_BUCKET_PATH:
+        logging.error("As variáveis de ambiente DRIVE_REMOTE_FULL_PATH e R2_REMOTE_FULL_PATH não estão definidas. Verifique a configuração do seu workflow.")
+        exit(1)
 
-    # A lógica de cache do GitHub Actions tratará de manter os ficheiros processados.
-    # Apenas garantimos que as pastas existem.
     LOCAL_ASSETS_DIR.mkdir(exist_ok=True)
     PROCESSED_ASSETS_DIR.mkdir(exist_ok=True)
     THUMBNAILS_DIR.mkdir(exist_ok=True)
 
-    # Usamos 'sync' para descarregar apenas ficheiros novos/modificados e remover os apagados.
     sync_cmd = ["rclone", "sync", DRIVE_REMOTE_PATH, str(LOCAL_ASSETS_DIR), "--progress"]
     if not run_rclone_command(sync_cmd, "Sincronização de ativos do Drive"):
         logging.error("Pipeline interrompido devido a falha na sincronização do Drive.")
@@ -200,8 +196,6 @@ def main():
             relative_path = input_path.relative_to(LOCAL_ASSETS_DIR)
             output_path = PROCESSED_ASSETS_DIR / relative_path
             
-            # Lógica de cache: se o ficheiro já existe, não o reprocessamos.
-            # Esta verificação é redundante se o sync local for perfeito, mas é uma segurança extra.
             if output_path.exists():
                 pbar.update(1)
                 continue
