@@ -1,4 +1,4 @@
-# main.py (Versão Definitiva com Correção do FFmpeg)
+# main.py (Versão Final com Correções de FFmpeg e Sincronização)
 
 import os
 import subprocess
@@ -14,6 +14,7 @@ import config
 
 # --- 1. CONFIGURAÇÃO DE LOGGING COM FUSO HORÁRIO DE LISBOA ---
 def setup_logging():
+    """Configura o logging para usar o fuso horário 'Europe/Lisbon'."""
     log_formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
     root_logger = logging.getLogger()
     if root_logger.hasHandlers(): root_logger.handlers.clear()
@@ -26,6 +27,7 @@ def setup_logging():
 
 # --- 2. FUNÇÕES DE APOIO ---
 def run_command(command: list, operation_name: str) -> bool:
+    """Executa um comando de terminal de forma segura."""
     logging.info(f"Iniciando: {operation_name}...")
     try:
         subprocess.run(command, check=True, capture_output=True, text=True, encoding='utf-8', timeout=900)
@@ -37,6 +39,7 @@ def run_command(command: list, operation_name: str) -> bool:
         return False
 
 def get_media_orientation(file_path: Path) -> str:
+    """Obtém a orientação de imagens e vídeos."""
     ext = file_path.suffix.lower()
     try:
         if ext in config.IMAGE_EXTENSIONS:
@@ -53,6 +56,7 @@ def get_media_orientation(file_path: Path) -> str:
 
 # --- 3. FUNÇÕES DE PROCESSAMENTO ---
 def process_image(input_path: Path, output_path: Path, apply_watermark_flag: bool):
+    """Processa uma imagem: otimiza, comprime e aplica marca de água se necessário."""
     with Image.open(input_path) as img:
         img = ImageOps.exif_transpose(img)
         if max(img.size) > 2048:
@@ -80,21 +84,21 @@ def process_image(input_path: Path, output_path: Path, apply_watermark_flag: boo
         img.save(output_path, "JPEG", quality=65, optimize=True, progressive=True)
 
 def process_video(input_path: Path, output_path: Path, apply_watermark_flag: bool):
-    """Processa um vídeo com uma sintaxe de filtro FFmpeg robusta."""
-    filter_complex = f"scale='min(1920,iw)':-2"
-    
-    if apply_watermark_flag:
-        # Escapar caracteres especiais para o filtro FFmpeg
-        font_path = str(config.WATERMARK_FONT_PATH).replace('\\', '/').replace(':', '\\:')
-        watermark_text = config.WATERMARK_TEXT.replace("'", "’")
+    """Processa um vídeo com uma sintaxe de filtro FFmpeg robusta e corrigida."""
+    # **CORREÇÃO DEFINITIVA DO ERRO FFmpeg**
+    # Escapa os caracteres especiais para o shell
+    font_path = str(config.WATERMARK_FONT_PATH).replace("'", "'\\''")
+    watermark_text = config.WATERMARK_TEXT.replace("'", "'\\''")
 
+    filter_complex = f"scale='min(1920,iw)':-2"
+    if apply_watermark_flag:
         watermark_filter = (
             f",drawtext=fontfile='{font_path}':text='{watermark_text}':"
             f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
-            f"x=(w-text_w-(min(w,h)*{config.MARGIN_RATIO}))+2:y=(h-text_h-(min(w,h)*{config.MARGIN_RATIO}))+2,"
+            f"x='(w-text_w-(min(w,h)*{config.MARGIN_RATIO}))+2':y='(h-text_h-(min(w,h)*{config.MARGIN_RATIO}))+2',"
             f"drawtext=fontfile='{font_path}':text='{watermark_text}':"
             f"fontsize=min(w,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=white@0.8:"
-            f"x=w-text_w-(min(w,h)*{config.MARGIN_RATIO}):y=h-text_h-(min(w,h)*{config.MARGIN_RATIO})"
+            f"x='w-text_w-(min(w,h)*{config.MARGIN_RATIO})':y='h-text_h-(min(w,h)*{config.MARGIN_RATIO})'"
         )
         filter_complex += watermark_filter
 
@@ -123,10 +127,18 @@ def process_video(input_path: Path, output_path: Path, apply_watermark_flag: boo
 def main():
     setup_logging()
     logging.info("--- INÍCIO DO WORKFLOW DE SINCRONIZAÇÃO ---")
+
     for path in [config.LOCAL_ASSETS_DIR, config.PROCESSED_ASSETS_DIR, config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR]:
         path.mkdir(exist_ok=True)
-    if not run_command(["rclone", "sync", config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "--progress", "-v"], "Sincronizar Google Drive"): return
-    if not run_command(["rclone", "sync", config.R2_REMOTE_PATH, str(config.PROCESSED_ASSETS_DIR), "--progress", "-v"], "Sincronizar R2"): return
+
+    if not run_command(["rclone", "sync", config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "--progress", "-v"], "Sincronizar Google Drive"):
+        return
+    
+    # **CORREÇÃO DE SINCRONIZAÇÃO**
+    # Adiciona --use-server-modtime para que as datas dos ficheiros no R2 sejam preservadas
+    if not run_command(["rclone", "sync", config.R2_REMOTE_PATH, str(config.PROCESSED_ASSETS_DIR), "--progress", "-v", "--use-server-modtime"], "Sincronizar R2 para local"):
+        return
+
     drive_stems = {p.stem for p in config.LOCAL_ASSETS_DIR.rglob("*.*")}
     for proc_file in list(config.PROCESSED_ASSETS_DIR.rglob("*.*")):
         if config.THUMBNAIL_DIR.name in proc_file.parts:
@@ -134,23 +146,36 @@ def main():
                 proc_file.unlink(); logging.info(f"Apagado thumbnail órfão: {proc_file.name}")
         elif proc_file.stem not in drive_stems:
             proc_file.unlink(); logging.info(f"Apagado ficheiro órfão: {proc_file.name}")
+
     manifest_entries = []
+    failed_files = []
     for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
         relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
         output_path = config.PROCESSED_ASSETS_DIR / relative_path
         ext = input_path.suffix.lower()
-        if output_path.exists() and input_path.stat().st_mtime <= output_path.stat().st_mtime: continue
+
+        if output_path.exists() and input_path.stat().st_mtime <= output_path.stat().st_mtime:
+            continue
+        
         output_path.parent.mkdir(parents=True, exist_ok=True)
         parent_folder = relative_path.parts[0] if len(relative_path.parts) > 1 else ""
         should_apply_watermark = parent_folder not in ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name]
+        
+        processed_successfully = True
         if ext in config.PDF_EXTENSIONS or ext in ['.gdoc', '.gsheet', '.gslides']:
             if ext not in ['.gdoc', '.gsheet', '.gslides']: shutil.copy2(input_path, output_path)
         elif ext in config.IMAGE_EXTENSIONS:
             process_image(input_path, output_path, apply_watermark_flag=should_apply_watermark)
         elif ext in config.VIDEO_EXTENSIONS:
-            if not process_video(input_path, output_path, apply_watermark_flag=should_apply_watermark): continue
-        else: continue
-        manifest_entries.append(f"{relative_path.as_posix()} - {datetime.now().isoformat()}")
+            if not process_video(input_path, output_path, apply_watermark_flag=should_apply_watermark):
+                processed_successfully = False
+                failed_files.append(str(relative_path))
+        else:
+            continue
+        
+        if processed_successfully:
+            manifest_entries.append(f"{relative_path.as_posix()} - {datetime.now().isoformat()}")
+
     final_data = {}
     for source_path in list(config.LOCAL_ASSETS_DIR.rglob("*.*")):
         relative_path = source_path.relative_to(config.LOCAL_ASSETS_DIR)
@@ -167,14 +192,32 @@ def main():
                 stem = output_path.stem
                 titles = stem.split('_'); title_pt, title_en, title_es = (titles[0] if titles else stem, titles[1] if len(titles) > 1 else titles[0], titles[2] if len(titles) > 2 else titles[0])
                 entry = {"titles": {"pt": title_pt, "en": title_en, "es": title_es}, "orientation": get_media_orientation(output_path), "url": f"{config.R2_PUBLIC_URL}/{relative_path.as_posix()}"}
-                if ext in config.VIDEO_EXTENSIONS: entry["thumbnail_url"] = f"{config.R2_PUBLIC_URL}/{config.THUMBNAIL_DIR.name}/{stem}_thumb.jpg"
+                if ext in config.VIDEO_EXTENSIONS:
+                    entry["thumbnail_url"] = f"{config.R2_PUBLIC_URL}/{config.THUMBNAIL_DIR.name}/{stem}_thumb.jpg"
                 final_data[output_path.name] = entry
-    with open(config.JSON_OUTPUT_FILE, 'w', encoding='utf-8') as f: json.dump(final_data, f, indent=4, ensure_ascii=False)
+
+    with open(config.JSON_OUTPUT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(final_data, f, indent=4, ensure_ascii=False)
+
+    # **CORREÇÃO DO MANIFESTO**
+    # Garante que os ficheiros são sempre criados, mesmo que vazios
     with open(config.R2_FILE_MANIFEST, 'w', encoding='utf-8') as f:
         f.write(f"Última sincronização: {datetime.now(pytz.timezone('Europe/Lisbon')).strftime('%Y-%m-%d %H:%M:%S %Z')}\n\n")
-        f.write("\n".join(manifest_entries))
+        if manifest_entries:
+            f.write("Ficheiros processados nesta execução:\n")
+            f.write("\n".join(manifest_entries))
+        else:
+            f.write("Nenhum ficheiro novo ou alterado foi processado.\n")
+            
+    with open(config.FAILED_FILES_LOG, 'w', encoding='utf-8') as f:
+        if failed_files:
+            f.write("Ficheiros que falharam o processamento:\n")
+            f.write("\n".join(failed_files))
+        else:
+            f.write("Nenhum ficheiro falhou o processamento.\n")
+
     run_command(["rclone", "sync", str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "--progress", "-v"], "Sincronizar para R2")
-    logging.info("--- WORKFLOW CONCLUÍDO ---")
+    logging.info("--- WORKFLOW CONCLÍDO ---")
 
 if __name__ == "__main__":
     main()
