@@ -86,17 +86,12 @@ def process_image(input_path: Path, output_path: Path, apply_watermark_flag: boo
 def process_video(input_path: Path, output_path: Path, apply_watermark_flag: bool):
     """Processa um vídeo com uma sintaxe de filtro FFmpeg robusta e corrigida."""
     
-    # A cadeia de filtros é construída de forma mais limpa, sem aspas internas desnecessárias.
-    filter_complex = "scale=min(1920\\,iw):-2" # Escapar a vírgula para o scale
+    filter_complex = "scale=min(1920\\,iw):-2"
     
     if apply_watermark_flag:
-        # Escapar caracteres especiais para o FFmpeg
-        # O FFmpeg requer que os dois pontos ':' e as barras invertidas '\' no caminho do Windows sejam escapados.
         font_path = str(config.WATERMARK_FONT_PATH).replace('\\', '\\\\').replace(':', '\\:')
-        watermark_text = config.WATERMARK_TEXT.replace("'", "’") # Substituir aspas para evitar conflitos
+        watermark_text = config.WATERMARK_TEXT.replace("'", "’")
 
-        # Construção do filtro de marca de água (sombra primeiro, depois o texto principal)
-        # A sintaxe foi simplificada para maior compatibilidade.
         watermark_filter = (
             f",drawtext=fontfile='{font_path}':text='{watermark_text}':"
             f"fontsize=min(w\\,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
@@ -112,12 +107,42 @@ def process_video(input_path: Path, output_path: Path, apply_watermark_flag: boo
         "-vf", filter_complex,
         "-c:v", "libx264", "-preset", "medium", "-crf", "28",
         "-c:a", "aac", "-b:a", "128k",
-        "-y", # Sobrescrever o ficheiro de saída se já existir
+        "-y",
         str(output_path)
     ]
     
     if not run_command(video_cmd, f"Processar vídeo {input_path.name}"):
         return False
+
+    # --- CORREÇÃO NA GERAÇÃO DE THUMBNAILS ---
+    try:
+        duration_cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(input_path)]
+        result = subprocess.run(duration_cmd, capture_output=True, text=True, check=True)
+        duration = float(result.stdout.strip())
+        
+        # Lógica de timestamp melhorada para evitar valores negativos ou fora dos limites
+        ts = max(0, duration * 0.15)
+        if ts >= duration:
+            ts = duration / 2  # Se o vídeo for muito curto, usa o ponto médio
+
+        thumb_path = config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR / f"{output_path.stem}_thumb.jpg"
+        
+        # Adicionada a flag '-update 1' para garantir que o FFmpeg cria um único ficheiro de imagem.
+        thumb_cmd = [
+            "ffmpeg", "-i", str(input_path), 
+            "-ss", str(ts), 
+            "-vframes", "1", 
+            "-q:v", "2",
+            "-update", "1", # Flag crucial para resolver o erro
+            "-y", 
+            str(thumb_path)
+        ]
+        run_command(thumb_cmd, f"Gerar thumbnail para {output_path.name}")
+    except Exception as e:
+        logging.error(f"FALHA ao gerar thumbnail para {input_path.name}: {e}")
+        return False
+        
+    return True
 
     # A lógica para gerar a thumbnail permanece a mesma
     try:
