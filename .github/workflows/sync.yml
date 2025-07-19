@@ -9,21 +9,12 @@ on:
 jobs:
   sync-and-process:
     runs-on: ubuntu-latest
-    
-    # Permissões para permitir que o workflow faça commit no repositório
     permissions:
       contents: write
 
     env:
-      # Nomes dos remotes que devem corresponder aos do rclone.conf
-      DRIVE_REMOTE_NAME: "Drive"
-      R2_REMOTE_NAME: "R2"
-      
-      # Paths completos para usar nos comandos rclone e no main.py
       DRIVE_REMOTE_FULL_PATH: "Drive:Portfólio Bia"
       R2_REMOTE_FULL_PATH: "R2:bia-portfolio-assets"
-      
-      # URL público para gerar os links no data.json
       R2_PUBLIC_URL: "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
 
     steps:
@@ -40,73 +31,42 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt' ) }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
 
-      - name: Cache para Ativos Processados
-        id: processed-assets-cache
-        uses: actions/cache@v4
-        with:
-          path: processed_assets
-          # Chave de cache estática para garantir consistência entre execuções
-          key: ${{ runner.os }}-processed-assets-v1
-          restore-keys: |
-            ${{ runner.os }}-processed-assets-v1
-
-      - name: Atualizar sistema e instalar dependências Apt
+      - name: Instalar dependências do sistema
         run: |
           sudo apt-get update -y
           sudo apt-get install -y ffmpeg libimage-exiftool-perl libblas3
           sudo ldconfig
 
       - name: Instalar dependências Python
-        run: |
-          pip install -r requirements.txt
-          # Garante que pytz está instalado para o format_manifest.py
-          pip install pytz
+        run: pip install -r requirements.txt
 
       - name: Instalar rclone
         run: curl https://rclone.org/install.sh | sudo bash
 
-      - name: Configurar rclone a partir de segredo Base64
+      - name: Configurar rclone
         run: |
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 --decode > ~/.config/rclone/rclone.conf
           
-      - name: Executar script de processamento principal
-        # O main.py agora usa a pasta 'processed_assets' restaurada da cache para evitar reprocessamento
+      - name: Executar script de processamento e sincronização
         run: python3 main.py
 
-      - name: Sincronizar Ativos Principais para o R2
+      - name: Sincronizar pasta processada final para o R2
         run: |
-          echo "A sincronizar ativos principais para ${{ env.R2_REMOTE_FULL_PATH }}..."
-          rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} \
-            --exclude "/Thumbnails/**" \
-            --update \
-            --use-server-modtime \
-            --progress -v
-
-      - name: Sincronizar Apenas as Thumbnails
-        run: |
-          echo "A sincronizar Thumbnails para ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails..."
-          rclone sync processed_assets/Thumbnails/ ${{ env.R2_REMOTE_FULL_PATH }}/Thumbnails \
-            --update \
-            --use-server-modtime \
-            --progress -v
+          echo "A sincronizar todos os ativos para o R2..."
+          rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} --progress -v --use-server-modtime
 
       - name: Gerar Manifesto de Ficheiros do R2
-        run: |
-          echo "A gerar o manifesto de ficheiros a partir do R2 com 'rclone lsjson'..."
-          rclone lsjson -R ${{ env.R2_REMOTE_FULL_PATH }} | python3 format_manifest.py
+        run: rclone lsf -R ${{ env.R2_REMOTE_FULL_PATH }} > r2_file_manifest.txt
 
-      - name: Fazer Commit e Push dos Ficheiros de Manifesto para o Git
+      - name: Fazer Commit e Push dos Ficheiros de Dados
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          # Adiciona os ficheiros de dados e o script de formatação (se for novo/modificado )
-          git add data.json r2_file_manifest.txt format_manifest.py || echo "Nenhum ficheiro para adicionar."
+          git add data.json r2_file_manifest.txt || echo "Nenhum ficheiro para adicionar."
           if git diff-index --quiet HEAD; then
-            echo "Nenhuma alteração nos ficheiros de manifesto para fazer commit."
+            echo "Nenhuma alteração para fazer commit."
           else
             git commit -m "CI: Atualiza data.json e manifesto R2"
             git push
