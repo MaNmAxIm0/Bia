@@ -216,6 +216,20 @@ Fotografias/409.JPG
 Melhores/carousel_image_1.png
 Melhores/carousel_image_2.png
 Melhores/carousel_image_3.png
+Thumbnails/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p_thumb.jpg
+Thumbnails/Design sem nome_thumb.jpg
+Thumbnails/Design_sem_nome_1_thumb.jpg
+Thumbnails/E foi assim que terminámos o nosso último dia de campanha_thumb.jpg
+Thumbnails/Este foi o nosso dia da campanha de hoje. Preparem-se para amanhã 🔥LISTA V- SOMOS A TUA VOZ🧡🖖_thumb.jpg
+Thumbnails/Estudantes, atenção! Se estão na zona da Expo e a precisar de uma pausa, o PEPE TACO_thumb.jpg
+Thumbnails/SnapInsta.to_AQNAQdz8jImZ2eL_4yfAXv2Nqzn9-auP2iuGGOizYB4IcG8HFMX2I2hukfLfJhpB6JII-PoXxcfEBDDG3eF4ejsOccFHZUK7H6N8rio_thumb.jpg
+Thumbnails/Tens mais de 16 anos e não sabes onde ir quinta à noite A Lista V tem a melhor solução para ti! _thumb.jpg
+Thumbnails/highlights - 17869451268147253_thumb.jpg
+Thumbnails/highlights - 17875946589196602_thumb.jpg
+Thumbnails/highlights - 17941463183908702_thumb.jpg
+Thumbnails/highlights - 18026883509390937_thumb.jpg
+Thumbnails/highlights - 18057588424859151_thumb.jpg
+Thumbnails/É com muito orgulho que apresentamos a nossa parceria com a melhor barbearia de loures e arredor_thumb.jpg
 Vídeos/A vossa lista, tem o prazer de apresentar a mais recente parceria com o @fitnesshut, em que os p.mp4
 Vídeos/Design sem nome.mp4
 Vídeos/Design_sem_nome_1.mp4
@@ -235,4 +249,5 @@ Capas/
 Designs/
 Fotografias/
 Melhores/
+Thumbnails/
 Vídeos/
