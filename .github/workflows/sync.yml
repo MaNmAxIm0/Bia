@@ -11,14 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      # --- AJUSTE AQUI SE NECESSÁRIO ---
-      # Estes nomes devem corresponder aos nomes entre [ ] no seu rclone.conf
+      # Nomes dos remotes que devem corresponder aos do rclone.conf
       DRIVE_REMOTE_NAME: "Drive"
       R2_REMOTE_NAME: "R2"
       
-      # Variáveis de ambiente completas para serem usadas nos passos
+      # Paths completos para usar nos comandos rclone
       DRIVE_REMOTE_FULL_PATH: "Drive:Portfólio Bia"
       R2_REMOTE_FULL_PATH: "R2:bia-portfolio-assets"
+      
+      # URL público para gerar os links no data.json
       R2_PUBLIC_URL: "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
 
     steps:
@@ -51,7 +52,9 @@ jobs:
         run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Configurar rclone a partir de segredo Base64
-        # Usa base64 para garantir que o ficheiro de configuração é escrito perfeitamente
+        # --- CORREÇÃO DEFINITIVA ---
+        # Usa base64 para garantir que o ficheiro de configuração é escrito perfeitamente,
+        # evitando a interpretação de caracteres especiais pela shell.
         run: |
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 --decode > ~/.config/rclone/rclone.conf
