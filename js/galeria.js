@@ -167,11 +167,15 @@ export async function loadPresentations() {
     gallery.innerHTML = `<p style="text-align: center;">${getTranslation('loading_presentations')}</p>`;
     try {
         const response = await fetch(`${getBasePath()}/data.json`);
-        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
         const data = await response.json();
         
-        // --- LÓGICA DE FILTRAGEM CORRIGIDA PARA APRESENTAÇÕES ---
-        const presentations = Object.values(data).filter(item => item.url && item.url.includes('/Apresenta'));
+        // --- FILTRO CORRIGIDO E MAIS ESPECÍFICO ---
+        const presentations = Object.values(data).filter(item => {
+            const url = item.url.toLowerCase();
+            // Apenas inclui o item se for um link externo (Google Slides)
+            // OU se o URL terminar em .pdf
+            return item.is_external || url.endsWith('.pdf');
+        });
 
         const lang = getCurrentLanguage();
         gallery.innerHTML = '';
@@ -184,16 +188,15 @@ export async function loadPresentations() {
         presentations.forEach(presentation => {
             const div = document.createElement("div");
             div.className = "presentation-item";
-            const title = presentation.titles?.[lang] || presentation.titles?.['pt'] || '';
             const titleElement = document.createElement("h3");
-            titleElement.textContent = title;
+            titleElement.textContent = presentation.titles[lang] || presentation.titles['pt'];
             
+            // Cria um iframe tanto para PDFs como para Google Slides
             const iframe = document.createElement("iframe");
             iframe.src = presentation.url;
             iframe.allowFullscreen = true;
-            iframe.title = title;
+            iframe.title = titleElement.textContent;
             iframe.loading = "lazy";
-            iframe.oncontextmenu = () => false;
             
             div.appendChild(titleElement);
             div.appendChild(iframe);

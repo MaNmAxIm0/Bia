@@ -61,6 +61,7 @@ class SecurityHeaders {
                 "img-src 'self' data: https: blob:",
                 "media-src 'self' https:",
                 "connect-src 'self' https://www.google-analytics.com",
+                "frame-src 'self' https://docs.google.com https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev",
                 "base-uri 'self'",
                 "form-action 'self'"
             ];

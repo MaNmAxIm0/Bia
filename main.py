@@ -57,13 +57,39 @@ def run_command(command: list, operation_name: str) -> bool:
         return False
 
 def get_media_orientation(file_path: Path) -> str:
-    """Determina a orientação ('vertical' ou 'horizontal') de um ficheiro de imagem."""
-    try:
-        with Image.open(file_path) as img:
-            width, height = img.size
+    """
+    Determina a orientação ('vertical' ou 'horizontal') de um ficheiro de imagem ou vídeo.
+    """
+    ext = file_path.suffix.lower()
+    
+    if ext in config.IMAGE_EXTENSIONS:
+        try:
+            with Image.open(file_path) as img:
+                width, height = img.size
+                return "vertical" if height > width else "horizontal"
+        except Exception as e:
+            logging.warning(f"Não foi possível ler as dimensões da imagem {file_path.name}: {e}")
+            return "horizontal"
+            
+    elif ext in config.VIDEO_EXTENSIONS:
+        try:
+            # Comando ffprobe para obter 'width,height' do vídeo
+            command = [
+                "ffprobe",
+                "-v", "error",
+                "-select_streams", "v:0",
+                "-show_entries", "stream=width,height",
+                "-of", "csv=s=x:p=0",
+                str(file_path)
+            ]
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
+            width, height = map(int, result.stdout.strip().split('x'))
             return "vertical" if height > width else "horizontal"
-    except Exception:
-        return "horizontal" # Padrão para vídeos ou em caso de erro
+        except Exception as e:
+            logging.warning(f"Não foi possível ler as dimensões do vídeo {file_path.name}: {e}")
+            return "horizontal"
+            
+    return "horizontal" # Padrão para outros tipos de ficheiro
 
 # --- Funções de Processamento de Média ---
 
@@ -72,7 +98,11 @@ def apply_watermark(base_image: Image.Image) -> Image.Image:
     image = base_image.copy().convert("RGBA")
     draw = ImageDraw.Draw(image)
     
-    font_size = int(image.width * config.IMG_WATERMARK_FONT_RATIO)
+    # --- CÁLCULO CORRIGIDO DO TAMANHO DA FONTE ---
+    # Usa a dimensão MÁXIMA da imagem (largura ou altura) como base para o rácio.
+    # Pode ser necessário ajustar o valor de IMG_WATERMARK_FONT_RATIO em config.py (para um valor mais baixo).
+    font_size = int(max(image.size) * config.IMG_WATERMARK_FONT_RATIO)
+    
     try:
         font = ImageFont.truetype(str(config.WATERMARK_FONT_PATH), font_size)
     except IOError:
@@ -82,7 +112,7 @@ def apply_watermark(base_image: Image.Image) -> Image.Image:
     bbox = draw.textbbox((0, 0), config.WATERMARK_TEXT, font=font)
     text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
     
-    margin = int(image.width * config.MARGIN_RATIO)
+    margin = int(max(image.size) * config.MARGIN_RATIO) # Margem também baseada na dimensão máxima
     x = image.width - text_width - margin
     y = image.height - text_height - margin
 
