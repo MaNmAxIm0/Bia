@@ -10,14 +10,20 @@ jobs:
   sync-and-process:
     runs-on: ubuntu-latest
     
+    # Permissões para permitir que o workflow faça commit no repositório
     permissions:
       contents: write
 
     env:
+      # Nomes dos remotes que devem corresponder aos do rclone.conf
       DRIVE_REMOTE_NAME: "Drive"
       R2_REMOTE_NAME: "R2"
+      
+      # Paths completos para usar nos comandos rclone e no main.py
       DRIVE_REMOTE_FULL_PATH: "Drive:Portfólio Bia"
       R2_REMOTE_FULL_PATH: "R2:bia-portfolio-assets"
+      
+      # URL público para gerar os links no data.json
       R2_PUBLIC_URL: "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
 
     steps:
@@ -37,14 +43,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      # --- CORREÇÃO: Estratégia de Cache Simplificada e Robusta ---
       - name: Cache para Ativos Processados
         id: processed-assets-cache
         uses: actions/cache@v4
         with:
           path: processed_assets
-          # Usamos uma chave estática para garantir que a cache é sempre encontrada.
-          # A lógica de sincronização tratará das atualizações.
+          # Chave de cache estática para garantir consistência entre execuções
           key: ${{ runner.os }}-processed-assets-v1
           restore-keys: |
             ${{ runner.os }}-processed-assets-v1
@@ -58,7 +62,7 @@ jobs:
       - name: Instalar dependências Python
         run: |
           pip install -r requirements.txt
-          # Adiciona pytz que é usado pelo format_manifest.py
+          # Garante que pytz está instalado para o format_manifest.py
           pip install pytz
 
       - name: Instalar rclone
@@ -70,14 +74,12 @@ jobs:
           echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 --decode > ~/.config/rclone/rclone.conf
           
       - name: Executar script de processamento principal
+        # O main.py agora usa a pasta 'processed_assets' restaurada da cache para evitar reprocessamento
         run: python3 main.py
 
-      # --- CORREÇÃO: Flags para Sincronização Inteligente ---
       - name: Sincronizar Ativos Principais para o R2
         run: |
           echo "A sincronizar ativos principais para ${{ env.R2_REMOTE_FULL_PATH }}..."
-          # --update: Não substitui ficheiros mais recentes no destino.
-          # --use-server-modtime: Usa a data do R2 como referência, evitando atualizações de metadados.
           rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} \
             --exclude "/Thumbnails/**" \
             --update \
@@ -101,10 +103,11 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          # Adiciona os ficheiros de dados e o script de formatação (se for novo/modificado )
           git add data.json r2_file_manifest.txt format_manifest.py || echo "Nenhum ficheiro para adicionar."
           if git diff-index --quiet HEAD; then
             echo "Nenhuma alteração nos ficheiros de manifesto para fazer commit."
           else
-            git commit -m "CI: Atualiza data.json e manifesto R2 [skip ci]"
+            git commit -m "CI: Atualiza data.json e manifesto R2"
             git push
           fi

@@ -2,51 +2,62 @@ import os
 import subprocess
 import json
 import logging
-from PIL import Image, ImageOps, ImageDraw, ImageFont
-from tqdm import tqdm
 import shutil
-from pathlib import Path
 from datetime import datetime
+from tqdm import tqdm
+from PIL import Image, ImageOps, ImageDraw, ImageFont
 import pytz
+from pathlib import Path
 
 # --- CONFIGURAÇÃO ---
-DRIVE_REMOTE_PATH = os.getenv("DRIVE_REMOTE_FULL_PATH")
-R2_BUCKET_PATH = os.getenv("R2_REMOTE_FULL_PATH")
+DRIVE_REMOTE_PATH = os.getenv("DRIVE_REMOTE_FULL_PATH", "Drive:Portfólio Bia")
+R2_BUCKET_PATH = os.getenv("R2_REMOTE_FULL_PATH", "R2:bia-portfolio-assets")
 R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev" )
 
 LOCAL_ASSETS_DIR = Path("local_assets")
 PROCESSED_ASSETS_DIR = Path("processed_assets")
 THUMBNAILS_DIR = PROCESSED_ASSETS_DIR / "Thumbnails"
+CACHE_FILE = Path("processed_cache.json") # Cache baseada em ficheiro
 WATERMARK_TEXT = "© Beatriz Rodrigues"
 FONT_PATH = Path("fonts/Montserrat-Medium.ttf")
 
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png']
 VIDEO_EXTENSIONS = ['.mp4', '.mov', '.avi']
 
-# --- CONFIGURAÇÃO DE LOGGING COM FUSO HORÁRIO DE LISBOA ---
+# --- CONFIGURAÇÃO DE LOGGING ---
 def setup_logging():
-    """Configura o logging para usar o fuso horário de Lisboa."""
     log_formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
-
     def custom_time(*args):
         return datetime.now(pytz.timezone('Europe/Lisbon')).timetuple()
-
     logging.Formatter.converter = custom_time
-    
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(log_formatter)
     if not root_logger.handlers:
         root_logger.addHandler(console_handler)
-
 setup_logging()
 
-# --- FUNÇÕES AUXILIARES E DE PROCESSAMENTO ---
-# **CORREÇÃO: Todas as funções são definidas aqui, ANTES de serem usadas pela função main()**
+# --- FUNÇÕES DE CACHE E MANIFESTO ---
+def load_cache():
+    if CACHE_FILE.exists():
+        try:
+            with open(CACHE_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            logging.warning("Ficheiro de cache corrompido. A criar um novo.")
+    return {}
 
+def save_cache(cache_data):
+    with open(CACHE_FILE, 'w', encoding='utf-8') as f:
+        json.dump(cache_data, f, indent=4)
+
+def generate_r2_manifest():
+    # Esta função será chamada pelo format_manifest.py, mas a deixamos aqui para referência
+    pass
+
+# --- FUNÇÕES DE PROCESSAMENTO ---
 def run_rclone_command(command: list, operation_name: str) -> bool:
-    """Executa um comando rclone de forma segura e regista o resultado."""
     logging.info(f"Iniciando operação rclone: {operation_name}")
     try:
         subprocess.run(command, check=True, capture_output=True, text=True, encoding='utf-8')
@@ -57,16 +68,11 @@ def run_rclone_command(command: list, operation_name: str) -> bool:
         return False
 
 def get_media_dimensions(file_path: Path) -> tuple:
-    """Obtém a largura e altura de uma imagem ou vídeo."""
     try:
         if file_path.suffix.lower() in IMAGE_EXTENSIONS:
-            with Image.open(file_path) as img:
-                return img.size
+            with Image.open(file_path) as img: return img.size
         elif file_path.suffix.lower() in VIDEO_EXTENSIONS:
-            cmd = [
-                'ffprobe', '-v', 'error', '-select_streams', 'v:0',
-                '-show_entries', 'stream=width,height', '-of', 'json', str(file_path)
-            ]
+            cmd = ['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'json', str(file_path)]
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             video_data = json.loads(result.stdout)['streams'][0]
             return video_data['width'], video_data['height']
@@ -75,50 +81,34 @@ def get_media_dimensions(file_path: Path) -> tuple:
     return None, None
 
 def correct_image_orientation(img: Image.Image) -> Image.Image:
-    """Verifica e corrige a orientação da imagem com base nos metadados EXIF."""
     try:
         return ImageOps.exif_transpose(img)
-    except Exception as e:
-        logging.warning(f"Não foi possível aplicar a transposição EXIF: {e}")
+    except Exception:
         return img
 
 def apply_watermark_to_image(base_image: Image.Image) -> Image.Image:
-    """Aplica uma marca de água de texto com sombra e tamanho dinâmico a uma imagem."""
     image_with_watermark = base_image.copy().convert("RGBA")
     draw = ImageDraw.Draw(image_with_watermark)
     font_size = int(image_with_watermark.width * 0.035)
     try:
         font = ImageFont.truetype(str(FONT_PATH), font_size)
     except IOError:
-        logging.warning(f"Fonte '{FONT_PATH}' não encontrada. Usando fonte padrão.")
         font = ImageFont.load_default()
-    
     bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
-    
+    text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
     margin = int(image_with_watermark.width * 0.02)
     x = image_with_watermark.width - text_width - margin
     y = image_with_watermark.height - text_height - margin
-
     shadow_offset = int(font_size * 0.05)
-    shadow_color = (0, 0, 0, 100)
-    draw.text((x + shadow_offset, y + shadow_offset), WATERMARK_TEXT, font=font, fill=shadow_color)
-    
-    text_color = (255, 255, 255, 180)
-    draw.text((x, y), WATERMARK_TEXT, font=font, fill=text_color)
-    
+    draw.text((x + shadow_offset, y + shadow_offset), WATERMARK_TEXT, font=font, fill=(0, 0, 0, 100))
+    draw.text((x, y), WATERMARK_TEXT, font=font, fill=(255, 255, 255, 180))
     return image_with_watermark.convert("RGB")
 
 def process_video(input_path: Path, output_path: Path) -> bool:
-    """Aplica marca de água e gera uma thumbnail para um vídeo."""
     font_path_ffmpeg = str(FONT_PATH).replace("\\", "/").replace(":", "\\\\:")
     watermark_cmd = [
         "ffmpeg", "-i", str(input_path),
-        "-vf", (
-            f"drawtext=fontfile='{font_path_ffmpeg}':text='{WATERMARK_TEXT}':fontsize=h*0.03:fontcolor=black@0.5:x=(w-text_w-w*0.02)+2:y=(h-text_h-h*0.02)+2,"
-            f"drawtext=fontfile='{font_path_ffmpeg}':text='{WATERMARK_TEXT}':fontsize=h*0.03:fontcolor=white@0.8:x=w-text_w-w*0.02:y=h-text_h-h*0.02"
-        ),
+        "-vf", f"drawtext=fontfile='{font_path_ffmpeg}':text='{WATERMARK_TEXT}':fontsize=h*0.03:fontcolor=black@0.5:x=(w-text_w-w*0.02)+2:y=(h-text_h-h*0.02)+2,drawtext=fontfile='{font_path_ffmpeg}':text='{WATERMARK_TEXT}':fontsize=h*0.03:fontcolor=white@0.8:x=w-text_w-w*0.02:y=h-text_h-h*0.02",
         "-codec:v", "libx264", "-preset", "medium", "-crf", "23", "-codec:a", "copy", "-y", str(output_path)
     ]
     try:
@@ -126,7 +116,6 @@ def process_video(input_path: Path, output_path: Path) -> bool:
     except subprocess.CalledProcessError as e:
         logging.error(f"FFmpeg falhou ao aplicar marca de água ao vídeo '{input_path.name}': {e.stderr.strip()}")
         return False
-
     thumbnail_path = THUMBNAILS_DIR / f"{input_path.stem}_thumb.jpg"
     thumbnail_cmd = ["ffmpeg", "-i", str(output_path), "-ss", "00:00:01.000", "-vframes", "1", "-q:v", "2", "-y", str(thumbnail_path)]
     try:
@@ -137,120 +126,99 @@ def process_video(input_path: Path, output_path: Path) -> bool:
         return True
 
 def generate_data_json(output_file: str):
-    """Gera um ficheiro data.json com a estrutura detalhada por ficheiro."""
     logging.info("Gerando ficheiro de metadados data.json com a nova estrutura...")
     if not R2_PUBLIC_URL or "xxxx" in R2_PUBLIC_URL:
         logging.warning("A variável de ambiente R2_PUBLIC_URL não foi definida!")
-
     final_data_structure = {}
     all_processed_files = [p for p in PROCESSED_ASSETS_DIR.rglob("*") if p.is_file()]
-
     for file_path_local in all_processed_files:
-        if file_path_local.parent.name == "Thumbnails":
-            continue
-
-        filename = file_path_local.name
-        stem = file_path_local.stem
-        
+        if file_path_local.parent.name == "Thumbnails": continue
+        filename, stem = file_path_local.name, file_path_local.stem
         parts = stem.split('_')
-        title_pt = parts[0] if len(parts) > 0 else stem
-        title_es = parts[1] if len(parts) > 1 else title_pt
-        title_en = parts[2] if len(parts) > 2 else title_pt
-
+        title_pt, title_es, title_en = (parts[0] if len(parts) > 0 else stem, parts[1] if len(parts) > 1 else parts[0], parts[2] if len(parts) > 2 else parts[0])
         width, height = get_media_dimensions(file_path_local)
-        orientation = "horizontal"
-        if width is not None and height is not None and height > width:
-            orientation = "vertical"
-
+        orientation = "vertical" if width is not None and height is not None and height > width else "horizontal"
         relative_path = file_path_local.relative_to(PROCESSED_ASSETS_DIR)
         url_path = relative_path.as_posix()
         full_url = f"{R2_PUBLIC_URL.rstrip('/')}/{url_path}"
-
-        asset_info = {
-            "pt": title_pt, "es": title_es, "en": title_en,
-            "orientation": orientation, "url": full_url
-        }
-
+        asset_info = {"pt": title_pt, "es": title_es, "en": title_en, "orientation": orientation, "url": full_url}
         if file_path_local.suffix.lower() in VIDEO_EXTENSIONS:
-            thumbnail_filename = f"{stem}_thumb.jpg"
-            asset_info["thumbnail_url"] = f"{R2_PUBLIC_URL.rstrip('/')}/Thumbnails/{thumbnail_filename}"
-
+            asset_info["thumbnail_url"] = f"{R2_PUBLIC_URL.rstrip('/')}/Thumbnails/{stem}_thumb.jpg"
         final_data_structure[filename] = asset_info
-
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(final_data_structure, f, indent=4, ensure_ascii=False)
-    
     logging.info(f"'{output_file}' gerado com sucesso com a estrutura final.")
 
 # --- FLUXO DE TRABALHO PRINCIPAL ---
-
 def main():
-    """Orquestra todo o pipeline de processamento de média."""
     logging.info("--- INÍCIO DO PIPELINE DE PROCESSAMENTO ---")
-    
     if not DRIVE_REMOTE_PATH or not R2_BUCKET_PATH:
-        logging.error("As variáveis de ambiente DRIVE_REMOTE_FULL_PATH e R2_REMOTE_FULL_PATH não estão definidas.")
+        logging.error("As variáveis de ambiente dos remotes não estão definidas.")
         exit(1)
 
     LOCAL_ASSETS_DIR.mkdir(exist_ok=True)
     PROCESSED_ASSETS_DIR.mkdir(exist_ok=True)
     THUMBNAILS_DIR.mkdir(exist_ok=True)
 
-    sync_cmd = ["rclone", "sync", DRIVE_REMOTE_PATH, str(LOCAL_ASSETS_DIR), "--progress"]
-    if not run_rclone_command(sync_cmd, "Sincronização de ativos do Drive"):
-        logging.error("Pipeline interrompido devido a falha na sincronização do Drive.")
+    download_cmd = ["rclone", "copy", DRIVE_REMOTE_PATH, str(LOCAL_ASSETS_DIR), "--progress"]
+    if not run_rclone_command(download_cmd, "Download de ativos do Drive"):
+        logging.error("Pipeline interrompido devido a falha no download.")
         return
 
-    all_local_files = [p for p in LOCAL_ASSETS_DIR.rglob("*") if p.is_file() and not p.name.startswith('.')]
+    cache_data = load_cache()
+    updated_cache = cache_data.copy()
+    files_to_process = []
     
-    if not all_local_files:
-        logging.info("Nenhum ficheiro novo ou modificado para processar.")
-    else:
-        logging.info(f"Encontrados {len(all_local_files)} ficheiros na origem. Verificando contra a cache...")
+    all_local_files = [p for p in LOCAL_ASSETS_DIR.rglob("*") if p.is_file() and not p.name.startswith('.')]
+    logging.info(f"Encontrados {len(all_local_files)} ficheiros na origem. Verificando contra a cache de ficheiro...")
+
+    for file_path in all_local_files:
+        relative_path_str = str(file_path.relative_to(LOCAL_ASSETS_DIR))
+        mod_time = str(file_path.stat().st_mtime)
+        
+        if cache_data.get(relative_path_str) != mod_time:
+            files_to_process.append(file_path)
+
+    processed_count = len(all_local_files) - len(files_to_process)
+    if processed_count > 0:
+        logging.info(f"{processed_count} ficheiros encontrados na cache e serão ignorados.")
+    logging.info(f"{len(files_to_process)} ficheiros novos ou modificados para processar.")
 
     failure_count = 0
-    processed_count = 0
-    with tqdm(total=len(all_local_files), desc="Processando ativos") as pbar:
-        for input_path in all_local_files:
+    with tqdm(total=len(files_to_process), desc="Processando novos ativos") as pbar:
+        for input_path in files_to_process:
             relative_path = input_path.relative_to(LOCAL_ASSETS_DIR)
             output_path = PROCESSED_ASSETS_DIR / relative_path
-            
-            if output_path.exists():
-                pbar.update(1)
-                continue
-            
-            processed_count += 1
-            pbar.set_description(f"Processando {input_path.name}")
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            file_ext = input_path.suffix.lower()
+            
             processed_successfully = False
-
             try:
-                if file_ext in IMAGE_EXTENSIONS:
+                if input_path.suffix.lower() in IMAGE_EXTENSIONS:
                     with Image.open(input_path) as img:
                         img = correct_image_orientation(img)
                         img = apply_watermark_to_image(img)
                         img.save(output_path, "JPEG", quality=90, optimize=True, progressive=True)
-                        processed_successfully = True
-                elif file_ext in VIDEO_EXTENSIONS:
+                    processed_successfully = True
+                elif input_path.suffix.lower() in VIDEO_EXTENSIONS:
                     if process_video(input_path, output_path):
                         processed_successfully = True
                 else:
                     shutil.copy2(input_path, output_path)
                     processed_successfully = True
+                
+                if processed_successfully:
+                    updated_cache[str(relative_path)] = str(input_path.stat().st_mtime)
             except Exception as e:
                 logging.error(f"Erro inesperado ao processar {input_path.name}: {e}")
-
-            if not processed_successfully:
                 failure_count += 1
             pbar.update(1)
 
-    logging.info(f"Processamento concluído. {processed_count} ficheiros foram processados nesta execução.")
+    save_cache(updated_cache)
     generate_data_json("data.json")
+    # A geração do manifesto r2 é agora feita no workflow para usar o script format_manifest.py
 
     if failure_count > 0:
         logging.warning(f"{failure_count} ficheiros falharam ao processar.")
-    
     logging.info("--- FIM DO PIPELINE ---")
 
 if __name__ == "__main__":
