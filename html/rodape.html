@@ -1,15 +1,39 @@
-<!-- Ficheiro: /includes/rodape.html -->
 <footer class="main-footer">
   <div class="container">
-    <div class="social-links">
-      <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-      <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-      <a href="https://wa.me/35192541131" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-      <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+    <div class="footer-grid">
+      <div class="footer-column-right">
+        <div class="newsletter-container">
+          <h4 data-lang-key="newsletter_signup">Subscreva a nossa newsletter</h4>
+          <div id="newsletter-embed-container"></div>
+        </div>
+      </div>
+      <div class="footer-column-left">
+        <div class="social-links">
+          <a href="https://instagram.com/beatrizpssantos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="https://wa.me/35192541131" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+        <div class="footer-legal-links">
+          <a href="#" data-page-key="politica-de-privacidade.html" data-lang-key="privacy_policy">Política de Privacidade</a>
+          <a href="#" data-page-key="termos-de-utilizacao.html" data-lang-key="terms_of_use">Termos de Utilização</a>
+        </div>
+        <div class="footer-copyright">
+          <p data-lang-key="all_rights_reserved">&copy; 2025 Beatriz Rodrigues. Todos os direitos reservados.</p>
+        </div>
+      </div>
     </div>
-    <p data-lang-key="all_rights_reserved">&copy; 2025 Beatriz Rodrigues. Todos os direitos reservados.</p>
-    <a href="#" data-page-key="politica-de-privacidade.html" data-lang-key="privacy_policy">Política de Privacidade</a>
   </div>
 </footer>
 
+<div id="lightbox" class="lightbox"></div>
+<div id="cookie-consent-banner" class="cookie-consent-banner" style="display: none;">
+  <p>
+    <span data-translate="cookie_consent_text">Este site utiliza cookies para melhorar a sua experiência.</span> 
+    <a href="#" data-page-key="politica-de-privacidade.html" data-translate="learn_more">Saber mais</a>.
+  </p>
+  <button id="accept-cookies" data-translate="accept_cookies">Aceitar</button>
+</div>
 
+<script src="../../js/cookie-consent.js" defer></script>
+<script src="../../js/principal.js" type="module"></script>

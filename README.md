@@ -1,6 +1,6 @@
 # Portfólio Pessoal – Beatriz Rodrigues
 
-Este repositório contém o site de portfólio pessoal de **Beatriz Rodrigues**.  
+Este repositório contém o site de portfólio pessoal de **Beatriz Rodrigues**.
 O site apresenta uma seleção dos seus trabalhos em formato visual, incluindo vídeos, fotografias e apresentações.
 
 Desenvolvido com um estilo moderno, adaptado a dispositivos móveis e com navegação intuitiva, o portfólio pretende dar a conhecer o percurso, as competências e os projectos realizados por Beatriz Rodrigues.
@@ -40,11 +40,10 @@ O portfólio é composto pelas seguintes páginas:
 └── assets/
     └── imagens e outros recursos
 
-A publicação está disponível em:  
+A publicação está disponível em:
 ➡️ [https://manmaxim0.github.io/bia](https://manmaxim0.github.io/bia)
 
 ## ✍️ Autor
 
-Este site foi desenvolvido para fins de apresentação pessoal de Beatriz Rodrigues.  
+Este site foi desenvolvido para fins de apresentação pessoal de Beatriz Rodrigues.
 A gestão e alojamento do código são feitos por [@manmaxim0](https://github.com/manmaxim0).
-

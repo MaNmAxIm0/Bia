@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt"> <!-- Lang padrão para este ficheiro, será alterado pelo JS -->
+<html lang="pt">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Beatriz Rodrigues - Portfolio</title>
-    
-  <!-- Metatags essenciais para SEO básico da página de entrada -->
   <meta name="description" content="Portfólio de Beatriz Rodrigues.">
   <meta property="og:title" content="Portfólio - Beatriz Rodrigues">
   <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self'; 
-    script-src 'self' 'unsafe-inline' https://cdn.plyr.io https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com; 
-    style-src 'self' 'unsafe-inline' https://cdn.plyr.io https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; 
-    font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; 
-    img-src 'self' data: https: blob:; 
-    connect-src 'self' https://www.google-analytics.com https://cdn.plyr.io;
-    media-src 'self' https: blob:;
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+    style-src 'self' 'unsafe-inline' https:;
+    font-src 'self' data: https:;
+    img-src 'self' data: https: blob:;
+    media-src 'self' https:;
+    connect-src 'self' https:;
+    frame-src 'self' https:;
+    base-uri 'self';
+    form-action 'self' https://assets.mailerlite.com;
   ">
   <meta property="og:description" content="Vê os meus projetos.">
   <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
@@ -28,38 +29,26 @@
   <meta name="twitter:description" content="Vê os meus projetos.">
   <meta name="twitter:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
   <meta name="robots" content="index, follow">
-
-  <!-- Favicons -->
   <link rel="icon" type="image/png" href="./favicons/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="./favicons/favicon.svg" />
   <link rel="shortcut icon" href="./favicons/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="./favicons/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
   <link rel="manifest" href="./favicons/site.webmanifest" />
-
-  <!-- Links hreflang para a raiz do site -->
   <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/index.html" />
   <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/index.html" />
-
-  <!-- Script de redirecionamento de idioma - COLOCADO AQUI PARA EXECUÇÃO IMEDIATA -->
   <script>
-    // Detect browser language or use stored preference
     const storedLang = localStorage.getItem('preferredLanguage' );
     const browserLang = (navigator.language || navigator.userLanguage).substring(0, 2);
-        
-    // Default to 'pt', but prioritize stored preference, then browser language if 'en'
     let language = 'pt';
     if (storedLang === 'en' || storedLang === 'pt') {
       language = storedLang;
     } else if (browserLang === 'en') {
       language = 'en';
     }
-        
-    // Redirect to appropriate language folder
     window.location.replace(`./html/${language}/index.html`);
   </script>
 </head>
 <body>
-  <!-- O corpo da página estará vazio, pois o redirecionamento ocorre antes de ser renderizado -->
 </body>
 </html>

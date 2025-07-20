@@ -1,39 +1,25 @@
-# config.py
-
 from pathlib import Path
 
-# --- Caminhos e Remotes ---
 DRIVE_REMOTE_PATH = "Drive:Portfólio Bia"
 R2_REMOTE_PATH = "R2:bia-portfolio-assets"
-R2_PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev" # URL PÚBLICO DO SEU BUCKET
-
-# --- Diretórios Locais e de Destino ---
+R2_PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
 LOCAL_ASSETS_DIR = Path("local_assets" )
 PROCESSED_ASSETS_DIR = Path("processed_assets")
-THUMBNAIL_DIR = Path("Thumbnails") # Nome da pasta para os thumbnails
-
-# --- Geração de Ficheiros ---
+THUMBNAIL_DIR = Path("Thumbnails")
 JSON_OUTPUT_FILE = Path("data.json")
 R2_FILE_MANIFEST = "r2_manifest.txt"
 FAILED_FILES_LOG = Path("failed_files.log")
-
-# --- Configurações da Marca de Água ---
 WATERMARK_TEXT = "© Beatriz Rodrigues"
 WATERMARK_OPACITY = 200
 WATERMARK_FONT_PATH = "fonts/Montserrat-Medium.ttf"
 WATERMARK_COLOR_RGB = (255, 255, 255)
-
-# --- Parâmetros de Processamento ---
 IMG_WATERMARK_FONT_RATIO = 0.04
 VID_WATERMARK_FONT_RATIO = 0.06
 MARGIN_RATIO = 0.02
 IMAGE_QUALITY = 90
-
-# --- Configurações de Thumbnail de Vídeo ---
 THUMBNAIL_WIDTH = 1280
 THUMBNAIL_TIMESTAMP = "00:00:02"
-
-# --- Filtros de Ficheiros ---
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png']
 VIDEO_EXTENSIONS = ['.mp4', '.mov', '.avi']
-PDF_EXTENSIONS = ['.pdf'] 
+PDF_EXTENSIONS = ['.pdf']
+PPTX_EXTENSIONS = ['.pptx', '.ppt']

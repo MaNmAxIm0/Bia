@@ -1,44 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Plyr.io - Custom Video Player -->
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-  
+  <link rel="preconnect" href="https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev" crossorigin>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title data-lang-key="videos_vertical_page_title">Beatriz Rodrigues - Vertical Videos</title>
-  <!-- Meta Tags de Segurança -->
   <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self'; 
-    script-src 'self' 'unsafe-inline' https://cdn.plyr.io https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com; 
-    style-src 'self' 'unsafe-inline' https://cdn.plyr.io https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; 
-    font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; 
-    img-src 'self' data: https: blob:; 
-    connect-src 'self' https://www.google-analytics.com https://cdn.plyr.io;
-    media-src 'self' https: blob:;
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+    style-src 'self' 'unsafe-inline' https:;
+    font-src 'self' data: https:;
+    img-src 'self' data: https: blob:;
+    media-src 'self' https:;
+    connect-src 'self' https:;
+    frame-src 'self' https:;
+    base-uri 'self';
+    form-action 'self' https://assets.mailerlite.com;
   ">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-XSS-Protection" content="1; mode=block">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <!-- Metatags for SEO & Open Graph -->
   <meta name="description" content="A selection of vertical and portrait videos by Beatriz Rodrigues.">
   <meta property="og:title" content="Portfolio - Beatriz Rodrigues - Vertical Videos">
   <meta property="og:description" content="A selection of vertical and portrait videos by Beatriz Rodrigues.">
   <meta property="og:image" content="https://manmaxim0.github.io/Bia/imagens/banner.png">
   <meta property="og:url" content="https://manmaxim0.github.io/Bia/html/en/videos-vertical.html">
-  
-  <!-- hreflang links -->
   <link rel="alternate" hreflang="pt" href="https://manmaxim0.github.io/Bia/html/pt/videos-verticais.html" />
   <link rel="alternate" hreflang="en" href="https://manmaxim0.github.io/Bia/html/en/videos-vertical.html" />
-
-  <!-- Rest of your links and metatags -->
   <link rel="stylesheet" href="../../css/estilo.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@300;400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="../../css/galeria-das-paginas.css" />
-  <!-- CSS para Ícones de Bandeiras (flag-icons) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
   <link rel="icon" type="image/png" href="../../favicons/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="../../favicons/favicon.svg" />
@@ -46,8 +40,6 @@
   <link rel="apple-touch-icon" sizes="180x180" href="../../favicons/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="Beatriz Rodrigues" />
   <link rel="manifest" href="../../favicons/site.webmanifest" />
-
-  <!-- Importmap -->
   <script type="importmap">
     {
       "imports": {
@@ -62,18 +54,18 @@
 </head>
 <body data-page-title-key="videos_vertical_page_title">
   <div id="header-placeholder"></div>
-
   <main class="page-content">
     <section class="section-videos container">
       <h2 data-lang-key="videos_vertical_section_title">Vertical Videos</h2>
       <p class="section-description" data-lang-key="videos_vertical_section_description">A selection of videos in portrait format.</p>
-      <!-- Unique container ID -->
       <div id="video-v-gallery" class="video-gallery"></div>
     </section>
   </main>
-
   <div id="footer-placeholder"></div>
-
+  <script src="../../js/security-headers.js"></script>
+  <script src="../../js/cookie-consent.js" defer></script>
+  <link rel="stylesheet" href="../../css/cookie-consent.css" />
+  <script src="../../js/analytics-consent.js"></script>
   <script src="../../js/html-injector.js"></script>
   <script src="../../js/principal.js" type="module"></script>
 </body>

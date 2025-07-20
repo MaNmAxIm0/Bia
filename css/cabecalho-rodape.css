@@ -1,301 +1,352 @@
-/* ==========================================================================
-   Cabeçalho e Navegação Principal
-   ========================================================================== */
-
 .main-header {
-    background-color: var(--surface-color);
-    padding: 15px 0;
-    box-shadow: var(--box-shadow);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    z-index: 1000;
+  background-color: var(--surface-color);
+  padding: 15px 0;
+  box-shadow: var(--box-shadow);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .main-header .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .logo a {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .logo img {
-    max-height: 40px;
-    width: auto;
-    object-fit: contain;
+  max-height: 40px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.logo a:hover img {
+  transform: scale(1.05);
 }
 
 .main-nav {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .main-nav ul {
-    list-style: none;
-    display: flex;
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
 }
 
 .main-nav ul li {
-    margin-left: 30px;
+  margin-left: 30px;
 }
 
 .main-nav ul li a {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 400;
-    font-size: 1.1em;
-    color: var(--primary-color);
-    position: relative;
-    padding-bottom: 5px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 1.1em;
+  color: var(--primary-color);
+  position: relative;
+  padding-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Regra base para o sublinhado (inicia com largura 0) */
 .main-nav ul li a::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 0;
-    height: 2px;
-    background-color: var(--accent-color);
-    transition: width 0.3s ease;
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--accent-color);
+  transition: width 0.3s ease;
 }
 
-/* 
-   Regra ATUALIZADA para mostrar o sublinhado:
-   - Mostra no hover de QUALQUER link.
-   - Mostra se o link tiver a classe .active, mas APENAS se NÃO for um link dentro de um .dropdown-menu.
-*/
 .main-nav ul li a:hover::after,
 .main-nav ul li > a.active:not(.dropdown-toggle)::after {
-    width: 100%;
+  width: 100%;
 }
 
-/* Regra específica para o item PAI do dropdown (ex: "Fotografias") ficar ativo */
 .main-nav .dropdown.active > a::after {
-    width: 100%;
+  width: 100%;
 }
 
-
-/* Controles do cabeçalho para mobile */
 .header-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 1.8em;
-    color: var(--primary-color);
-    cursor: pointer;
-    transition: color 0.3s ease;
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.8em;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
 .menu-toggle:hover {
-    color: var(--accent-color);
+  color: var(--accent-color);
 }
 
-
-/* ==========================================================================
-   Dropdowns do Menu de Navegação (Fotografias, Vídeos)
-   ========================================================================== */
-
 .main-nav .dropdown {
-    position: relative;
+  position: relative;
 }
 
 .main-nav .dropdown .dropdown-toggle {
-    cursor: default;
+  cursor: default;
 }
 
 .main-nav .dropdown .dropdown-toggle i {
-    font-size: 0.7em; /* Ajuste o tamanho conforme necessário */
-    margin-left: 5px; /* Espaçamento entre o texto e a seta */
-    transition: transform 0.3s ease; /* Animação suave */
+  font-size: 0.7em;
+  transition: transform 0.3s ease;
 }
 
 .main-nav .dropdown .dropdown-menu {
-    flex-direction: column; /* Garante que os itens ficam em coluna */
-    opacity: 0;
-    visibility: hidden;
-    position: absolute;
-    top: 100%; 
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--surface-color);
-    box-shadow: var(--box-shadow);
-    border-radius: var(--border-radius);
-    list-style: none;
-    padding: 10px 0;
-    margin-top: 15px;
-    min-width: 180px; 
-    z-index: 1001; 
-    transition: opacity 0.2s ease, visibility 0.2s ease, margin-top 0.2s ease;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--surface-color);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-radius);
+  list-style: none;
+  padding: 10px 0;
+  margin-top: 15px;
+  min-width: 180px;
+  z-index: 1001;
+  transition: opacity 0.2s ease, visibility 0.2s ease, margin-top 0.2s ease;
 }
 
 .main-nav .dropdown .dropdown-menu li {
-    margin: 0;
-    width: 100%;
+  margin: 0;
+  width: 100%;
 }
 
 .main-nav .dropdown .dropdown-menu li a {
-    display: block;
-    padding: 10px 20px;
-    white-space: nowrap;
-    font-size: 1em;
+  display: block;
+  padding: 10px 20px;
+  white-space: nowrap;
+  font-size: 1em;
 }
 
 .main-nav .dropdown .dropdown-menu li a:hover {
-    background-color: var(--background-color);
+  background-color: var(--background-color);
 }
 
-/* Lógica para mostrar o submenu no hover (apenas em ecrãs grandes) */
 @media (min-width: 769px) {
-    .main-nav .dropdown:hover .dropdown-menu {
-        opacity: 1;
-        visibility: visible;
-        margin-top: 5px;
-    }
-
-    /* A seta roda quando o rato passa por cima do item do menu */
-    .main-nav .dropdown:hover .dropdown-toggle i {
-        transform: rotate(180deg);
-    }
+  .main-nav .dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    margin-top: 5px;
+  }
+  .main-nav .dropdown:hover .dropdown-toggle i {
+    transform: rotate(180deg);
+  }
 }
-
-
-/* ==========================================================================
-   Dropdown de Seleção de Idioma
-   ========================================================================== */
 
 .language-dropdown {
-    position: relative;
+  position: relative;
 }
 
 .language-selected {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: transparent;
-    border: 1px solid var(--border-color);
-    padding: 8px 12px;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-family: 'Montserrat', sans-serif;
-    color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--text-color);
 }
 
 .language-selected:hover {
-    background-color: var(--background-color);
+  background-color: var(--background-color);
 }
 
 .language-selected .fi {
-    font-size: 1.2em;
-    border-radius: 3px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-size: 1.2em;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.language-selected span {
-    font-weight: 600;
+.language-selected span:not(.fi) {
+  font-weight: 600;
 }
 
 .language-selected i {
-    font-size: 0.8em;
-    transition: transform 0.3s ease;
+  font-size: 0.8em;
+  transition: transform 0.3s ease;
 }
 
 .language-dropdown.open .language-selected i {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .language-options {
-    display: none;
-    position: absolute;
-    top: calc(100% + 5px);
-    right: 0;
-    background-color: var(--surface-color);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    list-style: none;
-    padding: 5px;
-    margin: 0;
-    min-width: 180px;
-    z-index: 1002;
-    border: 1px solid var(--border-color);
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  list-style: none;
+  padding: 5px;
+  margin: 0;
+  min-width: 180px;
+  z-index: 1002;
+  border: 1px solid var(--border-color);
 }
 
 .language-dropdown.open .language-options {
-    display: block;
+  display: block;
 }
 
 .language-options .lang-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 15px;
-    color: var(--text-color);
-    border-radius: 5px;
-    transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  color: var(--text-color);
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
 }
 
 .language-options .lang-option:hover {
-    background-color: var(--background-color);
-    color: var(--primary-color);
+  background-color: var(--background-color);
+  color: var(--primary-color);
 }
 
 .language-options .lang-option.active {
-    background-color: var(--accent-color);
-    color: white;
-    font-weight: 600;
+  background-color: var(--accent-color);
+  color: white;
+  font-weight: 600;
 }
 
 .language-options .lang-option .fi {
-    font-size: 1.5em;
-    border-radius: 3px;
+  font-size: 1.5em;
+  border-radius: 3px;
 }
-
-
-/* ==========================================================================
-   Rodapé Principal
-   ========================================================================== */
 
 .main-footer {
-    background-color: var(--secondary-color);
-    color: var(--background-color);
-    padding: 30px 0;
+  background-color: var(--secondary-color);
+  color: var(--background-color);
+  padding: 40px 0;
+  margin-top: auto;
+}
+
+.footer-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.footer-column-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+  flex: 1;
+  order: 1;
+}
+
+.footer-column-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 300px;
+  order: 2;
+}
+
+.social-links a {
+  color: var(--background-color);
+  font-size: 1.8em;
+  margin-right: 20px;
+}
+
+.social-links a:last-child {
+  margin-right: 0;
+}
+
+.footer-legal-links a {
+  font-size: 0.9em;
+  color: var(--light-text-color);
+  margin-right: 15px;
+}
+
+.footer-legal-links a:last-child {
+  margin-right: 0;
+}
+
+.footer-copyright p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.newsletter-container {
+  width: 100%;
+  max-width: 350px;
+}
+
+.newsletter-container h4 {
+  color: #FFFFFF;
+  margin-bottom: 10px;
+  font-size: 1em;
+  font-weight: 600;
+  text-align: left;
+}
+
+@media (max-width: 992px) {
+  .footer-grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+  .footer-column-left,
+  .footer-column-right {
+    order: 0;
+    width: 100%;
+  }
+  .footer-column-left {
+    align-items: center;
+  }
+  .footer-column-right {
+    justify-content: center;
+  }
+  .newsletter-container h4 {
     text-align: center;
-    margin-top: auto;
+  }
 }
 
-.main-footer .social-links {
-    margin-bottom: 15px;
-}
-
-.main-footer .social-links a {
-    color: var(--background-color);
-    font-size: 1.8em;
-    margin: 0 15px;
-    transition: color 0.3s ease, transform 0.2s ease;
-}
-
-.main-footer .social-links a:hover {
-    color: var(--accent-color);
-    transform: translateY(-3px);
-}
-
-.main-footer p {
-    margin: 0;
-    font-size: 0.9em;
+@media (max-width: 480px) {
+  .footer-legal-links {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .footer-copyright .copyright-line {
+    display: block;
+    text-align: center;
+  }
 }
