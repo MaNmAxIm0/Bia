@@ -45,7 +45,8 @@ async function createAndSendCampaignForLanguage(config) {
     groups: [config.groupId],
     emails: [{
       subject: config.subject,
-      from_name: 'luisfmaximo8@gmail.com',
+      from_name: 'Beatriz Rodrigues',
+      from: 'luisfmaximo8@gmail.com',
       content_type: 'html',
       content: emailHtmlContent
     }]
