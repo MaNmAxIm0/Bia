@@ -43,14 +43,11 @@ async function createAndSendCampaignForLanguage(config) {
     name: `${config.subject} (${config.lang.toUpperCase()})`,
     type: 'regular',
     groups: [config.groupId],
-    emails: [{
-      subject: config.subject,
-      from_name: 'Beatriz Rodrigues',
-      from: 'luisfmaximo8@gmail.com',
-      content_type: 'html',
-      content: emailHtmlContent
-    }]
-  }
+    subject: config.subject,
+    from_name: 'Beatriz Rodrigues',
+    from: 'luisfmaximo8@gmail.com',
+    content: emailHtmlContent
+    };
   try {
     console.log(`A criar campanha para o grupo ${config.groupId}...`);
     const response = await axios.post('https://connect.mailerlite.com/api/campaigns', payload, { headers });
