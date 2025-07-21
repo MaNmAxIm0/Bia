@@ -1,21 +1,36 @@
-name: Enviar Newsletter Manual
-
+name: Enviar Newsletter Manualmente
 on:
   workflow_dispatch:
     inputs:
-      subject:
-        description: 'O Assunto do E-mail da Newsletter'
+      subject_pt:
+        description: 'Assunto da newsletter em Português'
         required: true
-        default: 'Novidades no meu Portfólio!'
-      message:
-        description: 'Uma pequena mensagem sobre as novidades (ex: Adicionei novas fotos de Coimbra!)'
+        type: string
+      message_pt:
+        description: 'Mensagem da newsletter em Português'
         required: true
-
+        type: string
+      subject_en:
+        description: 'Assunto da newsletter em Inglês'
+        required: false
+        type: string
+      message_en:
+        description: 'Mensagem da newsletter em Inglês'
+        required: false
+        type: string
+      subject_es:
+        description: 'Assunto da newsletter em Espanhol'
+        required: false
+        type: string
+      message_es:
+        description: 'Mensagem da newsletter em Espanhol'
+        required: false
+        type: string
 jobs:
   send-newsletter:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do repositório
+      - name: Checkout do código
         uses: actions/checkout@v3
 
       - name: Configurar Node.js
@@ -26,9 +41,13 @@ jobs:
       - name: Instalar dependências
         run: npm install axios
 
-      - name: Criar e Enviar Newsletter
-        run: node ./.github/workflows/send-newsletter.js
+      - name: Executar script para enviar a newsletter
+        run: node ./send-newsletter.js
         env:
           MAILERLITE_API_KEY: ${{ secrets.MAILERLITE_API_KEY }}
-          NEWSLETTER_SUBJECT: ${{ github.event.inputs.subject }}
-          NEWSLETTER_MESSAGE: ${{ github.event.inputs.message }}
+          NEWSLETTER_SUBJECT_PT: ${{ github.event.inputs.subject_pt }}
+          NEWSLETTER_MESSAGE_PT: ${{ github.event.inputs.message_pt }}
+          NEWSLETTER_SUBJECT_EN: ${{ github.event.inputs.subject_en }}
+          NEWSLETTER_MESSAGE_EN: ${{ github.event.inputs.message_en }}
+          NEWSLETTER_SUBJECT_ES: ${{ github.event.inputs.subject_es }}
+          NEWSLETTER_MESSAGE_ES: ${{ github.event.inputs.message_es }}
