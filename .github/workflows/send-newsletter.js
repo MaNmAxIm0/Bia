@@ -23,7 +23,7 @@ const languageConfig = [
 const API_KEY = process.env.MAILERLITE_API_KEY;
 async function createAndSendCampaignForLanguage(config) {
   if (!config.groupId || !config.subject || !config.message) {
-    console.warn(`A saltar a língua '${config.lang}' por falta de configuração (verifique os seus GitHub Secrets para o assunto e a mensagem).`);
+    console.log(`A saltar a língua '${config.lang}' por falta de configuração.`);
     return;
   }
   console.log(`\n--- A preparar newsletter para a língua: ${config.lang.toUpperCase()} ---`);
@@ -39,28 +39,28 @@ async function createAndSendCampaignForLanguage(config) {
     'Authorization': `Bearer ${API_KEY}`,
     'Content-Type': 'application/json'
   };
-  try {
-    const campaignResponse = await axios.post('https://connect.mailerlite.com/api/campaigns', {
-      name: `${config.subject} (${config.lang.toUpperCase()}) - ${new Date().toLocaleDateString('pt-PT')}`,
-      type: 'regular',
-      groups: [config.groupId]
-    }, { headers });
-    const campaignId = campaignResponse.data.data.id;
-    console.log(`Campanha (${config.lang}) criada com sucesso! ID: ${campaignId}`);
-    await axios.post(`https://connect.mailerlite.com/api/campaigns/${campaignId}/content`, {
+  const payload = {
+    name: `${config.subject} (${config.lang.toUpperCase()})`,
+    type: 'regular',
+    groups: [config.groupId],
+    emails: [{
       subject: config.subject,
-      from_name: 'Beatriz Rodrigues',
-      from: 'luisfmaximo8@gmail.com',
+      from_name: 'luisfmaximo8@gmail.com',
       content_type: 'html',
       content: emailHtmlContent
-    }, { headers });
-    console.log(`Conteúdo (${config.lang}) adicionado com sucesso!`);
+    }]
+  }
+  try {
+    console.log(`A criar campanha para o grupo ${config.groupId}...`);
+    const response = await axios.post('https://connect.mailerlite.com/api/campaigns', payload, { headers });
+    console.log(`SUCESSO! Campanha (${config.lang}) criada com ID: ${response.data.data.id}`);
+
   } catch (error) {
     console.error(`Ocorreu um erro ao enviar para a língua '${config.lang}':`);
     if (error.response) {
-      console.error(JSON.stringify(error.response.data, null, 2));
+      console.error('Dados do Erro:', JSON.stringify(error.response.data, null, 2));
     } else {
-      console.error(error.message);
+      console.error('Mensagem de Erro:', error.message);
     }
   }
 }
