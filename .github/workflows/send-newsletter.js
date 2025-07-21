@@ -54,7 +54,7 @@ async function createAndSendCampaignForLanguage(config) {
     console.log(`A criar campanha para o grupo ${config.groupId}...`);
     const campaignResponse = await axios.post('https://connect.mailerlite.com/api/campaigns', payload, { headers });
     const campaignId = campaignResponse.data.data.id;
-    console.log(`SUCESSO! Campanha (${config.lang}) criada com ID: ${response.data.data.id}`);
+    console.log(`SUCESSO! Campanha (${config.lang}) criada com ID: ${campaignid}`);
     console.log(`A emitir comando de envio para a campanha ${campaignId}...`);
     await axios.post(`https://connect.mailerlite.com/api/campaigns/${campaignId}/schedule`, {
       delivery: 'instant'
