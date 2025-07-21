@@ -63,11 +63,9 @@ async function createAndSendCampaignForLanguage(config) {
 
   } catch (error) {
     console.error(`Ocorreu um erro ao enviar para a língua '${config.lang}':`);
-    if (error.response) {
-      console.error('Dados do Erro:', JSON.stringify(error.response.data, null, 2));
-    } else {
-      console.error('Mensagem de Erro:', error.message);
-    }
+    console.error('--- INÍCIO DO ERRO DETALHADO ---');
+    console.error(error);
+    console.error('--- FIM DO ERRO DETALHADO ---')
   }
 }
 
