@@ -2,7 +2,7 @@ const axios = require('axios');
 const API_KEY = process.env.MAILERLITE_API_KEY;
 
 // Vamos usar valores fixos para o teste
-const TEST_GROUP_ID = 'igOq2z'; // O ID do seu grupo PT
+const TEST_GROUP_ID = '160388108749112929'; // O ID do seu grupo PT
 const TEST_SUBJECT = 'Campanha de Teste Simples';
 const TEST_NAME = `Teste - ${new Date().toISOString()}`;
 const TEST_HTML_CONTENT = '<p>Isto é um simples teste.</p>';
