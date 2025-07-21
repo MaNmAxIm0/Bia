@@ -38,12 +38,14 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Listar ficheiros para debug
+        run: ls -R
+
       - name: Instalar dependências
         run: npm install axios
 
       - name: Executar script para enviar a newsletter
         run: node send-newsletter.js
-        working-directory: ./Bia
         env:
           MAILERLITE_API_KEY: ${{ secrets.MAILERLITE_API_KEY }}
           NEWSLETTER_SUBJECT_PT: ${{ github.event.inputs.subject_pt }}
