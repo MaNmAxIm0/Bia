@@ -1,8 +1,8 @@
 export const translations = {
   pt: {
     portuguese: 'Português',
-    english: 'English',
-    spanish: 'Español',
+    english: 'Inglês',
+    spanish: 'Espanhol',
     home: 'Início',
     presentations: 'Apresentações',
     designs: 'Designs',
@@ -91,9 +91,9 @@ export const translations = {
     marketing_desc: 'Utilizados para mostrar anúncios relevantes aos utilizadores.'
   },
   en: {
-    portuguese: 'Português',
+    portuguese: 'Portuguese',
     english: 'English',
-    spanish: 'Español',
+    spanish: 'Spanish',
     home: 'Home',
     presentations: 'Presentations',
     designs: 'Designs',
@@ -182,8 +182,8 @@ export const translations = {
     marketing_desc: 'Used to show relevant advertisements to users.'
   },
   es: {
-    portuguese: 'Português',
-    english: 'English',
+    portuguese: 'Portugués',
+    english: 'Inglés',
     spanish: 'Español',
     home: 'Inicio',
     presentations: 'Presentaciones',
