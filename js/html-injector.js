@@ -4,8 +4,19 @@ document.addEventListener("DOMContentLoaded", function() {
   if (!headerPlaceholder && !footerPlaceholder) {
     return;
   }
-  const headerPath = `/cabecalho.html`;
-  const footerPath = `/rodape.html`;
+
+  // Determinar o caminho relativo baseado na localização atual
+  const currentPath = window.location.pathname;
+  let relativePath = '';
+  
+  // Se estivermos numa subpasta (pt/, en/, es/), precisamos de voltar atrás
+  if (currentPath.includes('/pt/') || currentPath.includes('/en/') || currentPath.includes('/es/')) {
+    relativePath = '../';
+  }
+  
+  const headerPath = `${relativePath}cabecalho.html`;
+  const footerPath = `${relativePath}rodape.html`;
+
   const loadHTML = (filePath, placeholder) => {
     return new Promise((resolve, reject) => {
       if (!placeholder) {
@@ -26,10 +37,12 @@ document.addEventListener("DOMContentLoaded", function() {
       .catch(error => reject(error));
     });
   };
+
   if (footerPlaceholder) {
     loadHTML(footerPath, footerPlaceholder)
     .catch(error => console.error(`Erro ao carregar rodapé:`, error));
   }
+
   if (headerPlaceholder) {
     loadHTML(headerPath, headerPlaceholder)
     .then(() => {
@@ -38,3 +51,4 @@ document.addEventListener("DOMContentLoaded", function() {
     .catch(error => console.error(`Erro ao carregar cabeçalho:`, error));
   }
 });
+
