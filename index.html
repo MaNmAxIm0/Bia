@@ -70,8 +70,14 @@
     }
   </script>
   <script>
-    const storedLang = localStorage.getItem('preferredLanguage' );
+    const storedLang = localStorage.getItem('preferredLanguage');
     const browserLang = (navigator.language || navigator.userLanguage).substring(0, 2);
+    const langPageMap = {
+      pt: 'inicio',
+      en: 'home',
+      es: 'inicio'
+    };
+
     let language = 'pt';
     if (storedLang === 'en' || storedLang === 'pt' || storedLang === 'es') {
       language = storedLang;
@@ -80,7 +86,10 @@
     } else if (browserLang === 'es') {
       language = 'es';
     }
-    window.location.replace(`./${language}/index.html`);
+
+    const pageName = langPageMap[language];
+
+    window.location.replace(`./${language}/${pageName}/`);
   </script>
 </head>
 <body>

@@ -1,11 +1,18 @@
 document.addEventListener("DOMContentLoaded", function() {
   const headerPlaceholder = document.getElementById('header-placeholder');
   const footerPlaceholder = document.getElementById('footer-placeholder');
+
   if (!headerPlaceholder && !footerPlaceholder) {
     return;
   }
-  const headerPath = `/cabecalho.html`;
-  const footerPath = `/rodape.html`;
+
+  const getBasePath = () => {
+    return window.location.hostname.includes('github.io') ? '/Bia' : '';
+  };
+  const basePath = getBasePath();
+  const headerPath = `${basePath}/cabecalho.html`;
+  const footerPath = `${basePath}/rodape.html`;
+
   const loadHTML = (filePath, placeholder) => {
     return new Promise((resolve, reject) => {
       if (!placeholder) {
@@ -26,10 +33,12 @@ document.addEventListener("DOMContentLoaded", function() {
       .catch(error => reject(error));
     });
   };
+
   if (footerPlaceholder) {
     loadHTML(footerPath, footerPlaceholder)
     .catch(error => console.error(`Erro ao carregar rodapé:`, error));
   }
+
   if (headerPlaceholder) {
     loadHTML(headerPath, headerPlaceholder)
     .then(() => {

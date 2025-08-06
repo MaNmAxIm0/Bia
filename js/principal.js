@@ -80,7 +80,7 @@ async function loadWorkCards() {
     { pageKey: 'apresentacoes', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentações' }
     ];
     gridContainer.innerHTML = '';
-    workCardsData.forEach(cardData => {
+        workCardsData.forEach(cardData => {
       const cardDiv = document.createElement('div');
       cardDiv.className = 'work-item';
       const cover = covers.find(c => c.titles.pt.toLowerCase() === cardData.coverKey.toLowerCase());
@@ -90,7 +90,7 @@ async function loadWorkCards() {
       <img src="${coverUrl}" alt="${getTranslation(cardData.titleKey)}">
       <h3>${getTranslation(cardData.titleKey)}</h3>
       <p>${getTranslation(cardData.descKey)}</p>
-      <a href="/${getCurrentLanguage()}/${targetFile}/" class="btn">${getTranslation("view_gallery")} <i class="fas fa-arrow-right"></i></a>`;
+      <a href="${getBasePath()}/${getCurrentLanguage()}/${targetFile}/" class="btn">${getTranslation("view_gallery")} <i class="fas fa-arrow-right"></i></a>`;
       gridContainer.appendChild(cardDiv);
     });
   } catch (error) {
@@ -199,12 +199,14 @@ function setupHeader() {
 
 function updateNavigationLinks(lang) {
   const sourceFile = getSourcePageFile();
-  
+  const basePath = getBasePath(); // Obter o caminho base
+
   // Atualizar links de navegação
   document.querySelectorAll("a[data-page-key]").forEach(link => {
     const pageKey = link.dataset.pageKey;
     const targetFile = pageMap[pageKey]?.[lang] || pageKey;
-    link.href = `/${lang}/${targetFile}/`;
+    // MODIFICAÇÃO: Adicionar basePath ao início do href
+    link.href = `${basePath}/${lang}/${targetFile}/`; 
   });
   
   // Atualizar links de idioma
@@ -212,15 +214,13 @@ function updateNavigationLinks(lang) {
   document.querySelectorAll(".lang-option").forEach(link => {
     const linkLang = link.dataset.lang;
     const targetFile = pageMap[sourceFile]?.[linkLang] || sourceFile;
-    link.href = `/${linkLang}/${targetFile}/`;
+    // MODIFICAÇÃO: Adicionar basePath ao início do href
+    link.href = `${basePath}/${linkLang}/${targetFile}/`;
 
-    // ===== INÍCIO DA CORREÇÃO =====
-    // Seleciona o span correto usando o seu atributo 'data-lang-key'
     const textSpan = link.querySelector('span[data-lang-key]');
     if (textSpan) {
       textSpan.textContent = langNames[linkLang];
     }
-    // ===== FIM DA CORREÇÃO =====
 
     if (linkLang === lang) {
       link.classList.add("active");
@@ -229,6 +229,7 @@ function updateNavigationLinks(lang) {
     }
   });
 }
+
 function onPageLoad() {
   const pathSegments = window.location.pathname.split('/');
   const lang = pathSegments.find(seg => ['pt', 'en', 'es'].includes(seg)) || 'pt';
