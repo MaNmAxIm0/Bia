@@ -35,67 +35,63 @@
                           </div>
 
 <script>
-// Script para configurar caminhos dinâmicos no rodapé - GitHub Pages
+// Script para configurar caminhos dinâmicos no rodapé
 document.addEventListener('DOMContentLoaded', function() {
   const currentPath = window.location.pathname;
   let basePath = '';
   
-  // Para GitHub Pages, o site está em /Bia/, então precisamos considerar isso
-  const isGitHubPages = window.location.hostname.includes('github.io');
-  const repoName = '/Bia/';
-  
-  if (isGitHubPages) {
-    // No GitHub Pages, determinar caminho baseado na estrutura /Bia/...
-    if (currentPath === repoName || currentPath === repoName + 'index.html') {
-      // Estamos na raiz do repositório
-      basePath = './';
-    } else if (currentPath.includes(repoName + 'pt/') || currentPath.includes(repoName + 'en/') || currentPath.includes(repoName + 'es/')) {
-      // Estamos numa pasta de idioma
-      const pathAfterRepo = currentPath.replace(repoName, '');
-      const pathParts = pathAfterRepo.split('/').filter(part => part !== '');
-      
-      if (pathParts.length >= 2) {
-        // Estamos numa subpasta dentro do idioma (ex: /Bia/pt/apresentacoes/)
-        basePath = '../../';
-      } else {
-        // Estamos diretamente na pasta do idioma (ex: /Bia/pt/)
-        basePath = '../';
-      }
+  // Determinar o caminho base baseado na profundidade da página atual
+  if (currentPath.includes('/pt/') || currentPath.includes('/en/') || currentPath.includes('/es/')) {
+    // Se estamos numa subpasta de idioma
+    const pathParts = currentPath.split('/').filter(part => part !== '');
+    const depth = pathParts.length;
+    
+    if (depth >= 2) {
+      // Se estamos numa subpasta dentro do idioma (ex: /pt/apresentacoes/)
+      basePath = '../../';
     } else {
-      // Fallback para raiz
-      basePath = './';
+      // Se estamos diretamente na pasta do idioma (ex: /pt/)
+      basePath = '../';
     }
   } else {
-    // Para desenvolvimento local, usar lógica anterior
-    if (currentPath.includes('/pt/') || currentPath.includes('/en/') || currentPath.includes('/es/')) {
-      const pathParts = currentPath.split('/').filter(part => part !== '');
-      const depth = pathParts.length;
-      
-      if (depth >= 2) {
-        basePath = '../../';
-      } else {
-        basePath = '../';
-      }
-    } else {
-      basePath = './';
-    }
+    // Se estamos na raiz
+    basePath = './';
   }
-  
-  console.log('GitHub Pages mode (footer):', isGitHubPages);
-  console.log('Current path (footer):', currentPath);
-  console.log('Calculated base path (footer):', basePath);
   
   // Configurar links legais no rodapé
   document.getElementById('footer-privacy').href = basePath + 'pt/politica-de-privacidade/';
   document.getElementById('footer-terms').href = basePath + 'pt/termos-de-utilizacao/';
   document.getElementById('cookie-privacy-link').href = basePath + 'pt/politica-de-privacidade/';
+});
+</script>
+
+<script>
+// Carregar scripts com caminhos dinâmicos
+document.addEventListener('DOMContentLoaded', function() {
+  const currentPath = window.location.pathname;
+  let basePath = '';
   
-  // Carregar scripts com caminhos dinâmicos
+  // Determinar o caminho base baseado na profundidade da página atual
+  if (currentPath.includes('/pt/') || currentPath.includes('/en/') || currentPath.includes('/es/')) {
+    const pathParts = currentPath.split('/').filter(part => part !== '');
+    const depth = pathParts.length;
+    
+    if (depth >= 2) {
+      basePath = '../../';
+    } else {
+      basePath = '../';
+    }
+  } else {
+    basePath = './';
+  }
+  
+  // Carregar cookie-consent.js
   const cookieScript = document.createElement('script');
   cookieScript.src = basePath + 'js/cookie-consent.js';
   cookieScript.defer = true;
   document.head.appendChild(cookieScript);
   
+  // Carregar principal.js
   const principalScript = document.createElement('script');
   principalScript.src = basePath + 'js/principal.js';
   principalScript.type = 'module';
