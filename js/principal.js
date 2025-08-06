@@ -21,15 +21,14 @@ function getSourcePageFile() {
   const pathSegments = window.location.pathname.split("/").filter(segment => segment !== "");
   const lang = pathSegments.find(seg => ["pt", "en", "es"].includes(seg));
   let pageName = pathSegments[pathSegments.indexOf(lang) + 1];
-  if (!pageName) return "inicio"; // Default to 'inicio' if no page name is found
-  
-  // Find the original pageKey from pageMap based on the current language and pageName
+  if (!pageName) return "inicio";
+
   for (const ptPage in pageMap) {
     if (pageMap[ptPage][lang] === pageName) {
       return ptPage;
     }
   }
-  return "inicio"; // Default to 'inicio' if not found in pageMap
+  return "inicio";
 }
 async function loadDynamicCarousel() {
   const slidesContainer = document.getElementById('dynamic-carousel-slides');
@@ -62,6 +61,7 @@ async function loadDynamicCarousel() {
     carouselSection.style.display = 'none';
   }
 }
+
 async function loadWorkCards() {
   const gridContainer = document.getElementById('my-works-grid');
   if (!gridContainer) return;
@@ -98,6 +98,7 @@ async function loadWorkCards() {
     gridContainer.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', 'trabalhos')}</p>`;
   }
 }
+
 async function loadPagePreviews() {
   const previewContainer = document.querySelector('.section-preview-grid');
   if (!previewContainer) return;
@@ -158,6 +159,11 @@ function loadNewsletterForm() {
   initializeMailerLite();
 }
 function setupHeader() {
+  const logoImage = document.querySelector('.logo img');
+  if (logoImage) {
+    const basePath = getBasePath();
+    logoImage.src = `${basePath}/imagens/logo.png`;
+  }
   const menuToggle = document.querySelector('.menu-toggle');
   const navLinks = document.querySelector('.nav-links');
   if (menuToggle && navLinks) {
@@ -183,10 +189,7 @@ function setupHeader() {
     dropdown.classList.toggle('open');
   });
   document.addEventListener('click', () => dropdown.classList.remove('open'));
-  
-  // Atualizar todos os links com base no idioma atual
   updateNavigationLinks(lang);
-  
   const sourceFile = getSourcePageFile();
   document.querySelectorAll('a[data-page-key]').forEach(link => {
     if (link.dataset.pageKey === sourceFile) {
@@ -199,24 +202,17 @@ function setupHeader() {
 
 function updateNavigationLinks(lang) {
   const sourceFile = getSourcePageFile();
-  const basePath = getBasePath(); // Obter o caminho base
-
-  // Atualizar links de navegação
+  const basePath = getBasePath();
   document.querySelectorAll("a[data-page-key]").forEach(link => {
     const pageKey = link.dataset.pageKey;
     const targetFile = pageMap[pageKey]?.[lang] || pageKey;
-    // MODIFICAÇÃO: Adicionar basePath ao início do href
     link.href = `${basePath}/${lang}/${targetFile}/`; 
   });
-  
-  // Atualizar links de idioma
   const langNames = { pt: 'Português', en: 'English', es: 'Español' };
   document.querySelectorAll(".lang-option").forEach(link => {
     const linkLang = link.dataset.lang;
     const targetFile = pageMap[sourceFile]?.[linkLang] || sourceFile;
-    // MODIFICAÇÃO: Adicionar basePath ao início do href
     link.href = `${basePath}/${linkLang}/${targetFile}/`;
-
     const textSpan = link.querySelector('span[data-lang-key]');
     if (textSpan) {
       textSpan.textContent = langNames[linkLang];
