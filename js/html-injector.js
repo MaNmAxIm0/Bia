@@ -5,17 +5,59 @@ document.addEventListener("DOMContentLoaded", function() {
     return;
   }
 
-  // Determinar o caminho relativo baseado na localização atual
+  // Determinar o caminho relativo baseado na localização atual - GitHub Pages
   const currentPath = window.location.pathname;
   let relativePath = '';
   
-  // Se estivermos numa subpasta (pt/, en/, es/), precisamos de voltar atrás
-  if (currentPath.includes('/pt/') || currentPath.includes('/en/') || currentPath.includes('/es/')) {
-    relativePath = '../';
+  // Para GitHub Pages, o site está em /Bia/, então precisamos considerar isso
+  const isGitHubPages = window.location.hostname.includes('github.io');
+  const repoName = '/Bia/';
+  
+  if (isGitHubPages) {
+    // No GitHub Pages, determinar caminho baseado na estrutura /Bia/...
+    if (currentPath === repoName || currentPath === repoName + 'index.html') {
+      // Estamos na raiz do repositório
+      relativePath = '';
+    } else if (currentPath.includes(repoName + 'pt/') || currentPath.includes(repoName + 'en/') || currentPath.includes(repoName + 'es/')) {
+      // Estamos numa pasta de idioma
+      const pathAfterRepo = currentPath.replace(repoName, '');
+      const pathParts = pathAfterRepo.split('/').filter(part => part !== '');
+      
+      if (pathParts.length >= 2) {
+        // Estamos numa subpasta dentro do idioma (ex: /Bia/pt/apresentacoes/)
+        relativePath = '../../';
+      } else {
+        // Estamos diretamente na pasta do idioma (ex: /Bia/pt/)
+        relativePath = '../';
+      }
+    } else {
+      // Fallback para raiz
+      relativePath = '';
+    }
+  } else {
+    // Para desenvolvimento local, usar lógica anterior
+    const pathParts = currentPath.split('/').filter(part => part !== '');
+    
+    // Remover o nome do ficheiro se existir (ex: index.html)
+    let depth = pathParts.length;
+    if (pathParts[pathParts.length - 1] && pathParts[pathParts.length - 1].includes('.html')) {
+      depth = depth - 1;
+    }
+    
+    // Se estamos numa subpasta, precisamos de voltar atrás
+    if (depth > 0) {
+      relativePath = '../'.repeat(depth);
+    }
   }
   
   const headerPath = `${relativePath}cabecalho.html`;
   const footerPath = `${relativePath}rodape.html`;
+
+  console.log('GitHub Pages mode (injector):', isGitHubPages);
+  console.log('Current path (injector):', currentPath);
+  console.log('Calculated relative path (injector):', relativePath);
+  console.log('Header path (injector):', headerPath);
+  console.log('Footer path (injector):', footerPath);
 
   const loadHTML = (filePath, placeholder) => {
     return new Promise((resolve, reject) => {
@@ -51,4 +93,3 @@ document.addEventListener("DOMContentLoaded", function() {
     .catch(error => console.error(`Erro ao carregar cabeçalho:`, error));
   }
 });
-
