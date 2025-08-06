@@ -15,8 +15,8 @@
                     <a href="mailto:rod357571@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
                     </div>
                     <div class="footer-legal-links">
-                      <a href="#" id="footer-privacy" data-page-key="politica-de-privacidade" data-lang-key="privacy_policy">Política de Privacidade</a>
-                        <a href="#" id="footer-terms" data-page-key="termos-de-utilizacao" data-lang-key="terms_of_use">Termos de Utilização</a>
+                      <a href="./pt/politica-de-privacidade/" data-page-key="politica-de-privacidade" data-lang-key="privacy_policy">Política de Privacidade</a>
+                        <a href="./pt/termos-de-utilizacao/" data-page-key="termos-de-utilizacao" data-lang-key="terms_of_use">Termos de Utilização</a>
                         </div>
                         <div class="footer-copyright">
                           <p data-lang-key="all_rights_reserved">&copy; 2025 Beatriz Rodrigues. Todos os direitos reservados.</p>
@@ -29,72 +29,10 @@
                     <div id="cookie-consent-banner" class="cookie-consent-banner" style="display: none;">
                       <p>
                         <span data-translate="cookie_consent_text">Este site utiliza cookies para melhorar a sua experiência.</span>
-                          <a href="#" id="cookie-privacy-link" data-page-key="politica-de-privacidade" data-translate="learn_more">Saber mais</a>.
+                          <a href="./pt/politica-de-privacidade/" data-page-key="politica-de-privacidade" data-translate="learn_more">Saber mais</a>.
                           </p>
                           <button id="accept-cookies" data-translate="accept_cookies">Aceitar</button>
                           </div>
+                          <script src="js/cookie-consent.js" defer></script>
+                          <script src="js/principal.js" type="module"></script>
 
-<script>
-// Script para configurar caminhos dinâmicos no rodapé
-document.addEventListener('DOMContentLoaded', function() {
-  const currentPath = window.location.pathname;
-  let basePath = '';
-  
-  // Determinar o caminho base baseado na profundidade da página atual
-  if (currentPath.includes('/pt/') || currentPath.includes('/en/') || currentPath.includes('/es/')) {
-    // Se estamos numa subpasta de idioma
-    const pathParts = currentPath.split('/').filter(part => part !== '');
-    const depth = pathParts.length;
-    
-    if (depth >= 2) {
-      // Se estamos numa subpasta dentro do idioma (ex: /pt/apresentacoes/)
-      basePath = '../../';
-    } else {
-      // Se estamos diretamente na pasta do idioma (ex: /pt/)
-      basePath = '../';
-    }
-  } else {
-    // Se estamos na raiz
-    basePath = './';
-  }
-  
-  // Configurar links legais no rodapé
-  document.getElementById('footer-privacy').href = basePath + 'pt/politica-de-privacidade/';
-  document.getElementById('footer-terms').href = basePath + 'pt/termos-de-utilizacao/';
-  document.getElementById('cookie-privacy-link').href = basePath + 'pt/politica-de-privacidade/';
-});
-</script>
-
-<script>
-// Carregar scripts com caminhos dinâmicos
-document.addEventListener('DOMContentLoaded', function() {
-  const currentPath = window.location.pathname;
-  let basePath = '';
-  
-  // Determinar o caminho base baseado na profundidade da página atual
-  if (currentPath.includes('/pt/') || currentPath.includes('/en/') || currentPath.includes('/es/')) {
-    const pathParts = currentPath.split('/').filter(part => part !== '');
-    const depth = pathParts.length;
-    
-    if (depth >= 2) {
-      basePath = '../../';
-    } else {
-      basePath = '../';
-    }
-  } else {
-    basePath = './';
-  }
-  
-  // Carregar cookie-consent.js
-  const cookieScript = document.createElement('script');
-  cookieScript.src = basePath + 'js/cookie-consent.js';
-  cookieScript.defer = true;
-  document.head.appendChild(cookieScript);
-  
-  // Carregar principal.js
-  const principalScript = document.createElement('script');
-  principalScript.src = basePath + 'js/principal.js';
-  principalScript.type = 'module';
-  document.head.appendChild(principalScript);
-});
-</script>
