@@ -9,86 +9,13 @@ document.addEventListener("DOMContentLoaded", function() {
   const currentPath = window.location.pathname;
   let relativePath = '';
   
-  // Contar quantas pastas precisamos subir baseado no caminho atual
-  const pathParts = currentPath.split('/').filter(part => part !== '');
-  
-  // Remover o nome do ficheiro se existir (ex: index.html)
-  let depth = pathParts.length;
-  if (pathParts[pathParts.length - 1] && pathParts[pathParts.length - 1].includes('.html')) {
-    depth = depth - 1;
-  }
-  
-  // Se estamos numa subpasta, precisamos de voltar atrás
-  if (depth > 0) {
-    relativePath = '../'.repeat(depth);
+  // Se estivermos numa subpasta (pt/, en/, es/), precisamos de voltar atrás
+  if (currentPath.includes('/pt/') || currentPath.includes('/en/') || currentPath.includes('/es/')) {
+    relativePath = '../';
   }
   
   const headerPath = `${relativePath}cabecalho.html`;
   const footerPath = `${relativePath}rodape.html`;
-
-  console.log('Current path:', currentPath);
-  console.log('Calculated depth:', depth);
-  console.log('Relative path:', relativePath);
-  console.log('Header path:', headerPath);
-  console.log('Footer path:', footerPath);
-
-  const loadHTML = (filePath, placeholder) => {
-    return new Promise((resolve, reject) => {
-      if (!placeholder) {
-        resolve();
-        return;
-      }
-      fetch(filePath)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Ficheiro não encontrado: ${filePath}. Verifique o caminho e o nome do ficheiro.`);
-        }
-        return response.text();
-      })
-      .then(data => {
-        placeholder.innerHTML = data;
-        resolve();
-      })
-      .catch(error => reject(error));
-    });
-  };
-
-  if (footerPlaceholder) {
-    loadHTML(footerPath, footerPlaceholder)
-    .catch(error => console.error(`Erro ao carregar rodapé:`, error));
-  }
-
-  if (headerPlaceholder) {
-    loadHTML(headerPath, headerPlaceholder)
-    .then(() => {
-      document.dispatchEvent(new CustomEvent('headerLoaded'));
-    })
-    .catch(error => console.error(`Erro ao carregar cabeçalho:`, error));
-  }
-});  } else {
-    // Para desenvolvimento local, usar lógica anterior
-    const pathParts = currentPath.split('/').filter(part => part !== '');
-    
-    // Remover o nome do ficheiro se existir (ex: index.html)
-    let depth = pathParts.length;
-    if (pathParts[pathParts.length - 1] && pathParts[pathParts.length - 1].includes('.html')) {
-      depth = depth - 1;
-    }
-    
-    // Se estamos numa subpasta, precisamos de voltar atrás
-    if (depth > 0) {
-      relativePath = '../'.repeat(depth);
-    }
-  }
-  
-  const headerPath = `${relativePath}cabecalho.html`;
-  const footerPath = `${relativePath}rodape.html`;
-
-  console.log('GitHub Pages mode (injector):', isGitHubPages);
-  console.log('Current path (injector):', currentPath);
-  console.log('Calculated relative path (injector):', relativePath);
-  console.log('Header path (injector):', headerPath);
-  console.log('Footer path (injector):', footerPath);
 
   const loadHTML = (filePath, placeholder) => {
     return new Promise((resolve, reject) => {
@@ -124,3 +51,4 @@ document.addEventListener("DOMContentLoaded", function() {
     .catch(error => console.error(`Erro ao carregar cabeçalho:`, error));
   }
 });
+
