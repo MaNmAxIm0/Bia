@@ -59,6 +59,101 @@
                                               </header>
 
 <script>
+// Script para configurar caminhos dinâmicos baseados na localização atual - GitHub Pages
+document.addEventListener('DOMContentLoaded', function() {
+  const currentPath = window.location.pathname;
+  let basePath = '';
+  
+  // Para GitHub Pages, o site está em /Bia/, então precisamos considerar isso
+  const isGitHubPages = window.location.hostname.includes('github.io');
+  const repoName = '/Bia/';
+  
+  if (isGitHubPages) {
+    // No GitHub Pages, determinar caminho baseado na estrutura /Bia/...
+    if (currentPath === repoName || currentPath === repoName + 'index.html') {
+      // Estamos na raiz do repositório
+      basePath = './';
+    } else if (currentPath.includes(repoName + 'pt/') || currentPath.includes(repoName + 'en/') || currentPath.includes(repoName + 'es/')) {
+      // Estamos numa pasta de idioma
+      const pathAfterRepo = currentPath.replace(repoName, '');
+      const pathParts = pathAfterRepo.split('/').filter(part => part !== '');
+      
+      if (pathParts.length >= 2) {
+        // Estamos numa subpasta dentro do idioma (ex: /Bia/pt/apresentacoes/)
+        basePath = '../../';
+      } else {
+        // Estamos diretamente na pasta do idioma (ex: /Bia/pt/)
+        basePath = '../';
+      }
+    } else {
+      // Fallback para raiz
+      basePath = './';
+    }
+  } else {
+    // Para desenvolvimento local, usar lógica anterior
+    if (currentPath.includes('/pt/') || currentPath.includes('/en/') || currentPath.includes('/es/')) {
+      const pathParts = currentPath.split('/').filter(part => part !== '');
+      const depth = pathParts.length;
+      
+      if (depth >= 2) {
+        basePath = '../../';
+      } else {
+        basePath = '../';
+      }
+    } else {
+      basePath = './';
+    }
+  }
+  
+  console.log('GitHub Pages mode:', isGitHubPages);
+  console.log('Current path:', currentPath);
+  console.log('Calculated base path:', basePath);
+  
+  // Configurar caminho da imagem do logo
+  document.getElementById('logo-img').src = basePath + 'imagens/logo.png';
+  
+  // Configurar links de navegação
+  document.getElementById('logo-link').href = basePath + 'pt/inicio/';
+  document.getElementById('nav-inicio').href = basePath + 'pt/inicio/';
+  document.getElementById('nav-apresentacoes').href = basePath + 'pt/apresentacoes/';
+  document.getElementById('nav-designs').href = basePath + 'pt/designs/';
+  document.getElementById('nav-fotos-horizontais').href = basePath + 'pt/fotos-horizontais/';
+  document.getElementById('nav-fotos-verticais').href = basePath + 'pt/fotos-verticais/';
+  document.getElementById('nav-videos-horizontais').href = basePath + 'pt/videos-horizontais/';
+  document.getElementById('nav-videos-verticais').href = basePath + 'pt/videos-verticais/';
+  document.getElementById('nav-sobre-mim').href = basePath + 'pt/sobre-mim/';
+  document.getElementById('nav-contactos').href = basePath + 'pt/contactos/';
+  
+  // Configurar links de idiomas
+  document.getElementById('lang-pt').href = basePath + 'pt/inicio/';
+  document.getElementById('lang-en').href = basePath + 'en/home/';
+  document.getElementById('lang-es').href = basePath + 'es/inicio/';
+});
+</script>                                            <a href="#" id="lang-pt" class="lang-option lang-pt-link" data-lang="pt">
+                                              <span class="fi fi-pt"></span>
+                                                <span data-lang-key="portuguese">Português</span>
+                                                </a>
+                                              </li>
+                                              <li>
+                                                <a href="#" id="lang-en" class="lang-option lang-en-link" data-lang="en">
+                                                  <span class="fi fi-gb"></span>
+                                                    <span data-lang-key="english">Inglês</span>
+                                                    </a>
+                                                  </li>
+                                                  <li>
+                                                    <a href="#" id="lang-es" class="lang-option lang-es-link" data-lang="es">
+                                                      <span class="fi fi-es"></span>
+                                                        <span data-lang-key="spanish">Espanhol</span>
+                                                        </a>
+                                                      </li>
+                                                    </ul>
+                                                  </div>
+                                                  <button class="menu-toggle" aria-label="Alternar navegação" data-lang-key="toggle_navigation"><i class="fas fa-bars"></i></button>
+                                                  </div>
+                                                </div>
+                                              </header>
+
+<script>
 // Script para configurar caminhos dinâmicos baseados na localização atual
 document.addEventListener('DOMContentLoaded', function() {
   const currentPath = window.location.pathname;
