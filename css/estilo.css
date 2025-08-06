@@ -6,4 +6,7 @@
 @import './galeria-das-paginas.css';
 @import './contactos.css';
 @import './sobre-mim.css';
+@import './form-styles.css';
+@import url("privacy-policy.css");
+@import url("tally-styles.css");
 @import './responsivo.css';

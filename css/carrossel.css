@@ -3,7 +3,6 @@
   margin-bottom: 60px;
   overflow: hidden;
 }
-
 .carousel-container {
   position: relative;
   max-width: 100%;
@@ -12,18 +11,15 @@
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
 }
-
 .carousel-slides {
   display: flex;
   transition: transform 0.5s ease-in-out;
 }
-
 .carousel-slide {
   min-width: 100%;
   position: relative;
   overflow: hidden;
 }
-
 .carousel-slide img {
   width: 100%;
   height: 500px;
@@ -31,38 +27,34 @@
   display: block;
   filter: brightness(0.7);
 }
-
 .carousel-caption {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-  color: white;
+  background: linear-gradient(to top, var(--cor-sobreposicao-escura) 0%, transparent 100%);
+  color: var(--cor-texto-claro);
   padding: 30px 50px;
   text-align: center;
 }
-
 .carousel-caption h2 {
-  color: white;
+  color: var(--cor-texto-claro);
   margin-bottom: 10px;
   font-size: 2.5em;
 }
 .carousel-caption h2::after {
   display: none;
 }
-
 .carousel-caption p {
   font-size: 1.2em;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--cor-sobreposicao-clara);
 }
-
 .carousel-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
+  background: var(--cor-sobreposicao-media);
+  color: var(--cor-texto-claro);
   border: none;
   padding: 15px;
   cursor: pointer;
@@ -76,19 +68,15 @@
   align-items: center;
   justify-content: center;
 }
-
 .carousel-btn:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--cor-sobreposicao-escura);
 }
-
 .carousel-btn.prev {
   left: 20px;
 }
-
 .carousel-btn.next {
   right: 20px;
 }
-
 .carousel-dots {
   position: absolute;
   bottom: 20px;
@@ -98,16 +86,14 @@
   gap: 10px;
   z-index: 10;
 }
-
 .dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: var(--cor-sobreposicao-clara-media);
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
-
 .dot.active {
   background-color: white;
   transform: scale(1.2);

@@ -1,0 +1,64 @@
+[data-tema="escuro"] .contact-form-container {
+  background-color: var(--cor-fundo-principal);
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+}
+[data-tema="escuro"] .contact-form-container h3 {
+  color: var(--cor-texto-principal);
+  margin-bottom: 20px;
+}
+[data-tema="escuro"] .contact-form-container::before {
+  content: "";
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  z-index: 1;
+  pointer-events: none;
+}
+[data-tema="escuro"] .contact-form-container iframe {
+  position: relative;
+  z-index: 2;
+  border-radius: 8px;
+  background-color: #ffffff !important;
+}
+[data-tema="escuro"] iframe[data-tally-src],
+[data-tema="escuro"] iframe[src*="tally.so"] {
+  background-color: #ffffff !important;
+  border-radius: 8px;
+  border: 1px solid var(--cor-borda);
+}
+[data-tema="claro"] .contact-form-container iframe,
+[data-tema="claro"] iframe[data-tally-src],
+[data-tema="claro"] iframe[src*="tally.so"] {
+  background-color: #ffffff;
+  border-radius: 8px;
+}
+[data-tema="escuro"] .tally-branding,
+[data-tema="escuro"] [class*="tally-powered"],
+[data-tema="escuro"] [data-testid*="tally"] {
+  background-color: white !important;
+  color: #333 !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+}
+[data-tema="escuro"] .contact-form-container label,
+[data-tema="escuro"] .contact-form-container .form-label {
+  color: var(--cor-texto-principal) !important;
+}
+[data-tema="escuro"] .tally-wrapper {
+  background-color: #ffffff;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid var(--cor-borda);
+  overflow: hidden;
+}
+[data-tema="escuro"] .tally-wrapper iframe {
+  background-color: #ffffff !important;
+  border: none;
+}

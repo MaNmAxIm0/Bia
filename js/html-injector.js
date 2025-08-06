@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
   const headerPlaceholder = document.getElementById('header-placeholder');
   const footerPlaceholder = document.getElementById('footer-placeholder');
-
   if (!headerPlaceholder && !footerPlaceholder) {
     return;
   }

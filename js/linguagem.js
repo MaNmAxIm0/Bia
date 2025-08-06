@@ -1,7 +1,5 @@
 import { translations } from './traducao.js';
-
 let currentLanguage = 'pt';
-
 export function setLanguage(lang) {
   if (['pt', 'en', 'es'].includes(lang)) {
     currentLanguage = lang;
@@ -9,15 +7,12 @@ export function setLanguage(lang) {
     document.documentElement.lang = lang;
   }
 }
-
 export function getCurrentLanguage() {
   return currentLanguage;
 }
-
 export function getTranslation(key) {
   return translations[currentLanguage]?.[key] || translations.pt?.[key] || key;
 }
-
 export function applyTranslations() {
   const pageTitleKey = document.body.getAttribute('data-page-title-key');
   if (pageTitleKey) {
@@ -38,4 +33,9 @@ export function applyTranslations() {
       element.innerHTML = translation;
     }
   });
+  
+  // Atualizar links de navegação quando a tradução é aplicada
+  if (typeof updateNavigationLinks === 'function') {
+    updateNavigationLinks(currentLanguage);
+  }
 }

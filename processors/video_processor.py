@@ -1,70 +1,64 @@
 import logging
 import subprocess
-import shlex
 from pathlib import Path
 import config
-from .image_processor import process_image
+from processors.image_processor import process_image
 
-def apply_video_watermark(video_path: Path, output_path: Path) -> bool:
+def run_command(command: list, operation_name: str) -> bool:
+  logging.info(f"Iniciando: {operation_name}...")
   try:
-    font_color_hex = f"#{config.WATERMARK_COLOR_RGB[0]:02x}{config.WATERMARK_COLOR_RGB[1]:02x}{config.WATERMARK_COLOR_RGB[2]:02x}"
-    ffmpeg_alpha = config.WATERMARK_OPACITY / 255.0
-    pos_x = f"w-text_w-(w*{config.MARGIN_RATIO})"
-    pos_y = f"h-text_h-(h*{config.MARGIN_RATIO})"
-    shadow_offset = f"h*{config.VID_WATERMARK_FONT_RATIO}*0.05"
-    shadow_x = f"{pos_x}+{shadow_offset}"
-    shadow_y = f"{pos_y}+{shadow_offset}"
-    drawtext_filter = (
-      f"drawtext="
-      f"fontfile='{config.WATERMARK_FONT_PATH}':"
-      f"text='{config.WATERMARK_TEXT}':"
-      f"fontsize=h*{config.VID_WATERMARK_FONT_RATIO}:"
-      f"fontcolor=black@{ffmpeg_alpha*0.8}:"
-      f"x={shadow_x}:y={shadow_y},"
-      f"drawtext="
-      f"fontfile='{config.WATERMARK_FONT_PATH}':"
-      f"text='{config.WATERMARK_TEXT}':"
-      f"fontsize=h*{config.VID_WATERMARK_FONT_RATIO}:"
-      f"fontcolor={font_color_hex}@{ffmpeg_alpha}:"
-      f"x={pos_x}:y={pos_y}"
-    )
-    command = [
-      "ffmpeg", "-i", str(video_path),
-      "-vf", drawtext_filter,
-      "-codec:v", "libx264", "-preset", "medium", "-crf", "23",
-      "-codec:a", "copy", "-y", str(output_path)
-    ]
-    subprocess.run(command, check=True, capture_output=True, text=True)
+    subprocess.run(command, check=True, capture_output=True, text=True, encoding=\'utf-8\', timeout=900)
+    logging.info(f"Sucesso: {operation_name} concluída.")
     return True
-  except subprocess.CalledProcessError as e:
-    logging.error(f"FFmpeg falhou ao aplicar marca de água ao vídeo '{video_path.name}': {e.stderr}")
-    return False
-
-def generate_thumbnail(video_path: Path) -> bool:
-  logging.info(f"A gerar thumbnail para '{video_path.name}'...")
-  try:
-    relative_video_path = video_path.relative_to(config.PROCESSED_ASSETS_DIR)
-    final_thumb_path = config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR / relative_video_path.with_name(f"{video_path.stem}_thumb.jpg")
-    final_thumb_path.parent.mkdir(parents=True, exist_ok=True)
-    temp_frame_path = Path.cwd() / f"{video_path.stem}_temp_frame.jpg"
-    extract_cmd = [
-      'ffmpeg', '-ss', config.THUMBNAIL_TIMESTAMP, '-i', str(video_path),
-      '-vframes', '1', '-q:v', '2', '-y', str(temp_frame_path)
-    ]
-    subprocess.run(extract_cmd, check=True, capture_output=True, text=True)
-    if not temp_frame_path.exists():
-      raise FileNotFoundError("FFmpeg não criou o frame temporário.")
-    logging.info(f"A aplicar marca de água ao thumbnail '{temp_frame_path.name}'...")
-    if not process_image(temp_frame_path, final_thumb_path):
-      raise Exception("O processador de imagem falhou ao criar o thumbnail final.")
-    logging.info(f"Thumbnail '{final_thumb_path.name}' gerado com sucesso em '{final_thumb_path.parent}'.")
-    return True
-  except subprocess.CalledProcessError as e:
-    logging.error(f"FFmpeg falhou ao extrair thumbnail de '{video_path.name}': {e.stderr}")
-    return False
   except Exception as e:
-    logging.error(f"Falha ao gerar thumbnail para '{video_path.name}': {e}")
+    stderr = getattr(e, \'stderr\', str(e))
+    logging.error(f"FALHA em \'{operation_name}\': {stderr.strip()}")
     return False
-  finally:
-    if 'temp_frame_path' in locals() and temp_frame_path.exists():
-      temp_frame_path.unlink()
+
+def process_video(input_path: Path, output_path: Path, apply_watermark_flag: bool) -> bool:
+  output_path.parent.mkdir(parents=True, exist_ok=True)
+  filter_complex = "scale=min(1920\\,iw):-2"
+  if apply_watermark_flag:
+    font_path = str(config.WATERMARK_FONT_PATH).replace(\'\\\', \'\\\\\').replace(\':\', \'\\:\')
+    watermark_text = config.WATERMARK_TEXT.replace("\'", "’")
+    watermark_filter = (
+      f",drawtext=fontfile=\\'{font_path}\\\':text=\\'{watermark_text}\\\':"
+      f"fontsize=min(w\\,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=black@0.5:"
+      f"x=(w-text_w-(min(w\\,h)*{config.MARGIN_RATIO}))+2:y=(h-text_h-(min(w\\,h)*{config.MARGIN_RATIO}))+2,"
+      f"drawtext=fontfile=\\'{font_path}\\\':text=\\'{watermark_text}\\\':"
+      f"fontsize=min(w\\,h)*{config.VID_WATERMARK_FONT_RATIO}:fontcolor=white@0.8:"
+      f"x=w-text_w-(min(w\\,h)*{config.MARGIN_RATIO}):y=h-text_h-(min(w\\,h)*{config.MARGIN_RATIO})"
+    )
+    filter_complex += watermark_filter
+  video_cmd = [
+    "ffmpeg", "-i", str(input_path),
+    "-vf", filter_complex,
+    "-c:v", "libx264", "-preset", "medium", "-crf", "32",
+    "-c:a", "aac", "-b:a", "128k",
+    "-y", str(output_path)
+  ]
+  if not run_command(video_cmd, f"Processar vídeo {input_path.name}"):
+    return False
+  try:
+    thumb_path = config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR / f"{output_path.stem}_thumb.jpg"
+    thumb_path.parent.mkdir(parents=True, exist_ok=True)
+    duration_cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(input_path)]
+    result = subprocess.run(duration_cmd, capture_output=True, text=True, check=True)
+    duration = float(result.stdout.strip())
+    ts = max(0.1, duration * 0.15)
+    if ts >= duration:
+      ts = duration / 2
+    thumb_cmd = [
+      "ffmpeg", "-ss", str(ts), "-i", str(input_path),
+      "-vframes", "1",
+      "-q:v", "2",
+      "-y",
+      str(thumb_path)
+    ]
+    if not run_command(thumb_cmd, f"Gerar thumbnail para {output_path.name}"):
+      logging.warning(f"Não foi possível gerar thumbnail para {output_path.name}, mas o vídeo foi processado.")
+  except Exception as e:
+    logging.error(f"FALHA CRÍTICA ao gerar thumbnail para {input_path.name}: {e}")
+    return False
+  return True
+

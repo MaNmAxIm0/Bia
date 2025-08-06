@@ -1,11 +1,9 @@
 import { initCarousel } from './carrossel.js';
 import { loadGalleryContent, loadPresentations } from './galeria.js';
 import { setLanguage, getCurrentLanguage, getTranslation, applyTranslations } from './linguagem.js';
-
 function getBasePath() {
   return window.location.hostname.includes('github.io') ? '/Bia' : '';
 }
-
 const pageMap = {
   'index.html': { en: 'index.html', es: 'index.html' },
   'apresentacoes.html': { en: 'presentations.html', es: 'presentaciones.html' },
@@ -19,7 +17,6 @@ const pageMap = {
   'termos-de-utilizacao.html': { en: 'terms-of-use.html', es: 'terminos-de-uso.html' },
   'videos-verticais.html': { en: 'videos-vertical.html', es: 'videos-verticales.html' }
 };
-
 function getSourcePageFile() {
   const pathSegments = window.location.pathname.split('/');
   const currentPageFile = pathSegments.pop() || 'index.html';
@@ -32,7 +29,6 @@ function getSourcePageFile() {
   }
   return currentPageFile;
 }
-
 async function loadDynamicCarousel() {
   const slidesContainer = document.getElementById('dynamic-carousel-slides');
   const carouselSection = document.querySelector('.hero-carousel');
@@ -54,8 +50,8 @@ async function loadDynamicCarousel() {
       const title = item.titles?.[lang] || item.titles?.pt || '';
       const description = item.descriptions?.[lang] || item.descriptions?.pt || '';
       slideDiv.innerHTML = `
-                <img src="${item.url}" alt="${title}" loading="lazy">
-                <div class="carousel-caption"><h2>${title}</h2><p>${description}</p></div>`;
+      <img src="${item.url}" alt="${title}" loading="lazy">
+      <div class="carousel-caption"><h2>${title}</h2><p>${description}</p></div>`;
       slidesContainer.appendChild(slideDiv);
     });
     initCarousel(carouselSection);
@@ -64,7 +60,6 @@ async function loadDynamicCarousel() {
     carouselSection.style.display = 'none';
   }
 }
-
 async function loadWorkCards() {
   const gridContainer = document.getElementById('my-works-grid');
   if (!gridContainer) return;
@@ -75,12 +70,12 @@ async function loadWorkCards() {
     const data = await response.json();
     const covers = Object.values(data).filter(item => item.url && item.url.includes('/Capas/'));
     const workCardsData = [
-      { pageKey: 'fotos-horizontais.html', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'Fotografias Horizontais' },
-      { pageKey: 'fotos-verticais.html', titleKey: 'vertical_photos_title', descKey: 'vertical_photos_desc', coverKey: 'Fotografias Verticais' },
-      { pageKey: 'videos-horizontais.html', titleKey: 'horizontal_videos_title', descKey: 'horizontal_videos_desc', coverKey: 'Vídeos Horizontais' },
-      { pageKey: 'videos-verticais.html', titleKey: 'vertical_videos_title', descKey: 'vertical_videos_desc', coverKey: 'Vídeos Verticais' },
-      { pageKey: 'designs.html', titleKey: 'designs_title', descKey: 'designs_desc', coverKey: 'designs' },
-      { pageKey: 'apresentacoes.html', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentações' }
+    { pageKey: 'fotos-horizontais.html', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'Fotografias Horizontais' },
+    { pageKey: 'fotos-verticais.html', titleKey: 'vertical_photos_title', descKey: 'vertical_photos_desc', coverKey: 'Fotografias Verticais' },
+    { pageKey: 'videos-horizontais.html', titleKey: 'horizontal_videos_title', descKey: 'horizontal_videos_desc', coverKey: 'Vídeos Horizontais' },
+    { pageKey: 'videos-verticais.html', titleKey: 'vertical_videos_title', descKey: 'vertical_videos_desc', coverKey: 'Vídeos Verticais' },
+    { pageKey: 'designs.html', titleKey: 'designs_title', descKey: 'designs_desc', coverKey: 'designs' },
+    { pageKey: 'apresentacoes.html', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentações' }
     ];
     gridContainer.innerHTML = '';
     workCardsData.forEach(cardData => {
@@ -90,10 +85,10 @@ async function loadWorkCards() {
       const coverUrl = cover ? cover.url : `${getBasePath()}/imagens/placeholder.png`;
       const targetFile = pageMap[cardData.pageKey]?.[getCurrentLanguage()] || cardData.pageKey;
       cardDiv.innerHTML = `
-        <img src="${coverUrl}" alt="${getTranslation(cardData.titleKey)}">
-        <h3>${getTranslation(cardData.titleKey)}</h3>
-        <p>${getTranslation(cardData.descKey)}</p>
-        <a href="../${getCurrentLanguage()}/${targetFile}" class="btn">${getTranslation('view_gallery')} <i class="fas fa-arrow-right"></i></a>`;
+      <img src="${coverUrl}" alt="${getTranslation(cardData.titleKey)}">
+      <h3>${getTranslation(cardData.titleKey)}</h3>
+      <p>${getTranslation(cardData.descKey)}</p>
+      <a href="../${getCurrentLanguage()}/${targetFile}" class="btn">${getTranslation('view_gallery')} <i class="fas fa-arrow-right"></i></a>`;
       gridContainer.appendChild(cardDiv);
     });
   } catch (error) {
@@ -101,7 +96,6 @@ async function loadWorkCards() {
     gridContainer.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', 'trabalhos')}</p>`;
   }
 }
-
 async function loadPagePreviews() {
   const previewContainer = document.querySelector('.section-preview-grid');
   if (!previewContainer) return;
@@ -112,8 +106,8 @@ async function loadPagePreviews() {
     const covers = Object.values(data).filter(item => item.url && item.url.includes('/Capas/'));
     const lang = getCurrentLanguage();
     const previewMap = [
-      { linkSelector: 'a[href*="sobre-mi"], a[href*="about-me"]', coverTitleKey: 'sobre mim' },
-      { linkSelector: 'a[href*="contactos"], a[href*="contacts"]', coverTitleKey: 'contactos' }
+    { linkSelector: 'a[href*="sobre-mi"], a[href*="about-me"]', coverTitleKey: 'sobre mim' },
+    { linkSelector: 'a[href*="contactos"], a[href*="contacts"]', coverTitleKey: 'contactos' }
     ];
     previewMap.forEach(item => {
       const linkElement = previewContainer.querySelector(item.linkSelector);
@@ -134,120 +128,129 @@ async function loadPagePreviews() {
     console.error("Erro ao carregar imagens de preview:", error);
   }
 }
-
 function initializeMailerLite() {
-  if (document.querySelector('script[src="https://assets.mailerlite.com/js/universal.js"]' )) {
-    if (window.ml) {
-      window.ml('account', '1677717');
-    }
-    return;
+  if (document.querySelector('script[src="https://assets.mailerlite.com/js/universal.js"]')) {
+  if (window.ml) {
+    window.ml('account', '1677717');
   }
-  (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml'  );
-    ml('account', '1677717');
+  return;
+}
+(function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[]).push(arguments);},l=d.createElement(e),l.async=1,l.src=u,n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})(window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+ml('account', '1677717');
+}
+function loadNewsletterForm() {
+  const container = document.getElementById('newsletter-embed-container');
+  if (!container) return;
+  const formIds = {
+    pt: 'igOq2z',
+    en: 'IYWzHx',
+    es: 'JgeLNy'
+  };
+  const lang = getCurrentLanguage();
+  const formId = formIds[lang] || formIds.pt;
+  const mailerliteDiv = document.createElement('div');
+  mailerliteDiv.className = 'ml-embedded';
+  mailerliteDiv.dataset.form = formId;
+  container.innerHTML = '';
+  container.appendChild(mailerliteDiv);
+  initializeMailerLite();
+}
+function setupHeader() {
+  const menuToggle = document.querySelector('.menu-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  if (menuToggle && navLinks) {
+    menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
   }
-  function loadNewsletterForm() {
-    const container = document.getElementById('newsletter-embed-container');
-    if (!container) return;
-    const formIds = {
-      pt: 'igOq2z',
-      en: 'IYWzHx',
-      es: 'JgeLNy'
-    };
-    const lang = getCurrentLanguage();
-    const formId = formIds[lang] || formIds.pt;
-    const mailerliteDiv = document.createElement('div');
-    mailerliteDiv.className = 'ml-embedded';
-    mailerliteDiv.dataset.form = formId;
-    container.innerHTML = '';
-    container.appendChild(mailerliteDiv);
-    initializeMailerLite();
-  }
-  function setupHeader() {
-    const menuToggle = document.querySelector('.menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    if (menuToggle && navLinks) {
-      menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
-    }
-    document.querySelectorAll('.main-nav .dropdown > a').forEach(toggle => {
-      toggle.addEventListener('click', (event) => {
-        if (window.innerWidth <= 768) {
-          event.preventDefault();
-          toggle.parentElement.classList.toggle('active');
-        }
-      });
-    });
-    const dropdown = document.querySelector('.language-dropdown');
-    if (!dropdown) return;
-    const selectedButton = dropdown.querySelector('.language-selected');
-    const lang = getCurrentLanguage();
-    const langData = { pt: { flag: 'pt', text: 'PT' }, en: { flag: 'gb', text: 'EN' }, es: { flag: 'es', text: 'ES' } };
-    selectedButton.querySelector('.fi').className = `fi fi-${langData[lang].flag}`;
-    selectedButton.querySelector('span:not(.fi)').textContent = langData[lang].text;
-    selectedButton.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdown.classList.toggle('open');
-    });
-    document.addEventListener('click', () => dropdown.classList.remove('open'));
-    const sourceFile = getSourcePageFile();
-    document.querySelectorAll('a[data-page-key]').forEach(link => {
-      const pageKey = link.dataset.pageKey;
-      const targetFile = pageMap[pageKey]?.[lang] || pageKey;
-      link.href = `../${lang}/${targetFile}`;
-    });
-    document.querySelectorAll('.lang-option').forEach(link => {
-      const linkLang = link.dataset.lang;
-      const targetFile = pageMap[sourceFile]?.[linkLang] || sourceFile;
-      link.href = `../${linkLang}/${targetFile}`;
-      if (linkLang === lang) link.classList.add('active');
-    });
-    document.querySelectorAll('a[data-page-key]').forEach(link => {
-      if (link.dataset.pageKey === sourceFile) {
-        link.classList.add('active');
-        const parentDropdown = link.closest('.dropdown');
-        if (parentDropdown) parentDropdown.classList.add('active');
+  document.querySelectorAll('.main-nav .dropdown > a').forEach(toggle => {
+    toggle.addEventListener('click', (event) => {
+      if (window.innerWidth <= 768) {
+        event.preventDefault();
+        toggle.parentElement.classList.toggle('active');
       }
     });
-  }
-  function onPageLoad() {
-    const pathSegments = window.location.pathname.split('/');
-    const lang = pathSegments.find(seg => ['pt', 'en', 'es'].includes(seg)) || 'pt';
-    setLanguage(lang);
-    applyTranslations();
-    if (document.querySelector('.hero-carousel')) {
-      loadDynamicCarousel();
-      loadWorkCards();
-      loadPagePreviews();
-    }
-    const galleryIdMap = {
-      'fotos-horizontais': { id: 'photo-h-gallery', type: 'fotografias', orientation: 'horizontal' },
-      'fotos-verticais': { id: 'photo-v-gallery', type: 'fotografias', orientation: 'vertical' },
-      'videos-horizontais': { id: 'video-h-gallery', type: 'videos', orientation: 'horizontal' },
-      'videos-verticais': { id: 'video-v-gallery', type: 'videos', orientation: 'vertical' },
-      'designs': { id: 'design-gallery', type: 'designs' },
-      'apresentacoes': { id: 'presentation-gallery', type: 'apresentacoes' }
-    };
-    const pageKey = getSourcePageFile().replace('.html', '').replace(/-(horizontal|vertical)$/, '');
-    const galleryInfo = galleryIdMap[pageKey] || Object.values(galleryIdMap).find(g => window.location.pathname.includes(g.id.split('-gallery')[0]));
-    if (galleryInfo) {
-      if (galleryInfo.type === 'apresentacoes') {
-        loadPresentations();
-      } else {
-        loadGalleryContent(galleryInfo.type, galleryInfo.id, galleryInfo.orientation || null);
-      }
-    }
-  }
-  document.addEventListener('DOMContentLoaded', onPageLoad);
-  const observer = new MutationObserver((mutations, obs) => {
-    const header = document.querySelector('.main-header');
-    if (header && header.innerHTML.trim() !== '') {
-      setupHeader();
-      applyTranslations();
-      initializeMailerLite();
-      loadNewsletterForm();
-      obs.disconnect();
+  });
+  const dropdown = document.querySelector('.language-dropdown');
+  if (!dropdown) return;
+  const selectedButton = dropdown.querySelector('.language-selected');
+  const lang = getCurrentLanguage();
+  const langData = { pt: { flag: 'pt', text: 'PT' }, en: { flag: 'gb', text: 'EN' }, es: { flag: 'es', text: 'ES' } };
+  selectedButton.querySelector('.fi').className = `fi fi-${langData[lang].flag}`;
+  selectedButton.querySelector('span:not(.fi)').textContent = langData[lang].text;
+  selectedButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('open');
+  });
+  document.addEventListener('click', () => dropdown.classList.remove('open'));
+  
+  // Atualizar todos os links com base no idioma atual
+  updateNavigationLinks(lang);
+  
+  const sourceFile = getSourcePageFile();
+  document.querySelectorAll('a[data-page-key]').forEach(link => {
+    if (link.dataset.pageKey === sourceFile) {
+      link.classList.add('active');
+      const parentDropdown = link.closest('.dropdown');
+      if (parentDropdown) parentDropdown.classList.add('active');
     }
   });
-  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+function updateNavigationLinks(lang) {
+  const sourceFile = getSourcePageFile();
+  
+  // Atualizar links de navegação
+  document.querySelectorAll('a[data-page-key]').forEach(link => {
+    const pageKey = link.dataset.pageKey;
+    const targetFile = pageMap[pageKey]?.[lang] || pageKey;
+    link.href = `../${lang}/${targetFile}`;
+  });
+  
+  // Atualizar links de idioma
+  document.querySelectorAll('.lang-option').forEach(link => {
+    const linkLang = link.dataset.lang;
+    const targetFile = pageMap[sourceFile]?.[linkLang] || sourceFile;
+    link.href = `../${linkLang}/${targetFile}`;
+    if (linkLang === lang) link.classList.add('active');
+    else link.classList.remove('active');
+  });
+}
+function onPageLoad() {
+  const pathSegments = window.location.pathname.split('/');
+  const lang = pathSegments.find(seg => ['pt', 'en', 'es'].includes(seg)) || 'pt';
+  setLanguage(lang);
+  applyTranslations();
+  if (document.querySelector('.hero-carousel')) {
+    loadDynamicCarousel();
+    loadWorkCards();
+    loadPagePreviews();
+  }
+  const galleryIdMap = {
+    'fotos-horizontais': { id: 'photo-h-gallery', type: 'fotografias', orientation: 'horizontal' },
+    'fotos-verticais': { id: 'photo-v-gallery', type: 'fotografias', orientation: 'vertical' },
+    'videos-horizontais': { id: 'video-h-gallery', type: 'videos', orientation: 'horizontal' },
+    'videos-verticais': { id: 'video-v-gallery', type: 'videos', orientation: 'vertical' },
+    'designs': { id: 'design-gallery', type: 'designs' },
+    'apresentacoes': { id: 'presentation-gallery', type: 'apresentacoes' }
+  };
+  const pageKey = getSourcePageFile().replace('.html', '').replace(/-(horizontal|vertical)$/, '');
+  const galleryInfo = galleryIdMap[pageKey] || Object.values(galleryIdMap).find(g => window.location.pathname.includes(g.id.split('-gallery')[0]));
+  if (galleryInfo) {
+    if (galleryInfo.type === 'apresentacoes') {
+      loadPresentations();
+    } else {
+      loadGalleryContent(galleryInfo.type, galleryInfo.id, galleryInfo.orientation || null);
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded', onPageLoad);
+const observer = new MutationObserver((mutations, obs) => {
+  const header = document.querySelector('.main-header');
+  if (header && header.innerHTML.trim() !== '') {
+    setupHeader();
+    applyTranslations();
+    initializeMailerLite();
+    loadNewsletterForm();
+    obs.disconnect();
+  }
+});
+observer.observe(document.body, { childList: true, subtree: true });

@@ -1,12 +1,9 @@
 import { getTranslation, getCurrentLanguage } from './linguagem.js';
 import { openLightbox } from './pop-up.js';
-
 const galleryStates = {};
-
 function getBasePath() {
   return window.location.hostname.includes('github.io') ? '/Bia' : '';
 }
-
 function renderNextBatch(containerId) {
   const state = galleryStates[containerId];
   if (!state || state.currentIndex >= state.allItems.length) {
@@ -48,7 +45,67 @@ function renderNextBatch(containerId) {
     itemDiv.appendChild(imageContainer);
     itemDiv.appendChild(overlayDiv);
     itemDiv.addEventListener('click', () => {
-      openLightbox(item.url, isVideo ? 'video' : 'image', title);
+      if (isVideo) {
+        // Verificar se o vídeo já está a ser reproduzido
+        if (imageContainer.querySelector('video')) {
+          return; // Se já está a reproduzir, não fazer nada
+        }
+
+        // Substituir apenas a imagem pelo vídeo, mantendo o overlay
+        const videoElement = document.createElement('video');
+        videoElement.src = item.url;
+        videoElement.controls = true;
+        videoElement.autoplay = true;
+        videoElement.setAttribute('playsinline', '');
+        videoElement.setAttribute('webkit-playsinline', '');
+        videoElement.setAttribute('x5-playsinline', '');
+        
+        // Detectar orientação do vídeo e ajustar container
+        videoElement.addEventListener('loadedmetadata', () => {
+          const isVertical = videoElement.videoHeight > videoElement.videoWidth;
+          if (isVertical) {
+            imageContainer.classList.add('vertical-video');
+          } else {
+            imageContainer.classList.add('horizontal-video');
+          }
+        });
+        
+        // Adicionar evento para quando o vídeo terminar
+        videoElement.addEventListener('ended', () => {
+          // Restaurar o thumbnail quando o vídeo terminar
+          imageContainer.innerHTML = '';
+          imageContainer.appendChild(mediaElement);
+          imageContainer.appendChild(playIcon);
+          itemDiv.classList.remove('playing');
+        });
+        
+        // Criar botão de ecrã inteiro
+        const fullscreenButton = document.createElement('button');
+        fullscreenButton.className = 'fullscreen-button';
+        fullscreenButton.innerHTML = '<i class="fas fa-expand"></i>';
+        fullscreenButton.title = 'Ecrã Cheio';
+        fullscreenButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (videoElement.requestFullscreen) {
+            videoElement.requestFullscreen();
+          } else if (videoElement.webkitRequestFullscreen) {
+            videoElement.webkitRequestFullscreen();
+          } else if (videoElement.msRequestFullscreen) {
+            videoElement.msRequestFullscreen();
+          }
+        });
+        
+        // Substituir apenas a imagem pelo vídeo
+        imageContainer.innerHTML = '';
+        imageContainer.appendChild(videoElement);
+        imageContainer.appendChild(fullscreenButton);
+        
+        // Focar no vídeo para melhor experiência do utilizador
+        videoElement.focus();
+        
+      } else {
+        openLightbox(item.url, 'image', title);
+      }
     });
     galleryContainer.appendChild(itemDiv);
   });
@@ -62,7 +119,6 @@ function renderNextBatch(containerId) {
     state.observer.disconnect();
   }
 }
-
 export async function loadGalleryContent(type, containerId, orientationFilter = null) {
   const galleryContainer = document.getElementById(containerId);
   if (!galleryContainer) return;
@@ -118,7 +174,6 @@ export async function loadGalleryContent(type, containerId, orientationFilter = 
     galleryContainer.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', getTranslation(type))}</p>`;
   }
 }
-
 export async function loadPresentations() {
   const gallery = document.getElementById("presentation-gallery");
   if (!gallery) return;

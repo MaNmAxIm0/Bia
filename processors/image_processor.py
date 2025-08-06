@@ -5,29 +5,32 @@ import config
 
 def correct_image_orientation(img: Image.Image) -> Image.Image:
   try:
-    exif = img.getexif()
-    orientation_tag = 274
+    exif = img._getexif()
+    if exif is None: return img
+    for orientation_tag in ExifTags.TAGS.keys():
+      if ExifTags.TAGS[orientation_tag] == 'Orientation':
+        break
+    else: return img
     if orientation_tag in exif:
       orientation = exif[orientation_tag]
-    if orientation == 3:
-      img = img.rotate(180, expand=True)
-    elif orientation == 6:
-      img = img.rotate(270, expand=True)
-    elif orientation == 8:
-      img = img.rotate(90, expand=True)
-  except (AttributeError, KeyError, IndexError):
+      if orientation == 3:
+        img = img.transpose(Image.ROTATE_180)
+      elif orientation == 6:
+        img = img.transpose(Image.ROTATE_270)
+      elif orientation == 8:
+        img = img.transpose(Image.ROTATE_90)
+  except Exception:
     pass
   return img
 
 def apply_watermark(image: Image.Image) -> Image.Image:
   if image.mode != 'RGBA':
     image = image.convert('RGBA')
-
   txt_layer = Image.new('RGBA', image.size, (255, 255, 255, 0))
   draw = ImageDraw.Draw(txt_layer)
   font_size = int(image.width * config.IMG_WATERMARK_FONT_RATIO)
   try:
-    font = ImageFont.truetype(config.WATERMARK_FONT_PATH, font_size)
+    font = ImageFont.truetype(str(config.WATERMARK_FONT_PATH), font_size)
   except IOError:
     logging.warning(f"Fonte {config.WATERMARK_FONT_PATH} não encontrada. Usando fonte padrão.")
     font = ImageFont.load_default()
@@ -46,18 +49,21 @@ def apply_watermark(image: Image.Image) -> Image.Image:
   draw.text((x, y), config.WATERMARK_TEXT, font=font, fill=fill_color)
   return Image.alpha_composite(image, txt_layer)
 
-def process_image(file_path: Path, output_path: Path) -> bool:
+def process_image(file_path: Path, output_path: Path, apply_watermark_flag: bool) -> bool:
   try:
     with Image.open(file_path) as img:
       corrected_img = correct_image_orientation(img)
-      watermarked_img = apply_watermark(corrected_img)
-      final_img = watermarked_img.convert('RGB')
+      if apply_watermark_flag:
+        final_img = apply_watermark(corrected_img)
+      else:
+        final_img = corrected_img.convert('RGBA')
+      final_img = final_img.convert('RGB')
       final_img.save(
-      output_path,
-      'JPEG',
-      quality=config.IMAGE_QUALITY,
-      optimize=True,
-      progressive=True
+        output_path,
+        'JPEG',
+        quality=config.IMAGE_QUALITY,
+        optimize=True,
+        progressive=True
       )
     return True
   except UnidentifiedImageError:
@@ -66,3 +72,4 @@ def process_image(file_path: Path, output_path: Path) -> bool:
   except Exception as e:
     logging.error(f"FALHA INESPERADA ao processar imagem '{file_path.name}': {e}", exc_info=True)
     return False
+

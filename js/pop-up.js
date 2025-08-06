@@ -30,7 +30,6 @@ export function openLightbox(src, type, title) {
   }
   document.body.style.overflow = 'hidden';
 }
-
 function addControls(container, title) {
   const closeBtn = document.createElement('span');
   closeBtn.className = 'lightbox-close';
@@ -44,7 +43,6 @@ function addControls(container, title) {
   container.appendChild(closeBtn);
   container.appendChild(caption);
 }
-
 function closeLightbox() {
   const lightbox = document.getElementById('lightbox');
   if (!lightbox) return;
@@ -58,7 +56,6 @@ function closeLightbox() {
     lightbox.innerHTML = '';
   }, 300);
 }
-
 function setupLightboxEventListeners() {
   document.body.addEventListener('click', function(e) {
     if (e.target.matches('#lightbox') || e.target.matches('.lightbox-close')) {
@@ -73,5 +70,4 @@ function setupLightboxEventListeners() {
     }
   });
 }
-
 document.addEventListener('DOMContentLoaded', setupLightboxEventListeners);

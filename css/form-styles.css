@@ -1,0 +1,148 @@
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  font-size: 1rem;
+  font-family: 'Open Sans', sans-serif;
+  background-color: var(--cor-fundo-superficie);
+  color: var(--cor-texto-principal);
+  transition: border-color var(--transicao-media), box-shadow var(--transicao-media);
+  box-sizing: border-box;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--cor-destaque);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--cor-texto-secundario);
+  opacity: 0.8;
+}
+textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.5;
+}
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--cor-texto-principal);
+  font-size: 0.95rem;
+}
+[data-tema="escuro"] label {
+  color: var(--cor-texto-claro);
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-button,
+button[type="submit"] {
+  background-color: var(--cor-destaque);
+  color: var(--cor-texto-claro);
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--raio-borda);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transicao-media), transform var(--transicao-rapida);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-button:hover,
+button[type="submit"]:hover {
+  background-color: var(--cor-destaque-hover);
+  transform: translateY(-1px);
+}
+.form-button:active,
+button[type="submit"]:active {
+  transform: translateY(0);
+}
+.form-button.success {
+  background-color: var(--cor-sucesso);
+}
+.form-button.success:hover {
+  background-color: var(--cor-sucesso-escura);
+}
+.form-group.error input,
+.form-group.error textarea,
+.form-group.error select {
+  border-color: var(--cor-erro);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+.error-message {
+  color: var(--cor-erro);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: block;
+}
+.form-group.success input,
+.form-group.success textarea,
+.form-group.success select {
+  border-color: var(--cor-sucesso);
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+.success-message {
+  color: var(--cor-sucesso);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: block;
+}
+.required::after {
+  content: " *";
+  color: var(--cor-erro);
+}
+[data-tema="escuro"] input[type="text"],
+[data-tema="escuro"] input[type="email"],
+[data-tema="escuro"] input[type="tel"],
+[data-tema="escuro"] input[type="password"],
+[data-tema="escuro"] textarea,
+[data-tema="escuro"] select {
+  background-color: var(--cor-fundo-alternativo);
+  border-color: var(--cor-borda);
+  color: var(--cor-texto-principal);
+}
+[data-tema="escuro"] input::placeholder,
+[data-tema="escuro"] textarea::placeholder {
+  color: var(--cor-texto-secundario);
+}
+[data-tema="escuro"] input[type="text"]:focus,
+[data-tema="escuro"] input[type="email"]:focus,
+[data-tema="escuro"] input[type="tel"]:focus,
+[data-tema="escuro"] input[type="password"]:focus,
+[data-tema="escuro"] textarea:focus,
+[data-tema="escuro"] select:focus {
+  border-color: var(--cor-destaque);
+  box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.2);
+}
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  textarea,
+  select {
+    padding: 10px 14px;
+    font-size: 16px;
+  }
+  .form-button,
+  button[type="submit"] {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 1.1rem;
+  }
+}
