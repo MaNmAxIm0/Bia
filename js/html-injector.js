@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", function() {
   if (!headerPlaceholder && !footerPlaceholder) {
     return;
   }
-  const headerPath = `../cabecalho.html`;
-  const footerPath = `../rodape.html`;
+  const headerPath = `/cabecalho.html`;
+  const footerPath = `/rodape.html`;
   const loadHTML = (filePath, placeholder) => {
     return new Promise((resolve, reject) => {
       if (!placeholder) {

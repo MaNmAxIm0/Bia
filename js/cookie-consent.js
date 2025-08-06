@@ -229,7 +229,12 @@ class CookieConsent {
     const banner = document.querySelector('.cookie-consent-banner');
     if (banner) {
       banner.classList.remove('show');
-      banner.remove();
+      // Aguardar a transição CSS antes de remover o elemento
+      setTimeout(() => {
+        if (banner.parentNode) {
+          banner.remove();
+        }
+      }, 300); // Tempo da transição CSS
     }
   }
   loadAcceptedCookies() {

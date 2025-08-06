@@ -5,29 +5,31 @@ function getBasePath() {
   return window.location.hostname.includes('github.io') ? '/Bia' : '';
 }
 const pageMap = {
-  'index.html': { en: 'index.html', es: 'index.html' },
-  'apresentacoes.html': { en: 'presentations.html', es: 'presentaciones.html' },
-  'contactos.html': { en: 'contacts.html', es: 'contactos.html' },
-  'designs.html': { en: 'designs.html', es: 'disenos.html' },
-  'fotos-horizontais.html': { en: 'photos-horizontal.html', es: 'fotos-horizontales.html' },
-  'fotos-verticais.html': { en: 'photos-vertical.html', es: 'fotos-verticales.html' },
-  'sobre-mim.html': { en: 'about-me.html', es: 'sobre-mi.html' },
-  'politica-de-privacidade.html': { en: 'privacy-policy.html', es: 'politica-de-privacidad.html' },
-  'videos-horizontais.html': { en: 'videos-horizontal.html', es: 'videos-horizontales.html' },
-  'termos-de-utilizacao.html': { en: 'terms-of-use.html', es: 'terminos-de-uso.html' },
-  'videos-verticais.html': { en: 'videos-vertical.html', es: 'videos-verticales.html' }
+  'inicio': { pt: 'inicio', en: 'home', es: 'inicio' },
+  'apresentacoes': { pt: 'apresentacoes', en: 'presentations', es: 'presentaciones' },
+  'contactos': { pt: 'contactos', en: 'contacts', es: 'contactos' },
+  'designs': { pt: 'designs', en: 'designs', es: 'disenos' },
+  'fotos-horizontais': { pt: 'fotos-horizontais', en: 'photos-horizontal', es: 'fotos-horizontales' },
+  'fotos-verticais': { pt: 'fotos-verticais', en: 'photos-vertical', es: 'fotos-verticales' },
+  'sobre-mim': { pt: 'sobre-mim', en: 'about-me', es: 'sobre-mi' },
+  'politica-de-privacidade': { pt: 'politica-de-privacidade', en: 'privacy-policy', es: 'politica-de-privacidad' },
+  'videos-horizontais': { pt: 'videos-horizontais', en: 'videos-horizontal', es: 'videos-horizontales' },
+  'termos-de-utilizacao': { pt: 'termos-de-utilizacao', en: 'terms-of-use', es: 'terminos-de-uso' },
+  'videos-verticais': { pt: 'videos-verticais', en: 'videos-vertical', es: 'videos-verticales' }
 };
 function getSourcePageFile() {
-  const pathSegments = window.location.pathname.split('/');
-  const currentPageFile = pathSegments.pop() || 'index.html';
-  if (pathSegments.some(seg => ['en', 'es'].includes(seg))) {
-    for (const ptFile in pageMap) {
-      if (Object.values(pageMap[ptFile]).includes(currentPageFile)) {
-        return ptFile;
-      }
+  const pathSegments = window.location.pathname.split("/").filter(segment => segment !== "");
+  const lang = pathSegments.find(seg => ["pt", "en", "es"].includes(seg));
+  let pageName = pathSegments[pathSegments.indexOf(lang) + 1];
+  if (!pageName) return "inicio"; // Default to 'inicio' if no page name is found
+  
+  // Find the original pageKey from pageMap based on the current language and pageName
+  for (const ptPage in pageMap) {
+    if (pageMap[ptPage][lang] === pageName) {
+      return ptPage;
     }
   }
-  return currentPageFile;
+  return "inicio"; // Default to 'inicio' if not found in pageMap
 }
 async function loadDynamicCarousel() {
   const slidesContainer = document.getElementById('dynamic-carousel-slides');
@@ -70,12 +72,12 @@ async function loadWorkCards() {
     const data = await response.json();
     const covers = Object.values(data).filter(item => item.url && item.url.includes('/Capas/'));
     const workCardsData = [
-    { pageKey: 'fotos-horizontais.html', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'Fotografias Horizontais' },
-    { pageKey: 'fotos-verticais.html', titleKey: 'vertical_photos_title', descKey: 'vertical_photos_desc', coverKey: 'Fotografias Verticais' },
-    { pageKey: 'videos-horizontais.html', titleKey: 'horizontal_videos_title', descKey: 'horizontal_videos_desc', coverKey: 'Vídeos Horizontais' },
-    { pageKey: 'videos-verticais.html', titleKey: 'vertical_videos_title', descKey: 'vertical_videos_desc', coverKey: 'Vídeos Verticais' },
-    { pageKey: 'designs.html', titleKey: 'designs_title', descKey: 'designs_desc', coverKey: 'designs' },
-    { pageKey: 'apresentacoes.html', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentações' }
+    { pageKey: 'fotos-horizontais', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'Fotografias Horizontais' },
+    { pageKey: 'fotos-verticais', titleKey: 'vertical_photos_title', descKey: 'vertical_photos_desc', coverKey: 'Fotografias Verticais' },
+    { pageKey: 'videos-horizontais', titleKey: 'horizontal_videos_title', descKey: 'horizontal_videos_desc', coverKey: 'Vídeos Horizontais' },
+    { pageKey: 'videos-verticais', titleKey: 'vertical_videos_title', descKey: 'vertical_videos_desc', coverKey: 'Vídeos Verticais' },
+    { pageKey: 'designs', titleKey: 'designs_title', descKey: 'designs_desc', coverKey: 'designs' },
+    { pageKey: 'apresentacoes', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentações' }
     ];
     gridContainer.innerHTML = '';
     workCardsData.forEach(cardData => {
@@ -88,7 +90,7 @@ async function loadWorkCards() {
       <img src="${coverUrl}" alt="${getTranslation(cardData.titleKey)}">
       <h3>${getTranslation(cardData.titleKey)}</h3>
       <p>${getTranslation(cardData.descKey)}</p>
-      <a href="../${getCurrentLanguage()}/${targetFile}" class="btn">${getTranslation('view_gallery')} <i class="fas fa-arrow-right"></i></a>`;
+      <a href="/${getCurrentLanguage()}/${targetFile}/" class="btn">${getTranslation("view_gallery")} <i class="fas fa-arrow-right"></i></a>`;
       gridContainer.appendChild(cardDiv);
     });
   } catch (error) {
@@ -199,19 +201,32 @@ function updateNavigationLinks(lang) {
   const sourceFile = getSourcePageFile();
   
   // Atualizar links de navegação
-  document.querySelectorAll('a[data-page-key]').forEach(link => {
+  document.querySelectorAll("a[data-page-key]").forEach(link => {
     const pageKey = link.dataset.pageKey;
     const targetFile = pageMap[pageKey]?.[lang] || pageKey;
-    link.href = `../${lang}/${targetFile}`;
+    link.href = `/${lang}/${targetFile}/`;
   });
   
   // Atualizar links de idioma
-  document.querySelectorAll('.lang-option').forEach(link => {
+  const langNames = { pt: 'Português', en: 'English', es: 'Español' };
+  document.querySelectorAll(".lang-option").forEach(link => {
     const linkLang = link.dataset.lang;
     const targetFile = pageMap[sourceFile]?.[linkLang] || sourceFile;
-    link.href = `../${linkLang}/${targetFile}`;
-    if (linkLang === lang) link.classList.add('active');
-    else link.classList.remove('active');
+    link.href = `/${linkLang}/${targetFile}/`;
+
+    // ===== INÍCIO DA CORREÇÃO =====
+    // Seleciona o span correto usando o seu atributo 'data-lang-key'
+    const textSpan = link.querySelector('span[data-lang-key]');
+    if (textSpan) {
+      textSpan.textContent = langNames[linkLang];
+    }
+    // ===== FIM DA CORREÇÃO =====
+
+    if (linkLang === lang) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
   });
 }
 function onPageLoad() {
@@ -232,7 +247,7 @@ function onPageLoad() {
     'designs': { id: 'design-gallery', type: 'designs' },
     'apresentacoes': { id: 'presentation-gallery', type: 'apresentacoes' }
   };
-  const pageKey = getSourcePageFile().replace('.html', '').replace(/-(horizontal|vertical)$/, '');
+  const pageKey = getSourcePageFile();
   const galleryInfo = galleryIdMap[pageKey] || Object.values(galleryIdMap).find(g => window.location.pathname.includes(g.id.split('-gallery')[0]));
   if (galleryInfo) {
     if (galleryInfo.type === 'apresentacoes') {
