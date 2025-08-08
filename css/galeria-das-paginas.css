@@ -163,7 +163,6 @@
   background-color: rgba(0, 0, 0, 0.92);
   justify-content: center;
   align-items: center;
-  padding: 20px;
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -176,16 +175,31 @@
 .lightbox-content {
   position: relative;
   line-height: 0;
-  max-width: 95vw;
-  max-height: 90vh;
   border-radius: var(--raio-borda);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   transform: scale(0.95);
   transition: transform 0.3s ease;
-  display: inline-flex;
+  display: flex;
   justify-content: center;
   align-items: center;
+}
+.lightbox.active .lightbox-content {
+  transform: scale(1);
+}
+.lightbox-content {
+  position: relative;
+  line-height: 0;
+  border-radius: var(--raio-borda);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  height: fit-content;
 }
 .lightbox.active .lightbox-content {
   transform: scale(1);
@@ -195,8 +209,8 @@
   display: block;
   width: auto;
   height: auto;
-  max-width: 100%;
-  max-height: 100%;
+  max-width: calc(100vw - 80px); /* 40px left + 40px right */
+  max-height: calc(100vh - 80px); /* 40px top + 40px bottom */
   object-fit: contain;
   border-radius: var(--raio-borda);
 }
@@ -315,16 +329,46 @@
 
 .recent-files-grid .photo-item h3,
 .recent-files-grid .video-item h3 {
-  text-align: left; /* Alinha à esquerda */
-  font-size: 1.1em; /* Mantém o tamanho */
-  margin: 10px 15px; /* Ajusta as margens para espaçamento interno */
-  color: var(--cor-primaria); /* Garante a cor do texto principal */
+  text-align: left;
+  font-size: 1.1em;
+  margin: 10px 15px;
+  color: var(--cor-primaria);
 }
 
-/* Regra específica para títulos em galerias horizontais na aba de recentes */
 .recent-files-grid .horizontal-gallery h3 {
-  margin-left: 15px; /* Garante que não saia do container à esquerda */
-  margin-right: 15px; /* Garante que não saia do container à direita */
-  font-size: 1.1em; /* Mantém o tamanho consistente */
-  text-align: left; /* Garante alinhamento à esquerda */
+  margin-left: 15px;
+  margin-right: 15px;
+  font-size: 1.1em;
+  text-align: left;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 2em;
+  line-height: 44px;
+  text-align: center;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10001;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  border: none;
+}
+
+.lightbox-nav:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-prev {
+  left: 15px;
+}
+
+.lightbox-next {
+  right: 15px;
 }

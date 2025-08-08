@@ -58,7 +58,8 @@ def main():
       proc_file.unlink(); logging.info(f"Apagado ficheiro órfão: {proc_file.name}")
   manifest_entries = []
   failed_files = []
-  for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
+  for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")),
+                          desc="Processando Ficheiros"):
     relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
     if input_path.suffix.lower() in config.PPTX_EXTENSIONS:
       output_path = (config.PROCESSED_ASSETS_DIR / relative_path).with_suffix(".pdf")
@@ -141,4 +142,3 @@ def main():
   logging.info("--- WORKFLOW CONCLUÍDO ---")
 if __name__ == "__main__":
   main()
-

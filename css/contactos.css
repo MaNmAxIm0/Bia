@@ -40,7 +40,8 @@
 }
 .contact-info-container ul li a {
   color: var(--primary-color);
-  word-break: break-all;
+  overflow-wrap: break-word;
+  margin-left: 5px; /* Adiciona um espaço à esquerda do link */
 }
 .contact-info-container .note {
   margin-top: 30px;

@@ -152,5 +152,14 @@
     display: block;
     margin-bottom: 5px;
   }
+
+  .contact-info-container ul li {
+    display: block;
+  }
+
+  .contact-info-container ul li a {
+    display: block;
+    margin-top: 5px;
+  }
 }
 

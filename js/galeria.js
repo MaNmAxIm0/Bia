@@ -28,6 +28,7 @@ function renderNextBatch(containerId) {
     mediaElement.src = previewImageUrl;
     mediaElement.alt = title;
     mediaElement.loading = "lazy";
+    mediaElement.oncontextmenu = () => false; // Disable right-click
     mediaElement.onerror = () => {
       mediaElement.src = `${getBasePath()}/imagens/placeholder.png`;
     };
@@ -53,6 +54,8 @@ function renderNextBatch(containerId) {
         videoElement.src = item.url;
         videoElement.controls = true;
         videoElement.autoplay = true;
+        videoElement.controlsList = "nodownload"; // Prevent download
+        videoElement.oncontextmenu = () => false; // Disable right-click
         videoElement.setAttribute('playsinline', '');
         videoElement.setAttribute('webkit-playsinline', '');
         videoElement.setAttribute('x5-playsinline', '');
@@ -74,7 +77,14 @@ function renderNextBatch(containerId) {
         imageContainer.appendChild(videoElement);
         videoElement.focus();
       } else {
-        openLightbox(item.url, 'image', title);
+        const imageItems = state.allItems.filter(i => i.url && !i.url.includes('/Vídeos/'));
+        const clickedIndex = imageItems.findIndex(imgItem => imgItem.url === item.url);
+        const formattedItems = imageItems.map(imgItem => ({
+          type: 'image',
+          src: imgItem.url,
+          title: imgItem.titles[lang] || imgItem.titles.pt
+        }));
+        openLightbox(formattedItems, clickedIndex);
       }
     });
     galleryContainer.appendChild(itemDiv);
@@ -97,7 +107,8 @@ export async function loadGalleryContent(type, containerId, orientationFilter = 
   }
   if (orientationFilter === 'horizontal') {
     galleryContainer.classList.add('horizontal-gallery');
-  } else {
+  }
+  else {
     galleryContainer.classList.remove('horizontal-gallery');
   }
   galleryContainer.innerHTML = `<p style="text-align: center;">${getTranslation('loading_content')}</p>`;
@@ -167,10 +178,15 @@ export async function loadPresentations() {
       const titleElement = document.createElement("h3");
       titleElement.textContent = presentation.titles[lang] || presentation.titles['pt'];
       const iframe = document.createElement("iframe");
-      iframe.src = presentation.url;
+      if (presentation.url.toLowerCase().endsWith('.pdf')) {
+        iframe.src = presentation.url + '#toolbar=0&navpanes=0&scrollbar=0';
+      } else {
+        iframe.src = presentation.url;
+      }
       iframe.allowFullscreen = true;
       iframe.title = titleElement.textContent;
       iframe.loading = "lazy";
+      iframe.oncontextmenu = () => false; // Disable right-click
       div.appendChild(titleElement);
       div.appendChild(iframe);
       gallery.appendChild(div);
@@ -180,4 +196,3 @@ export async function loadPresentations() {
     gallery.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', getTranslation('presentations'))}</p>`;
   }
 }
-
