@@ -88,7 +88,10 @@ export const translations = {
     analytics_desc: 'Ajudam-nos a entender como os visitantes interagem com o site.',
     newsletter_signup: 'Subscreva a nossa newsletter',
     terms_of_use: 'Termos de Utilização',
-    marketing_desc: 'Utilizados para mostrar anúncios relevantes aos utilizadores.'
+    marketing_desc: 'Utilizados para mostrar anúncios relevantes aos utilizadores.',
+    recent_files: 'Ficheiros Recentes',
+    no_recent_files: 'Não existem ficheiros recentes.',
+    error_loading_recent_files: 'Erro ao carregar ficheiros recentes.'
   },
   en: {
     portuguese: 'Português',
@@ -179,7 +182,10 @@ export const translations = {
     analytics_desc: 'Help us understand how visitors interact with the website.',
     newsletter_signup: 'Subscribe to our newsletter',
     terms_of_use: 'Terms of Use',
-    marketing_desc: 'Used to show relevant advertisements to users.'
+    marketing_desc: 'Used to show relevant advertisements to users.',
+    recent_files: 'Recent Files',
+    no_recent_files: 'No recent files found.',
+    error_loading_recent_files: 'Error loading recent files.'
   },
   es: {
     portuguese: 'Português',
@@ -252,7 +258,7 @@ export const translations = {
     photos_vertical_section_title: 'Fotografías Verticales',
     photos_vertical_section_description: 'Una selección de fotografías en formato retrato.',
     videos_horizontal_page_title: 'Beatriz Rodrigues - Vídeos Horizontales',
-    videos_horizontal_section_title: 'Vídeos Horizontales',
+    videos_horizontal_section_title: 'Vídeos Horizontais',
     videos_horizontal_section_description: 'Una selección de vídeos en formato apaisado.',
     videos_vertical_page_title: 'Beatriz Rodrigues - Vídeos Verticales',
     videos_vertical_section_title: 'Vídeos Verticales',
@@ -270,6 +276,9 @@ export const translations = {
     analytics_desc: 'Nos ayudan a entender cómo los visitantes interactúan con el sitio web.',
     newsletter_signup: 'Subscribe to our newsletter',
     terms_of_use: 'Términos de Uso',
-    marketing_desc: 'Utilizadas para mostrar anuncios relevantes a los usuarios.'
+    marketing_desc: 'Utilizadas para mostrar anuncios relevantes a los usuarios.',
+    recent_files: 'Archivos Recientes',
+    no_recent_files: 'No se encontraron archivos recientes.',
+    error_loading_recent_files: 'Error al cargar los archivos recientes.'
   }
 };

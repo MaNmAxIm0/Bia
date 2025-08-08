@@ -6,7 +6,8 @@
 }
 .video-gallery,
 .photo-gallery,
-.design-gallery {
+.design-gallery,
+.recent-files-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 30px;
@@ -89,23 +90,31 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
   z-index: 2;
 }
+
+.recent-files-grid .photo-item .photo-overlay {
+  display: none; /* Oculta o overlay para fotos na aba de recentes */
+}
+
 .photo-item:hover .photo-overlay,
 .design-item:hover .design-overlay {
   opacity: 1;
   transform: translateY(0);
 }
 .photo-overlay h3,
-.design-overlay h3 {
+.design-overlay h3,
+.recent-files-grid .photo-overlay h3 {
   color: white;
   margin-bottom: 5px;
   font-size: 1.3em;
 }
 .photo-overlay h3::after,
-.design-overlay h3::after {
+.design-overlay h3::after,
+.recent-files-grid .photo-overlay h3::after {
   display: none;
 }
 .photo-overlay p,
-.design-overlay p {
+.design-overlay p,
+.recent-files-grid .photo-overlay p {
   font-size: 0.9em;
   color: rgba(255, 255, 255, 0.9);
 }
@@ -238,9 +247,6 @@
   padding-bottom: 25px;
   text-align: center;
 }
-
-
-/* Estilos para vídeo incorporado mantendo o design original */
 .image-container video {
   width: 100%;
   height: 100%;
@@ -248,16 +254,12 @@
   display: block;
   background: #000;
 }
-
-/* Ajustes específicos para orientação de vídeo */
 .image-container.vertical-video video {
   object-fit: contain;
 }
-
 .image-container.horizontal-video video {
   object-fit: contain;
 }
-
 .fullscreen-button {
   position: absolute;
   top: 10px;
@@ -276,39 +278,31 @@
   transition: background-color 0.3s ease, transform 0.2s ease;
   z-index: 10;
 }
-
 .fullscreen-button:hover {
   background: rgba(0, 0, 0, 0.9);
   transform: scale(1.1);
 }
-
 .fullscreen-button:active {
   transform: scale(0.95);
 }
-
-/* Compatibilidade com diferentes prefixos de fullscreen */
 .image-container video:-webkit-full-screen {
   object-fit: contain;
   background: #000;
   width: 100vw !important;
   height: 100vh !important;
 }
-
 .image-container video:-moz-full-screen {
   object-fit: contain;
   background: #000;
   width: 100vw !important;
   height: 100vh !important;
 }
-
 .image-container video:-ms-fullscreen {
   object-fit: contain;
   background: #000;
   width: 100vw !important;
   height: 100vh !important;
 }
-
-/* Responsividade para dispositivos móveis */
 @media (max-width: 768px) {
   .fullscreen-button {
     width: 35px;
@@ -317,4 +311,20 @@
     top: 8px;
     right: 8px;
   }
+}
+
+.recent-files-grid .photo-item h3,
+.recent-files-grid .video-item h3 {
+  text-align: left; /* Alinha à esquerda */
+  font-size: 1.1em; /* Mantém o tamanho */
+  margin: 10px 15px; /* Ajusta as margens para espaçamento interno */
+  color: var(--cor-primaria); /* Garante a cor do texto principal */
+}
+
+/* Regra específica para títulos em galerias horizontais na aba de recentes */
+.recent-files-grid .horizontal-gallery h3 {
+  margin-left: 15px; /* Garante que não saia do container à esquerda */
+  margin-right: 15px; /* Garante que não saia do container à direita */
+  font-size: 1.1em; /* Mantém o tamanho consistente */
+  text-align: left; /* Garante alinhamento à esquerda */
 }

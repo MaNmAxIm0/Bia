@@ -46,12 +46,9 @@ function renderNextBatch(containerId) {
     itemDiv.appendChild(overlayDiv);
     itemDiv.addEventListener('click', () => {
       if (isVideo) {
-        // Verificar se o vídeo já está a ser reproduzido
         if (imageContainer.querySelector('video')) {
-          return; // Se já está a reproduzir, não fazer nada
+          return;
         }
-
-        // Substituir apenas a imagem pelo vídeo, mantendo o overlay
         const videoElement = document.createElement('video');
         videoElement.src = item.url;
         videoElement.controls = true;
@@ -59,8 +56,6 @@ function renderNextBatch(containerId) {
         videoElement.setAttribute('playsinline', '');
         videoElement.setAttribute('webkit-playsinline', '');
         videoElement.setAttribute('x5-playsinline', '');
-        
-        // Detectar orientação do vídeo e ajustar container
         videoElement.addEventListener('loadedmetadata', () => {
           const isVertical = videoElement.videoHeight > videoElement.videoWidth;
           if (isVertical) {
@@ -69,40 +64,15 @@ function renderNextBatch(containerId) {
             imageContainer.classList.add('horizontal-video');
           }
         });
-        
-        // Adicionar evento para quando o vídeo terminar
         videoElement.addEventListener('ended', () => {
-          // Restaurar o thumbnail quando o vídeo terminar
           imageContainer.innerHTML = '';
           imageContainer.appendChild(mediaElement);
           imageContainer.appendChild(playIcon);
           itemDiv.classList.remove('playing');
         });
-        
-        // Criar botão de ecrã inteiro
-        const fullscreenButton = document.createElement('button');
-        fullscreenButton.className = 'fullscreen-button';
-        fullscreenButton.innerHTML = '<i class="fas fa-expand"></i>';
-        fullscreenButton.title = 'Ecrã Cheio';
-        fullscreenButton.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (videoElement.requestFullscreen) {
-            videoElement.requestFullscreen();
-          } else if (videoElement.webkitRequestFullscreen) {
-            videoElement.webkitRequestFullscreen();
-          } else if (videoElement.msRequestFullscreen) {
-            videoElement.msRequestFullscreen();
-          }
-        });
-        
-        // Substituir apenas a imagem pelo vídeo
         imageContainer.innerHTML = '';
         imageContainer.appendChild(videoElement);
-        imageContainer.appendChild(fullscreenButton);
-        
-        // Focar no vídeo para melhor experiência do utilizador
         videoElement.focus();
-        
       } else {
         openLightbox(item.url, 'image', title);
       }
@@ -210,3 +180,4 @@ export async function loadPresentations() {
     gallery.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', getTranslation('presentations'))}</p>`;
   }
 }
+

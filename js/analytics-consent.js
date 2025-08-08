@@ -68,16 +68,16 @@ class AnalyticsConsent {
   }
   removeAnalyticsCookies() {
     const analyticsCookies = [
-    '_ga',
-    '_ga_' + this.measurementId.replace('G-', ''),
-    '_gid',
-    '_gat',
-    '_gat_gtag_' + this.measurementId,
-    '__utma',
-    '__utmb',
-    '__utmc',
-    '__utmt',
-    '__utmz'
+      '_ga',
+      '_ga_' + this.measurementId.replace('G-', ''),
+      '_gid',
+      '_gat',
+      '_gat_gtag_' + this.measurementId,
+      '__utma',
+      '__utmb',
+      '__utmc',
+      '__utmt',
+      '__utmz'
     ];
     analyticsCookies.forEach(cookieName => {
       document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
@@ -148,7 +148,7 @@ class AnalyticsConsent {
     window.addEventListener('scroll', () => {
       if (!this.consentGiven || !window.gtag) return;
       const scrollPercent = Math.round(
-      (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100
+        (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100
       );
       if (scrollPercent > maxScroll) {
         maxScroll = scrollPercent;
@@ -264,3 +264,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 window.AnalyticsConsent = AnalyticsConsent;
 window.BeatrizAnalytics = BeatrizAnalytics;
+

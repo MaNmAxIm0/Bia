@@ -5,9 +5,9 @@ import logging
 import shutil
 from pathlib import Path
 from tqdm import tqdm
-from PIL import Image, ImageOps, ImageDraw, ImageFont
+from PIL import Image
 from datetime import datetime
-import pytz
+from zoneinfo import ZoneInfo
 import config
 from processors.image_processor import process_image
 from processors.video_processor import process_video
@@ -18,7 +18,7 @@ def setup_logging():
   log_formatter = logging.Formatter("%(asctime)s - [%(levelname)s] - %(message)s")
   root_logger = logging.getLogger()
   if root_logger.hasHandlers(): root_logger.handlers.clear()
-  lisbon_tz = pytz.timezone("Europe/Lisbon")
+  lisbon_tz = ZoneInfo("Europe/Lisbon")
   logging.Formatter.converter = lambda *args: datetime.now(lisbon_tz).timetuple()
   handler = logging.StreamHandler()
   handler.setFormatter(log_formatter)
@@ -72,8 +72,7 @@ def main():
     should_apply_watermark = parent_folder not in ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name]
     processed_successfully = True
     if ext in [".gdoc", ".gsheet", ".gslides"]:
-      if ext not in [".gdoc", ".gsheet", ".gslides"]:
-        shutil.copy2(input_path, output_path)
+      shutil.copy2(input_path, output_path)
     elif ext in config.PPTX_EXTENSIONS:
       logging.info(f"Convertendo {input_path.name} para PDF...")
       convert_cmd = [
@@ -126,7 +125,7 @@ def main():
   with open(config.JSON_OUTPUT_FILE, "w", encoding="utf-8") as f:
     json.dump(final_data, f, indent=2, ensure_ascii=False)
   with open(config.R2_FILE_MANIFEST, "w", encoding="utf-8") as f:
-    f.write(f"Última sincronização: {datetime.now(pytz.timezone("Europe/Lisbon")).strftime("%Y-%m-%d %H:%M:%S %Z")}\n\n")
+    f.write(f"Última sincronização: {datetime.now(ZoneInfo("Europe/Lisbon")).strftime("%Y-%m-%d %H:%M:%S %Z")}\n\n")
     if manifest_entries:
       f.write("Ficheiros processados nesta execução:\n")
       f.write("\n".join(manifest_entries))

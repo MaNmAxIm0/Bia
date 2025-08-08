@@ -7,7 +7,8 @@ export function getDirectGoogleDriveUrl(url) {
   const driveIdMatch = url.match(/(?:id=|file\/d\/|document\/d\/|presentation\/d\/)([a-zA-Z0-9_-]+)/);
   if (driveIdMatch && driveIdMatch[1]) {
     const fileId = driveIdMatch[1];
-    return `https:
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
   }
   return url;
 }
+

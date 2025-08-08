@@ -1,9 +1,9 @@
 export function initCarousel(carouselElement) {
-  const slidesContainer = carouselElement.querySelector('.carousel-slides');
+  const slidesContainer = carouselElement.querySelector(".carousel-slides");
   const slides = Array.from(slidesContainer.children);
-  const prevBtn = carouselElement.querySelector('.carousel-btn.prev');
-  const nextBtn = carouselElement.querySelector('.carousel-btn.next');
-  const dotsContainer = carouselElement.querySelector('.carousel-dots');
+  const prevBtn = carouselElement.querySelector(".carousel-btn.prev");
+  const nextBtn = carouselElement.querySelector(".carousel-btn.next");
+  const dotsContainer = carouselElement.querySelector(".carousel-dots");
   if (!slides.length) {
     console.warn("Carousel slides not found.");
     return;
@@ -11,17 +11,17 @@ export function initCarousel(carouselElement) {
   let currentIndex = 0;
   let autoPlayInterval;
   slides.forEach((_, index) => {
-    const dot = document.createElement('span');
-    dot.classList.add('dot');
-    if (index === 0) dot.classList.add('active');
-    dot.addEventListener('click', () => goToSlide(index));
+    const dot = document.createElement("span");
+    dot.classList.add("dot");
+    if (index === 0) dot.classList.add("active");
+    dot.addEventListener("click", () => goToSlide(index));
     dotsContainer.appendChild(dot);
   });
   const dots = Array.from(dotsContainer.children);
   function updateCarousel() {
     slidesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
     dots.forEach((dot, index) => {
-      dot.classList.toggle('active', index === currentIndex);
+      dot.classList.toggle("active", index === currentIndex);
     });
   }
   function goToSlide(index) {
@@ -46,13 +46,14 @@ export function initCarousel(carouselElement) {
     startAutoPlay();
   }
   if (prevBtn) {
-    prevBtn.addEventListener('click', prevSlide);
+    prevBtn.addEventListener("click", prevSlide);
   }
   if (nextBtn) {
-    nextBtn.addEventListener('click', nextSlide);
+    nextBtn.addEventListener("click", nextSlide);
   }
   updateCarousel();
   startAutoPlay();
-  carouselElement.addEventListener('mouseenter', stopAutoPlay);
-  carouselElement.addEventListener('mouseleave', startAutoPlay);
+  carouselElement.addEventListener("mouseenter", stopAutoPlay);
+  carouselElement.addEventListener("mouseleave", startAutoPlay);
 }
+

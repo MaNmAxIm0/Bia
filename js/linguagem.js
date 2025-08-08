@@ -30,19 +30,16 @@ export function applyTranslations() {
     } else if (element.hasAttribute('aria-label')) {
       element.setAttribute('aria-label', translation);
     } else {
-      // Preservar ícones Font Awesome ao aplicar traduções
       const icons = element.querySelectorAll('i[class*="fa"]');
       element.innerHTML = translation;
-      // Recriar os ícones preservados
       icons.forEach(icon => {
         element.appendChild(document.createTextNode(' '));
         element.appendChild(icon.cloneNode(true));
       });
     }
   });
-  
-  // Atualizar links de navegação quando a tradução é aplicada
   if (typeof updateNavigationLinks === 'function') {
     updateNavigationLinks(currentLanguage);
   }
 }
+

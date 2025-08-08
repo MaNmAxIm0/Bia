@@ -17,12 +17,13 @@ const pageMap = {
   'termos-de-utilizacao': { pt: 'termos-de-utilizacao', en: 'terms-of-use', es: 'terminos-de-uso' },
   'videos-verticais': { pt: 'videos-verticais', en: 'videos-vertical', es: 'videos-verticales' }
 };
+
+
 function getSourcePageFile() {
   const pathSegments = window.location.pathname.split("/").filter(segment => segment !== "");
   const lang = pathSegments.find(seg => ["pt", "en", "es"].includes(seg));
   let pageName = pathSegments[pathSegments.indexOf(lang) + 1];
   if (!pageName) return "inicio";
-
   for (const ptPage in pageMap) {
     if (pageMap[ptPage][lang] === pageName) {
       return ptPage;
@@ -61,7 +62,6 @@ async function loadDynamicCarousel() {
     carouselSection.style.display = 'none';
   }
 }
-
 async function loadWorkCards() {
   const gridContainer = document.getElementById('my-works-grid');
   if (!gridContainer) return;
@@ -72,15 +72,15 @@ async function loadWorkCards() {
     const data = await response.json();
     const covers = Object.values(data).filter(item => item.url && item.url.includes('/Capas/'));
     const workCardsData = [
-    { pageKey: 'fotos-horizontais', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'Fotografias Horizontais' },
-    { pageKey: 'fotos-verticais', titleKey: 'vertical_photos_title', descKey: 'vertical_photos_desc', coverKey: 'Fotografias Verticais' },
-    { pageKey: 'videos-horizontais', titleKey: 'horizontal_videos_title', descKey: 'horizontal_videos_desc', coverKey: 'Vídeos Horizontais' },
-    { pageKey: 'videos-verticais', titleKey: 'vertical_videos_title', descKey: 'vertical_videos_desc', coverKey: 'Vídeos Verticais' },
-    { pageKey: 'designs', titleKey: 'designs_title', descKey: 'designs_desc', coverKey: 'designs' },
-    { pageKey: 'apresentacoes', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentações' }
+      { pageKey: 'fotos-horizontais', titleKey: 'horizontal_photos_title', descKey: 'horizontal_photos_desc', coverKey: 'Fotografias Horizontais' },
+      { pageKey: 'fotos-verticais', titleKey: 'vertical_photos_title', descKey: 'vertical_photos_desc', coverKey: 'Fotografias Verticais' },
+      { pageKey: 'videos-horizontais', titleKey: 'horizontal_videos_title', descKey: 'horizontal_videos_desc', coverKey: 'Vídeos Horizontais' },
+      { pageKey: 'videos-verticais', titleKey: 'vertical_videos_title', descKey: 'vertical_videos_desc', coverKey: 'Vídeos Verticais' },
+      { pageKey: 'designs', titleKey: 'designs_title', descKey: 'designs_desc', coverKey: 'designs' },
+      { pageKey: 'apresentacoes', titleKey: 'presentations_title', descKey: 'presentations_desc', coverKey: 'apresentações' }
     ];
     gridContainer.innerHTML = '';
-        workCardsData.forEach(cardData => {
+    workCardsData.forEach(cardData => {
       const cardDiv = document.createElement('div');
       cardDiv.className = 'work-item';
       const cover = covers.find(c => c.titles.pt.toLowerCase() === cardData.coverKey.toLowerCase());
@@ -98,7 +98,6 @@ async function loadWorkCards() {
     gridContainer.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', 'trabalhos')}</p>`;
   }
 }
-
 async function loadPagePreviews() {
   const previewContainer = document.querySelector('.section-preview-grid');
   if (!previewContainer) return;
@@ -109,8 +108,8 @@ async function loadPagePreviews() {
     const covers = Object.values(data).filter(item => item.url && item.url.includes('/Capas/'));
     const lang = getCurrentLanguage();
     const previewMap = [
-    { linkSelector: 'a[href*="sobre-mi"], a[href*="about-me"]', coverTitleKey: 'sobre mim' },
-    { linkSelector: 'a[href*="contactos"], a[href*="contacts"]', coverTitleKey: 'contactos' }
+      { linkSelector: 'a[href*="sobre-mi"], a[href*="about-me"]', coverTitleKey: 'sobre mim' },
+      { linkSelector: 'a[href*="contactos"], a[href*="contacts"]', coverTitleKey: 'contactos' }
     ];
     previewMap.forEach(item => {
       const linkElement = previewContainer.querySelector(item.linkSelector);
@@ -133,13 +132,13 @@ async function loadPagePreviews() {
 }
 function initializeMailerLite() {
   if (document.querySelector('script[src="https://assets.mailerlite.com/js/universal.js"]')) {
-  if (window.ml) {
-    window.ml('account', '1677717');
+    if (window.ml) {
+      window.ml('account', '1677717');
+    }
+    return;
   }
-  return;
-}
-(function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[]).push(arguments);},l=d.createElement(e),l.async=1,l.src=u,n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})(window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-ml('account', '1677717');
+  (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[]).push(arguments);},l=d.createElement(e),l.async=1,l.src=u,n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})(window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+  ml('account', '1677717');
 }
 function loadNewsletterForm() {
   const container = document.getElementById('newsletter-embed-container');
@@ -199,14 +198,13 @@ function setupHeader() {
     }
   });
 }
-
 function updateNavigationLinks(lang) {
   const sourceFile = getSourcePageFile();
   const basePath = getBasePath();
   document.querySelectorAll("a[data-page-key]").forEach(link => {
     const pageKey = link.dataset.pageKey;
     const targetFile = pageMap[pageKey]?.[lang] || pageKey;
-    link.href = `${basePath}/${lang}/${targetFile}/`; 
+    link.href = `${basePath}/${lang}/${targetFile}/`;
   });
   const langNames = { pt: 'Português', en: 'English', es: 'Español' };
   document.querySelectorAll(".lang-option").forEach(link => {
@@ -217,7 +215,6 @@ function updateNavigationLinks(lang) {
     if (textSpan) {
       textSpan.textContent = langNames[linkLang];
     }
-
     if (linkLang === lang) {
       link.classList.add("active");
     } else {
@@ -225,7 +222,6 @@ function updateNavigationLinks(lang) {
     }
   });
 }
-
 function onPageLoad() {
   const pathSegments = window.location.pathname.split('/');
   const lang = pathSegments.find(seg => ['pt', 'en', 'es'].includes(seg)) || 'pt';
@@ -266,3 +262,4 @@ const observer = new MutationObserver((mutations, obs) => {
   }
 });
 observer.observe(document.body, { childList: true, subtree: true });
+
