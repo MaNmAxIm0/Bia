@@ -32,7 +32,7 @@ def format_rclone_manifest(input_json_str: str, output_file_path: str):
         mod_time_lisbon = mod_time_utc.astimezone(lisbon_tz)
         formatted_time = mod_time_lisbon.strftime('%Y-%m-%d %H:%M:%S')
         manifest_lines.append(f"{formatted_time} {path}")
-    manifest_lines.sort(key=lambda line: line.split(' ', 1)[1])
+    manifest_lines.sort(reverse=True)
     with open(output_file_path, 'w', encoding='utf-8') as f:
             f.write('\n'.join(manifest_lines))
     print(f"Manifesto '{output_file_path}' formatado e guardado com sucesso com {len(manifest_lines)} ficheiros.")
