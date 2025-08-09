@@ -1,13 +1,55 @@
-@import './variaveis.css';
-@import './base.css';
-@import './cabecalho-rodape.css';
-@import './carrossel.css';
-@import './seccoes-iniciais.css';
-@import './galeria-das-paginas.css';
-@import './contactos.css';
-@import './sobre-mim.css';
-@import './form-styles.css';
+@import "./variaveis.css";
+@import "./base.css";
+@import "./cabecalho-rodape.css";
+@import "./carrossel.css";
+@import "./seccoes-iniciais.css";
+@import "./galeria-das-paginas.css";
+@import "./contactos.css";
+@import "./sobre-mim.css";
+@import "./form-styles.css";
 @import url("privacy-policy.css");
 @import url("tally-styles.css");
-@import './responsivo.css';
+@import "./responsivo.css";
 
+.pdf-viewer-container {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+}
+
+.pdf-viewer-container canvas {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+.pdf-nav-buttons {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.pdf-nav-button {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 1.2em;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.pdf-nav-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}

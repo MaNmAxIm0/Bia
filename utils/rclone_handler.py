@@ -19,4 +19,3 @@ def sync_rclone(source: str, destination: str, operation_name: str, *args) -> bo
   except Exception as e:
     logging.error(f"Erro inesperado na operação rclone \'{operation_name}\': {e}")
     return False
-

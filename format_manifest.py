@@ -34,7 +34,7 @@ def format_rclone_manifest(input_json_str: str, output_file_path: str):
         manifest_lines.append(f"{formatted_time} {path}")
     manifest_lines.sort(reverse=True)
     with open(output_file_path, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(manifest_lines))
+      f.write('\n'.join(manifest_lines))
     print(f"Manifesto '{output_file_path}' formatado e guardado com sucesso com {len(manifest_lines)} ficheiros.")
   except json.JSONDecodeError:
     print("Erro: A entrada não é um JSON válido.", file=sys.stderr)
@@ -42,6 +42,7 @@ def format_rclone_manifest(input_json_str: str, output_file_path: str):
   except Exception as e:
     print(f"Ocorreu um erro inesperado: {e}", file=sys.stderr)
     sys.exit(1)
+
 if __name__ == '__main__':
   input_json = sys.stdin.read()
   output_file = "r2_file_manifest.txt"

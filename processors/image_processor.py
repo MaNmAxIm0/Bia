@@ -72,4 +72,3 @@ def process_image(file_path: Path, output_path: Path, apply_watermark_flag: bool
   except Exception as e:
     logging.error(f"FALHA INESPERADA ao processar imagem '{file_path.name}': {e}", exc_info=True)
     return False
-

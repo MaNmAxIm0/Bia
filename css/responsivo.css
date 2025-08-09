@@ -5,7 +5,8 @@
   .carousel-slide img {
     height: 400px;
   }
-  .contact-grid, .about-me-grid {
+  .contact-grid,
+  .about-me-grid {
     grid-template-columns: 1fr;
   }
   .about-me-pic {
@@ -123,15 +124,24 @@
   .main-nav .dropdown.active > .dropdown-toggle i {
     transform: rotate(180deg);
   }
-  .photo-gallery, .video-gallery, .design-gallery {
+  .photo-gallery,
+  .video-gallery,
+  .design-gallery {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  .carousel-slide img { height: 280px; }
-  .best-works-grid, .section-preview-grid { grid-template-columns: 1fr; }
+  .carousel-slide img {
+    height: 280px;
+  }
+  .best-works-grid,
+  .section-preview-grid {
+    grid-template-columns: 1fr;
+  }
 }
 @media (max-width: 480px) {
-  .photo-gallery, .video-gallery, .design-gallery {
+  .photo-gallery,
+  .video-gallery,
+  .design-gallery {
     grid-template-columns: 1fr;
   }
 }
@@ -152,14 +162,11 @@
     display: block;
     margin-bottom: 5px;
   }
-
   .contact-info-container ul li {
     display: block;
   }
-
   .contact-info-container ul li a {
     display: block;
     margin-top: 5px;
   }
 }
-

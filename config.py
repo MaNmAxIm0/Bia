@@ -3,7 +3,7 @@ from pathlib import Path
 DRIVE_REMOTE_PATH = "Drive:Portfólio Bia"
 R2_REMOTE_PATH = "R2:bia-portfolio-assets"
 R2_PUBLIC_URL = "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
-LOCAL_ASSETS_DIR = Path("local_assets" )
+LOCAL_ASSETS_DIR = Path("local_assets")
 PROCESSED_ASSETS_DIR = Path("processed_assets")
 THUMBNAIL_DIR = Path("Thumbnails")
 JSON_OUTPUT_FILE = Path("data.json")

@@ -1,12 +1,14 @@
 .section-contact {
   padding: 60px 0;
 }
+
 .contact-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
   padding: 0 20px;
 }
+
 .contact-form-container,
 .contact-info-container {
   background-color: var(--surface-color);
@@ -14,16 +16,19 @@
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
 }
+
 .contact-form-container h3,
 .contact-info-container h3 {
   text-align: center;
   margin-bottom: 1.5em;
   font-size: 1.8em;
 }
+
 .contact-info-container ul {
   list-style: none;
   margin-top: 20px;
 }
+
 .contact-info-container ul li {
   display: flex;
   align-items: center;
@@ -31,6 +36,7 @@
   font-size: 1.1em;
   color: var(--text-color);
 }
+
 .contact-info-container ul li .icon {
   font-size: 1.4em;
   color: var(--accent-color);
@@ -38,20 +44,22 @@
   width: 25px;
   text-align: center;
 }
+
 .contact-info-container ul li a {
   color: var(--primary-color);
   overflow-wrap: break-word;
-  margin-left: 5px; /* Adiciona um espaço à esquerda do link */
+  margin-left: 5px;
 }
+
 .contact-info-container .note {
   margin-top: 30px;
   font-style: italic;
   color: var(--light-text-color);
   text-align: center;
 }
+
 @media (max-width: 1120px) {
   .contact-grid {
     grid-template-columns: 1fr;
   }
 }
-

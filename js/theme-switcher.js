@@ -9,6 +9,7 @@ function initThemeSwitcher() {
     themeToggleButton.addEventListener("click", handleThemeToggle);
   }
 }
+
 function handleThemeToggle() {
   let theme = document.documentElement.getAttribute("data-tema");
   if (theme === "escuro") {
@@ -19,6 +20,7 @@ function handleThemeToggle() {
     localStorage.setItem("theme", "escuro");
   }
 }
+
 document.addEventListener("headerLoaded", initThemeSwitcher);
 if (document.readyState === "complete") {
   setTimeout(() => {

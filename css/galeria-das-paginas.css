@@ -20,7 +20,9 @@
   overflow: hidden;
   border-radius: var(--raio-borda);
   box-shadow: var(--sombra-caixa);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   cursor: pointer;
   background-color: var(--cor-fundo-superficie);
 }
@@ -61,7 +63,9 @@
   color: rgba(255, 255, 255, 0.8);
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
   pointer-events: none;
-  transition: transform 0.3s ease, color 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    color 0.3s ease;
   z-index: 3;
 }
 .video-item:hover .video-play-icon {
@@ -87,14 +91,14 @@
   padding: 20px;
   opacity: 0;
   transform: translateY(100%);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
   z-index: 2;
 }
-
 .recent-files-grid .photo-item .photo-overlay {
-  display: none; /* Oculta o overlay para fotos na aba de recentes */
+  display: none;
 }
-
 .photo-item:hover .photo-overlay,
 .design-item:hover .design-overlay {
   opacity: 1;
@@ -129,7 +133,9 @@
   border-radius: var(--raio-borda);
   overflow: hidden;
   box-shadow: var(--sombra-caixa);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
   padding: 1rem;
@@ -142,7 +148,7 @@
 .presentation-item h3 {
   margin: 0 0 10px 0;
   font-size: 1.4em;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 .presentation-item iframe {
   width: 100%;
@@ -209,8 +215,8 @@
   display: block;
   width: auto;
   height: auto;
-  max-width: calc(100vw - 80px); /* 40px left + 40px right */
-  max-height: calc(100vh - 80px); /* 40px top + 40px bottom */
+  max-width: calc(100vw - 80px);
+  max-height: calc(100vh - 80px);
   object-fit: contain;
   border-radius: var(--raio-borda);
 }
@@ -222,13 +228,15 @@
   height: 44px;
   background: rgba(0, 0, 0, 0.5);
   color: white;
-  font-size: 2em;
+  font-size: 1.5em;
   line-height: 44px;
   text-align: center;
   border-radius: 50%;
   cursor: pointer;
   z-index: 10000;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
   border: none;
 }
 .lightbox-close:hover {
@@ -289,7 +297,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
   z-index: 10;
 }
 .fullscreen-button:hover {
@@ -326,7 +336,6 @@
     right: 8px;
   }
 }
-
 .recent-files-grid .photo-item h3,
 .recent-files-grid .video-item h3 {
   text-align: left;
@@ -334,14 +343,12 @@
   margin: 10px 15px;
   color: var(--cor-primaria);
 }
-
 .recent-files-grid .horizontal-gallery h3 {
   margin-left: 15px;
   margin-right: 15px;
   font-size: 1.1em;
   text-align: left;
 }
-
 .lightbox-nav {
   position: absolute;
   top: 50%;
@@ -350,25 +357,84 @@
   height: 44px;
   background: rgba(0, 0, 0, 0.5);
   color: white;
-  font-size: 2em;
+  font-size: 1.5em;
   line-height: 44px;
   text-align: center;
   border-radius: 50%;
   cursor: pointer;
   z-index: 10001;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
   border: none;
 }
-
 .lightbox-nav:hover {
   background: rgba(0, 0, 0, 0.8);
   transform: translateY(-50%) scale(1.1);
 }
-
 .lightbox-prev {
   left: 15px;
 }
-
 .lightbox-next {
   right: 15px;
+}
+.pdf-viewer-container {
+  position: relative;
+  width: 100%;
+}
+.pdf-viewer-container canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  overflow: hidden;
+  box-shadow: var(--sombra-caixa);
+}
+.pdf-nav-buttons {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  z-index: 10;
+}
+.pdf-nav-button {
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 1.5em;
+  line-height: 44px;
+  text-align: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.pdf-nav-button:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+}
+.pdf-nav-button:active {
+  transform: scale(0.95);
+}
+@media (max-width: 768px) {
+  .pdf-nav-button {
+    width: 35px;
+    height: 35px;
+    font-size: 1.2em;
+  }
+  .pdf-nav-buttons {
+    padding: 0 8px;
+  }
 }

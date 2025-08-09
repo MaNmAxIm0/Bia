@@ -7,7 +7,9 @@
   top: 0;
   left: 0;
   z-index: 1000;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 .main-header .container {
   display: flex;
@@ -42,7 +44,7 @@
   margin-left: 30px;
 }
 .main-nav ul li a {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 400;
   font-size: 1.1em;
   color: var(--cor-texto-principal);
@@ -53,7 +55,7 @@
   gap: 8px;
 }
 .main-nav ul li a::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   bottom: 0;
@@ -112,7 +114,10 @@
   margin-top: 15px;
   min-width: 180px;
   z-index: 1001;
-  transition: opacity 0.2s ease, visibility 0.2s ease, margin-top 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease,
+    margin-top 0.2s ease;
 }
 .main-nav .dropdown .dropdown-menu li {
   margin: 0;
@@ -150,7 +155,7 @@
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: background-color 0.3s ease;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   color: var(--text-color);
 }
 .language-selected:hover {
@@ -302,4 +307,3 @@
     text-align: center;
   }
 }
-

@@ -56,4 +56,3 @@ export function initCarousel(carouselElement) {
   carouselElement.addEventListener("mouseenter", stopAutoPlay);
   carouselElement.addEventListener("mouseleave", startAutoPlay);
 }
-

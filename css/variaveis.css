@@ -35,12 +35,13 @@
   --sombra-caixa: 0 4px 8px rgba(0, 0, 0, 0.05);
   --sombra-caixa-hover: 0 6px 12px rgba(0, 0, 0, 0.1);
   --sombra-caixa-media: rgba(0, 0, 0, 0.1);
-  --sombra-caixa-media-leve: rgba(0,0,0,0.1);
+  --sombra-caixa-media-leve: rgba(0, 0, 0, 0.1);
   --raio-borda: 8px;
   --transicao-rapida: 0.2s ease;
   --transicao-media: 0.3s ease;
   --transicao-lenta: 0.5s ease;
 }
+
 [data-tema="escuro"] {
   --cor-primaria: #5dade2;
   --cor-secundaria: #3498db;
@@ -72,6 +73,7 @@
   --sombra-caixa: 0 4px 8px rgba(0, 0, 0, 0.3);
   --sombra-caixa-hover: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
+
 :root {
   --primary-color: var(--cor-primaria);
   --secondary-color: var(--cor-secundaria);
@@ -85,6 +87,7 @@
   --box-shadow: var(--sombra-caixa);
   --border-radius: var(--raio-borda);
 }
+
 [data-tema="escuro"] {
   --primary-color: var(--cor-primaria);
   --secondary-color: var(--cor-secundaria);
@@ -98,15 +101,23 @@
   --box-shadow: var(--sombra-caixa);
   --border-radius: var(--raio-borda);
 }
+
 * {
-  transition: background-color var(--transicao-media), color var(--transicao-media), border-color var(--transicao-media), box-shadow var(--transicao-media);
+  transition:
+    background-color var(--transicao-media),
+    color var(--transicao-media),
+    border-color var(--transicao-media),
+    box-shadow var(--transicao-media);
 }
+
 [data-tema="escuro"] img {
   opacity: 0.9;
 }
+
 [data-tema="escuro"] .carousel-slide img {
   filter: brightness(0.8);
 }
+
 [data-tema="escuro"] input,
 [data-tema="escuro"] textarea,
 [data-tema="escuro"] select {
@@ -114,16 +125,20 @@
   color: var(--cor-texto-principal);
   border-color: var(--cor-borda);
 }
+
 [data-tema="escuro"] input::placeholder,
 [data-tema="escuro"] textarea::placeholder {
   color: var(--cor-texto-secundario);
 }
+
 [data-tema="escuro"] ::-webkit-scrollbar {
   background-color: var(--cor-fundo-superficie);
 }
+
 [data-tema="escuro"] ::-webkit-scrollbar-thumb {
   background-color: var(--cor-borda);
 }
+
 [data-tema="escuro"] ::-webkit-scrollbar-thumb:hover {
   background-color: var(--cor-borda-clara);
 }

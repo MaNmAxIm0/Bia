@@ -9,10 +9,12 @@ select {
   border: 2px solid var(--cor-borda);
   border-radius: var(--raio-borda);
   font-size: 1rem;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   background-color: var(--cor-fundo-superficie);
   color: var(--cor-texto-principal);
-  transition: border-color var(--transicao-media), box-shadow var(--transicao-media);
+  transition:
+    border-color var(--transicao-media),
+    box-shadow var(--transicao-media);
   box-sizing: border-box;
 }
 input[type="text"]:focus,
@@ -58,7 +60,9 @@ button[type="submit"] {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color var(--transicao-media), transform var(--transicao-rapida);
+  transition:
+    background-color var(--transicao-media),
+    transform var(--transicao-rapida);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -146,4 +150,3 @@ button[type="submit"]:active {
     font-size: 1.1rem;
   }
 }
-
