@@ -127,26 +127,18 @@ def main():
   with open(config.JSON_OUTPUT_FILE, "w", encoding="utf-8") as f:
     json.dump(final_data, f, indent=2, ensure_ascii=False)
   with open(config.R2_FILE_MANIFEST, "w", encoding="utf-8") as f:
-    f.write(f"Última sincronização: {datetime.now(ZoneInfo('Europe/Lisbon')).strftime('%Y-%m-%d %H:%M:%S %Z')}
-
-")
+    f.write(f"Última sincronização: {datetime.now(ZoneInfo('Europe/Lisbon')).strftime('%Y-%m-%d %H:%M:%S %Z')}")
     if manifest_entries:
-      f.write("Ficheiros processados nesta execução:
-")
-      f.write("
-".join(manifest_entries))
+      f.write("Ficheiros processados nesta execução:")
+      f.write("".join(manifest_entries))
     else:
-      f.write("Nenhum ficheiro novo ou alterado foi processado.
-")
+      f.write("Nenhum ficheiro novo ou alterado foi processado.")
   with open(config.FAILED_FILES_LOG, "w", encoding="utf-8") as f:
     if failed_files:
-      f.write("Ficheiros que falharam o processamento:
-")
-      f.write("
-".join(failed_files))
+      f.write("Ficheiros que falharam o processamento:")
+      f.write("".join(failed_files))
     else:
-      f.write("Nenhum ficheiro falhou o processamento.
-")
+      f.write("Nenhum ficheiro falhou o processamento.")
   sync_rclone(str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "Sincronizar para R2")
   logging.info("--- WORKFLOW CONCLUÍDO ---")
 
