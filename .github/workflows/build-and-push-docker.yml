@@ -32,6 +32,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}/bia-workflow:latest
+          tags: ghcr.io/${{ github.repository | lower }}/bia-workflow:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
