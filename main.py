@@ -127,7 +127,7 @@ def main():
   with open(config.JSON_OUTPUT_FILE, "w", encoding="utf-8") as f:
     json.dump(final_data, f, indent=2, ensure_ascii=False)
   with open(config.R2_FILE_MANIFEST, "w", encoding="utf-8") as f:
-    f.write(f"Última sincronização: {datetime.now(ZoneInfo('Europe/Lisbon')).strftime("%Y-%m-%d %H:%M:%S %Z")}\n\n")
+    f.write(f"Última sincronização: {datetime.now(ZoneInfo('Europe/Lisbon')).strftime('%Y-%m-%d %H:%M:%S %Z')}\n\n")
     if manifest_entries:
       f.write("Ficheiros processados nesta execução:\n")
       f.write("\n".join(manifest_entries))

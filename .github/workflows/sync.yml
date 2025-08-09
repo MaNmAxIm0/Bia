@@ -6,6 +6,7 @@ on:
 jobs:
   sync-and-process:
     runs-on: ubuntu-latest
+    container: ghcr.io/YOUR_GITHUB_USERNAME/bia-workflow:latest
     permissions:
       contents: write
     env:
@@ -17,28 +18,29 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Configurar Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+      # Python, system dependencies, and rclone are now pre-installed in the Docker image
+      # - name: Configurar Python 3.10
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.10'
 
-      - name: Cache para dependências Pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt' ) }}
+      # - name: Cache para dependências Pip
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.cache/pip
+      #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt' ) }}
 
-      - name: Instalar dependências do sistema
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y ffmpeg libimage-exiftool-perl libblas3 ghostscript libreoffice-impress
-          sudo ldconfig
+      # - name: Instalar dependências do sistema
+      #   run: |
+      #     sudo apt-get update -y
+      #     sudo apt-get install -y ffmpeg libimage-exiftool-perl libblas3 ghostscript libreoffice-impress
+      #     sudo ldconfig
 
-      - name: Instalar dependências Python
-        run: pip install -r requirements.txt
+      # - name: Instalar dependências Python
+      #   run: pip install -r requirements.txt
 
-      - name: Instalar rclone
-        run: curl https://rclone.org/install.sh | sudo bash
+      # - name: Instalar rclone
+      #   run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Configurar rclone
         run: |
