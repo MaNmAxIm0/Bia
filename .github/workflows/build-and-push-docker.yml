@@ -29,6 +29,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/manmaxim0/Bia:latest
+          tags: ghcr.io/manmaxim0/bia:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
