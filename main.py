@@ -53,9 +53,9 @@ def main():
   for proc_file in list(config.PROCESSED_ASSETS_DIR.rglob("*.*")):
     if config.THUMBNAIL_DIR.name in proc_file.parts:
       if proc_file.stem.replace("_thumb", "") not in drive_stems:
-        proc_file.unlink(); logging.info(f"Apagado thumbnail órfão: {proc_file.name}")
+        proc_file.unlink()
     elif proc_file.stem not in drive_stems:
-      proc_file.unlink(); logging.info(f"Apagado ficheiro órfão: {proc_file.name}")
+      proc_file.unlink()
   manifest_entries = []
   failed_files = []
   for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")),
@@ -127,18 +127,26 @@ def main():
   with open(config.JSON_OUTPUT_FILE, "w", encoding="utf-8") as f:
     json.dump(final_data, f, indent=2, ensure_ascii=False)
   with open(config.R2_FILE_MANIFEST, "w", encoding="utf-8") as f:
-    f.write(f"Última sincronização: {datetime.now(ZoneInfo('Europe/Lisbon')).strftime('%Y-%m-%d %H:%M:%S %Z')}\n\n")
+    f.write(f"Última sincronização: {datetime.now(ZoneInfo('Europe/Lisbon')).strftime('%Y-%m-%d %H:%M:%S %Z')}
+
+")
     if manifest_entries:
-      f.write("Ficheiros processados nesta execução:\n")
-      f.write("\n".join(manifest_entries))
+      f.write("Ficheiros processados nesta execução:
+")
+      f.write("
+".join(manifest_entries))
     else:
-      f.write("Nenhum ficheiro novo ou alterado foi processado.\n")
+      f.write("Nenhum ficheiro novo ou alterado foi processado.
+")
   with open(config.FAILED_FILES_LOG, "w", encoding="utf-8") as f:
     if failed_files:
-      f.write("Ficheiros que falharam o processamento:\n")
-      f.write("\n".join(failed_files))
+      f.write("Ficheiros que falharam o processamento:
+")
+      f.write("
+".join(failed_files))
     else:
-      f.write("Nenhum ficheiro falhou o processamento.\n")
+      f.write("Nenhum ficheiro falhou o processamento.
+")
   sync_rclone(str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "Sincronizar para R2")
   logging.info("--- WORKFLOW CONCLUÍDO ---")
 

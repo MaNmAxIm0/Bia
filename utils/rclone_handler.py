@@ -11,11 +11,11 @@ def sync_rclone(source: str, destination: str, operation_name: str, *args) -> bo
   logging.info(f"Iniciando operação rclone: {operation_name}")
   try:
     subprocess.run(command, check=True, capture_output=True, text=True, encoding="utf-8", timeout=900)
-    logging.info(f"Operação rclone \'{operation_name}\' concluída com sucesso.")
+    logging.info(f"Operação rclone '{operation_name}' concluída com sucesso.")
     return True
   except subprocess.CalledProcessError as e:
-    logging.error(f"Falha na operação rclone \'{operation_name}\': {e.stderr}")
+    logging.error(f"Falha na operação rclone '{operation_name}': {e.stderr}")
     return False
   except Exception as e:
-    logging.error(f"Erro inesperado na operação rclone \'{operation_name}\': {e}")
+    logging.error(f"Erro inesperado na operação rclone '{operation_name}': {e}")
     return False

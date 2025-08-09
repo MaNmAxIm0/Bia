@@ -12,12 +12,12 @@ def run_command(command: list, operation_name: str) -> bool:
     return True
   except Exception as e:
     stderr = getattr(e, 'stderr', str(e))
-    logging.error(f"FALHA em \'{operation_name}\': {stderr.strip()}")
+    logging.error(f"FALHA em '{operation_name}': {stderr.strip()}")
     return False
 
 def process_video(input_path: Path, output_path: Path, apply_watermark_flag: bool) -> bool:
   output_path.parent.mkdir(parents=True, exist_ok=True)
-  filter_complex = "scale=min(1920\\,iw):-2"
+  filter_complex = "scale=min(1920\,iw):-2"
   if apply_watermark_flag:
     font_path = str(config.WATERMARK_FONT_PATH).replace('\\', '/')
     watermark_text = config.WATERMARK_TEXT.replace("'", "'")
