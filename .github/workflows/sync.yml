@@ -26,7 +26,7 @@ jobs:
       - name: Sincronizar pasta processada final para o R2
         run: |
           echo "A sincronizar todos os ativos para o R2..."
-          rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} --progress -v --use-server-modtime
+          rclone copy processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} --progress -v --use-server-modtime
       - name: Gerar Manifesto de Ficheiros do R2
         run: |
           rclone lsjson -R ${{ env.R2_REMOTE_FULL_PATH }} | python3 format_manifest.py

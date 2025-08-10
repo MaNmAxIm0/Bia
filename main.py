@@ -97,7 +97,8 @@ def main():
         continue
     output_path.parent.mkdir(parents=True, exist_ok=True)
     parent_folder = relative_path.parts[0] if len(relative_path.parts) > 1 else ""
-    should_apply_watermark = parent_folder not in ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name]
+    no_watermark_folders = ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name, ""]
+    should_apply_watermark = parent_folder not in no_watermark_folders
     processed_successfully = True
     if ext in [".gdoc", ".gsheet", ".gslides"]:
       shutil.copy2(input_path, output_path)

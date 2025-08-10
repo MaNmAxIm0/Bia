@@ -12,7 +12,7 @@ import {
   applyTranslations,
 } from "./linguagem.js";
 
-function getBasePath() {
+export function getBasePath() {
   return window.location.hostname.includes("github.io") ? "/Bia" : "";
 }
 const pageMap = {
@@ -245,11 +245,7 @@ function loadNewsletterForm() {
 }
 
 function setupHeader() {
-  const logoImage = document.querySelector(".logo img");
-  if (logoImage) {
-    const basePath = getBasePath();
-    logoImage.src = `${basePath}/imagens/logo.png`;
-  }
+  
   const menuToggle = document.querySelector(".menu-toggle");
   const navLinks = document.querySelector(".nav-links");
   if (menuToggle && navLinks) {
@@ -328,11 +324,50 @@ function updateNavigationLinks(lang) {
   });
 }
 
+async function updateStaticImages() {
+  const profilePicElement = document.getElementById('profile-picture');
+  const logoImage = document.querySelector(".logo img");
+  const ogImageMeta = document.querySelector('meta[property="og:image"]');
+  const twitterImageMeta = document.querySelector('meta[name="twitter:image"]');
+
+  try {
+    const response = await fetch(`${getBasePath()}/data.json`);
+    if (!response.ok) throw new Error("Failed to fetch data.json for static images");
+    const data = await response.json();
+
+    const updateImageSrc = (element, key) => {
+      const imageData = data[key];
+      if (imageData && imageData.url) {
+        element.src = imageData.url;
+      } else {
+        console.warn(`${key} data not found in data.json`);
+      }
+    };
+
+    if (profilePicElement) {
+      updateImageSrc(profilePicElement, "profile_picture.png");
+    }
+    if (logoImage) {
+      updateImageSrc(logoImage, "logo.png");
+    }
+    if (ogImageMeta) {
+      updateImageSrc(ogImageMeta, "banner.png");
+    }
+    if (twitterImageMeta) {
+      updateImageSrc(twitterImageMeta, "banner.png");
+    }
+
+  } catch (error) {
+    console.error("Error loading static images:", error);
+  }
+}
+
 function onPageLoad() {
   const pathSegments = window.location.pathname.split("/");
   const lang = pathSegments.find((seg) => ["pt", "en", "es"].includes(seg)) || "pt";
   setLanguage(lang);
   applyTranslations();
+  updateStaticImages(); // Call the new function here
   if (document.querySelector(".hero-carousel")) {
     loadDynamicCarousel();
     loadWorkCards();

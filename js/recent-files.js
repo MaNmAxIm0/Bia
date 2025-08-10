@@ -1,9 +1,9 @@
 import * as Tools from "./ferramentas.js";
-import * as Config from "./configuracoes.js";
 import * as Lightbox from "./pop-up.js";
 import {
   getCurrentLanguage
 } from "./linguagem.js";
+import { getBasePath } from "./principal.js";
 document.addEventListener("DOMContentLoaded", async () => {
   const recentHorizontalFilesContainer = document.getElementById("recent-horizontal-files");
   const recentVerticalFilesContainer = document.getElementById("recent-vertical-files");
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       mediaElement.alt = file.titles[getCurrentLanguage()] || file.fileName;
       mediaElement.loading = "lazy";
       mediaElement.onerror = () => {
-        mediaElement.src = `${Tools.getBasePath()}/imagens/placeholder.png`;
+        mediaElement.src = `${getBasePath()}/imagens/placeholder.png`;
       };
       imageContainer.appendChild(mediaElement);
       let playIcon;
