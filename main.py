@@ -21,9 +21,17 @@ def setup_logging():
     root_logger.handlers.clear()
   lisbon_tz = ZoneInfo("Europe/Lisbon")
   logging.Formatter.converter = lambda *args: datetime.now(lisbon_tz).timetuple()
-  handler = logging.StreamHandler()
-  handler.setFormatter(log_formatter)
-  root_logger.addHandler(handler)
+  
+  # Console handler
+  console_handler = logging.StreamHandler()
+  console_handler.setFormatter(log_formatter)
+  root_logger.addHandler(console_handler)
+
+  # File handler
+  file_handler = logging.FileHandler("workflow.log", encoding="utf-8")
+  file_handler.setFormatter(log_formatter)
+  root_logger.addHandler(file_handler)
+
   root_logger.setLevel(logging.INFO)
 
 def get_media_orientation(file_path: Path) -> str:
@@ -46,7 +54,7 @@ def main():
   logging.info("--- INÍCIO DO WORKFLOW DE SINCRONIZAÇÃO ---")
   for path in [config.LOCAL_ASSETS_DIR, config.PROCESSED_ASSETS_DIR, config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR]:
     path.mkdir(exist_ok=True)
-  if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar Google Drive", "--fast-list"):
+  if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar Google Drive", "--fast-list", "--ignore-times"):
     return
   
   logging.info("A obter metadados dos ficheiros existentes no R2...")
@@ -168,7 +176,7 @@ def main():
       f.write("".join(failed_files))
     else:
       f.write("Nenhum ficheiro falhou o processamento.")
-  sync_rclone(str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "Sincronizar para R2")
+  sync_rclone(str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "Sincronizar para R2", "--exclude", f"/{config.THUMBNAIL_DIR.name}/**")
   logging.info("--- WORKFLOW CONCLUÍDO ---")
 
 if __name__ == "__main__":
