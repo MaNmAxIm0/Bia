@@ -5,8 +5,7 @@ class CookieConsent {
     this.translations = {
       pt: {
         title: "Utilizamos Cookies",
-        message:
-          "Este site utiliza cookies para melhorar a sua experiência de navegação, analisar o tráfego e personalizar conteúdo. Pode escolher quais cookies aceitar.",
+        message: "Este site utiliza cookies para melhorar a sua experiência de navegação, analisar o tráfego e personalizar conteúdo. Pode escolher quais cookies aceitar.",
         acceptAll: "Aceitar Todos",
         acceptNecessary: "Apenas Necessários",
         settings: "Configurações dos Cookies",
@@ -14,18 +13,14 @@ class CookieConsent {
         necessary: "Cookies Necessários",
         analytics: "Cookies de Análise",
         marketing: "Cookies de Marketing",
-        necessaryDesc:
-          "Estes cookies são essenciais para o funcionamento básico do site.",
-        analyticsDesc:
-          "Ajudam-nos a entender como os visitantes interagem com o site.",
-        marketingDesc:
-          "Utilizados para mostrar anúncios relevantes aos utilizadores.",
+        necessaryDesc: "Estes cookies são essenciais para o funcionamento básico do site.",
+        analyticsDesc: "Ajudam-nos a entender como os visitantes interagem com o site.",
+        marketingDesc: "Utilizados para mostrar anúncios relevantes aos utilizadores.",
         privacyPolicy: "Política de Privacidade",
       },
       en: {
         title: "We Use Cookies",
-        message:
-          "This website uses cookies to improve your browsing experience, analyze traffic and personalize content. You can choose which cookies to accept.",
+        message: "This website uses cookies to improve your browsing experience, analyze traffic and personalize content. You can choose which cookies to accept.",
         acceptAll: "Accept All",
         acceptNecessary: "Necessary Only",
         settings: "Cookies settings",
@@ -33,30 +28,24 @@ class CookieConsent {
         necessary: "Necessary Cookies",
         analytics: "Analytics Cookies",
         marketing: "Marketing Cookies",
-        necessaryDesc:
-          "These cookies are essential for the basic functioning of the website.",
-        analyticsDesc:
-          "Help us understand how visitors interact with the website.",
+        necessaryDesc: "These cookies are essential for the basic functioning of the website.",
+        analyticsDesc: "Help us understand how visitors interact with the website.",
         marketingDesc: "Used to show relevant advertisements to users.",
         privacyPolicy: "Privacy Policy",
       },
       es: {
         title: "Utilizamos Cookies",
-        message:
-          "Este sitio web utiliza cookies para mejorar su experiencia de navegación, analizar el tráfico y personalizar el contenido. Puede elegir qué cookies aceptar.",
+        message: "Este sitio web utiliza cookies para mejorar su experiencia de navegación, analizar el tráfico y personalizar el contenido. Puede elegir qué cookies aceptar.",
         acceptAll: "Aceptar Todas",
         acceptNecessary: "Solo Necesarias",
         settings: "Configuraciones de cookies",
-        save: "Guardar Preferencias",
+        save: "Guardar Preferências",
         necessary: "Cookies Necesarias",
         analytics: "Cookies de Análisis",
         marketing: "Cookies de Marketing",
-        necessaryDesc:
-          "Estas cookies son esenciales para el funcionamiento básico del sitio web.",
-        analyticsDesc:
-          "Nos ayudan a entender cómo los visitantes interactúan con el sitio web.",
-        marketingDesc:
-          "Utilizadas para mostrar anuncios relevantes a los usuarios.",
+        necessaryDesc: "Estas cookies son esenciales para el funcionamiento básico del sitio web.",
+        analyticsDesc: "Nos ayudan a entender cómo los visitantes interactúan con el sitio web.",
+        marketingDesc: "Utilizadas para mostrar anuncios relevantes a los usuarios.",
         privacyPolicy: "Política de Privacidad",
       },
     };
@@ -101,15 +90,9 @@ class CookieConsent {
     const banner = document.createElement("div");
     banner.className = "cookie-consent-banner";
     banner.innerHTML = `    <div class="cookie-consent-content">    <div class="cookie-consent-text">    <h3>${this.getTranslation("title")}</h3>    <p>${this.getTranslation("message")}</p>    </div>    <div class="cookie-consent-actions">    <button class="cookie-btn cookie-btn-settings">    ${this.getTranslation("settings")}    </button>    <button class="cookie-btn cookie-btn-necessary">    ${this.getTranslation("acceptNecessary")}    </button>    <button class="cookie-btn cookie-btn-accept">    ${this.getTranslation("acceptAll")}    </button>    </div>    </div>    `;
-    banner
-      .querySelector(".cookie-btn-settings")
-      .addEventListener("click", () => this.showSettings());
-    banner
-      .querySelector(".cookie-btn-necessary")
-      .addEventListener("click", () => this.acceptNecessary());
-    banner
-      .querySelector(".cookie-btn-accept")
-      .addEventListener("click", () => this.acceptAll());
+    banner.querySelector(".cookie-btn-settings").addEventListener("click", () => this.showSettings());
+    banner.querySelector(".cookie-btn-necessary").addEventListener("click", () => this.acceptNecessary());
+    banner.querySelector(".cookie-btn-accept").addEventListener("click", () => this.acceptAll());
     return banner;
   }
   showSettings() {
@@ -149,11 +132,7 @@ class CookieConsent {
       marketing: true,
       timestamp: Date.now(),
     };
-    this.setCookie(
-      this.cookieName,
-      JSON.stringify(preferences),
-      this.cookieExpiry,
-    );
+    this.setCookie(this.cookieName, JSON.stringify(preferences), this.cookieExpiry);
     this.hideBanner();
     this.loadAcceptedCookies();
     this.triggerConsentEvent("all");
@@ -165,11 +144,7 @@ class CookieConsent {
       marketing: false,
       timestamp: Date.now(),
     };
-    this.setCookie(
-      this.cookieName,
-      JSON.stringify(preferences),
-      this.cookieExpiry,
-    );
+    this.setCookie(this.cookieName, JSON.stringify(preferences), this.cookieExpiry);
     this.hideBanner();
     this.loadAcceptedCookies();
     this.triggerConsentEvent("necessary");
@@ -184,11 +159,7 @@ class CookieConsent {
       marketing,
       timestamp: Date.now(),
     };
-    this.setCookie(
-      this.cookieName,
-      JSON.stringify(preferences),
-      this.cookieExpiry,
-    );
+    this.setCookie(this.cookieName, JSON.stringify(preferences), this.cookieExpiry);
     this.closeSettings();
     this.hideBanner();
     this.loadAcceptedCookies();
@@ -228,7 +199,10 @@ class CookieConsent {
   }
   triggerConsentEvent(type) {
     const event = new CustomEvent("cookieConsentChanged", {
-      detail: { type, preferences: this.getPreferences() },
+      detail: {
+        type,
+        preferences: this.getPreferences()
+      },
     });
     document.dispatchEvent(event);
   }
@@ -255,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
   cookieConsent = new CookieConsent();
   const manageCookiesBtn = document.getElementById("manage-cookies-btn");
   if (manageCookiesBtn) {
-    manageCookiesBtn.addEventListener("click", function (event) {
+    manageCookiesBtn.addEventListener("click", function(event) {
       if (cookieConsent) {
         cookieConsent.showSettings();
       }

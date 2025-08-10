@@ -9,7 +9,7 @@ RUN apt-get update -y && \
     libblas3 \
     ghostscript \
     libreoffice-impress \
-    sudo     curl     unzip &&     rm -rf /var/lib/apt/lists/*
+    sudo curl unzip git && rm -rf /var/lib/apt/lists/*
 
 RUN curl https://rclone.org/install.sh | sudo bash
 

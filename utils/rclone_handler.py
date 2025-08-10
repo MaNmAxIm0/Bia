@@ -10,8 +10,10 @@ def sync_rclone(source: str, destination: str, operation_name: str, *args) -> bo
   command.extend(["--progress", "-v"])
   logging.info(f"Iniciando operação rclone: {operation_name}")
   try:
-    subprocess.run(command, check=True, capture_output=True, text=True, encoding="utf-8", timeout=900)
+    result = subprocess.run(command, check=True, capture_output=True, text=True, encoding="utf-8", timeout=900)
     logging.info(f"Operação rclone '{operation_name}' concluída com sucesso.")
+    if result.stdout:
+        logging.info(f"Detalhes da operação:\n{result.stdout}")
     return True
   except subprocess.CalledProcessError as e:
     logging.error(f"Falha na operação rclone '{operation_name}': {e.stderr}")

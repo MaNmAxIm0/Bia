@@ -1,8 +1,6 @@
 name: Sincronizar e Processar Ativos do Portfólio
-
 on:
   workflow_dispatch:
-
 jobs:
   sync-and-process:
     runs-on: ubuntu-latest
@@ -13,60 +11,23 @@ jobs:
       DRIVE_REMOTE_FULL_PATH: "Drive:Portfólio Bia"
       R2_REMOTE_FULL_PATH: "R2:bia-portfolio-assets"
       R2_PUBLIC_URL: "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev"
-
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
-
-      - name: Instalar Git
-        run: |
-          apt-get update -y
-          apt-get install -y git
-
-      # Python, system dependencies, and rclone are now pre-installed in the Docker image
-      # - name: Configurar Python 3.10
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: '3.10'
-
-      # - name: Cache para dependências Pip
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: ~/.cache/pip
-      #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt' ) }}
-
-      # - name: Instalar dependências do sistema
-      #   run: |
-      #     sudo apt-get update -y
-      #     sudo apt-get install -y ffmpeg libimage-exiftool-perl libblas3 ghostscript libreoffice-impress
-      #     sudo ldconfig
-
-      # - name: Instalar dependências Python
-      #   run: |
-      #     python3 -m venv .venv
-      #     source .venv/bin/activate
-      #     pip install -r requirements.txt
-
-      # - name: Instalar rclone
-      #   run: curl https://rclone.org/install.sh | sudo bash
-
+      
       - name: Configurar rclone
         run: |
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 --decode > ~/.config/rclone/rclone.conf
-
       - name: Executar script de processamento e sincronização
         run: python3 main.py
-
       - name: Sincronizar pasta processada final para o R2
         run: |
           echo "A sincronizar todos os ativos para o R2..."
           rclone sync processed_assets/ ${{ env.R2_REMOTE_FULL_PATH }} --progress -v --use-server-modtime
-
       - name: Gerar Manifesto de Ficheiros do R2
         run: |
           rclone lsjson -R ${{ env.R2_REMOTE_FULL_PATH }} | python3 format_manifest.py
-
       - name: Fazer Commit e Push dos Ficheiros de Dados
         run: |
           git config --global user.name 'github-actions[bot]'

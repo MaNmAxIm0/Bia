@@ -1,5 +1,10 @@
-import { initCarousel } from "./carrossel.js";
-import { loadGalleryContent, loadPresentations } from "./galeria.js";
+import {
+  initCarousel
+} from "./carrossel.js";
+import {
+  loadGalleryContent,
+  loadPresentations
+} from "./galeria.js";
 import {
   setLanguage,
   getCurrentLanguage,
@@ -10,16 +15,27 @@ import {
 function getBasePath() {
   return window.location.hostname.includes("github.io") ? "/Bia" : "";
 }
-
 const pageMap = {
-  inicio: { pt: "inicio", en: "home", es: "inicio" },
+  inicio: {
+    pt: "inicio",
+    en: "home",
+    es: "inicio"
+  },
   apresentacoes: {
     pt: "apresentacoes",
     en: "presentations",
     es: "presentaciones",
   },
-  contactos: { pt: "contactos", en: "contacts", es: "contactos" },
-  designs: { pt: "designs", en: "designs", es: "disenos" },
+  contactos: {
+    pt: "contactos",
+    en: "contacts",
+    es: "contactos"
+  },
+  designs: {
+    pt: "designs",
+    en: "designs",
+    es: "disenos"
+  },
   "fotos-horizontais": {
     pt: "fotos-horizontais",
     en: "photos-horizontal",
@@ -30,7 +46,11 @@ const pageMap = {
     en: "photos-vertical",
     es: "fotos-verticales",
   },
-  "sobre-mim": { pt: "sobre-mim", en: "about-me", es: "sobre-mi" },
+  "sobre-mim": {
+    pt: "sobre-mim",
+    en: "about-me",
+    es: "sobre-mi"
+  },
   "politica-de-privacidade": {
     pt: "politica-de-privacidade",
     en: "privacy-policy",
@@ -54,20 +74,17 @@ const pageMap = {
 };
 
 function getSourcePageFile() {
-  const pathSegments = window.location.pathname
-    .split("/")
-    .filter((segment) => segment !== "");
+  const pathSegments = window.location.pathname.split("/").filter((segment) => segment !== "");
   const lang = pathSegments.find((seg) => ["pt", "en", "es"].includes(seg));
   let pageName = pathSegments[pathSegments.indexOf(lang) + 1];
   if (!pageName) return "inicio";
   for (const ptPage in pageMap) {
-    if (pageMap[ptPage][lang] === pageName) {
+    if (pageMap[ptPage]?.[lang] === pageName) {
       return ptPage;
     }
   }
   return "inicio";
 }
-
 async function loadDynamicCarousel() {
   const slidesContainer = document.getElementById("dynamic-carousel-slides");
   const carouselSection = document.querySelector(".hero-carousel");
@@ -76,9 +93,7 @@ async function loadDynamicCarousel() {
     const response = await fetch(`${getBasePath()}/data.json`);
     if (!response.ok) throw new Error("Failed to fetch carousel data");
     const data = await response.json();
-    const carouselItems = Object.values(data).filter(
-      (item) => item.url && item.url.includes("/Melhores/"),
-    );
+    const carouselItems = Object.values(data).filter((item) => item.url && item.url.includes("/Melhores/"));
     if (carouselItems.length === 0) {
       carouselSection.style.display = "none";
       return;
@@ -88,9 +103,8 @@ async function loadDynamicCarousel() {
     carouselItems.forEach((item) => {
       const slideDiv = document.createElement("div");
       slideDiv.className = "carousel-slide";
-      const title = item.titles?.[lang] || item.titles?.pt || "";
-      const description =
-        item.descriptions?.[lang] || item.descriptions?.pt || "";
+      const title = (item.titles && item.titles[lang]) || (item.titles && item.titles.pt) || "";
+      const description = (item.descriptions && item.descriptions[lang]) || (item.descriptions && item.descriptions.pt) || "";
       slideDiv.innerHTML = `
       <img src="${item.url}" alt="${title}" loading="lazy">
       <div class="carousel-caption"><h2>${title}</h2><p>${description}</p></div>`;
@@ -102,7 +116,6 @@ async function loadDynamicCarousel() {
     carouselSection.style.display = "none";
   }
 }
-
 async function loadWorkCards() {
   const gridContainer = document.getElementById("my-works-grid");
   if (!gridContainer) return;
@@ -111,59 +124,45 @@ async function loadWorkCards() {
     const response = await fetch(`${getBasePath()}/data.json`);
     if (!response.ok) throw new Error("Failed to fetch work cards data");
     const data = await response.json();
-    const covers = Object.values(data).filter(
-      (item) => item.url && item.url.includes("/Capas/"),
-    );
-    const workCardsData = [
-      {
-        pageKey: "fotos-horizontais",
-        titleKey: "horizontal_photos_title",
-        descKey: "horizontal_photos_desc",
-        coverKey: "Fotografias Horizontais",
-      },
-      {
-        pageKey: "fotos-verticais",
-        titleKey: "vertical_photos_title",
-        descKey: "vertical_photos_desc",
-        coverKey: "Fotografias Verticais",
-      },
-      {
-        pageKey: "videos-horizontais",
-        titleKey: "horizontal_videos_title",
-        descKey: "horizontal_videos_desc",
-        coverKey: "Vídeos Horizontais",
-      },
-      {
-        pageKey: "videos-verticais",
-        titleKey: "vertical_videos_title",
-        descKey: "vertical_videos_desc",
-        coverKey: "Vídeos Verticais",
-      },
-      {
-        pageKey: "designs",
-        titleKey: "designs_title",
-        descKey: "designs_desc",
-        coverKey: "designs",
-      },
-      {
-        pageKey: "apresentacoes",
-        titleKey: "presentations_title",
-        descKey: "presentations_desc",
-        coverKey: "apresentações",
-      },
-    ];
+    const covers = Object.values(data).filter((item) => item.url && item.url.includes("/Capas/"));
+    const workCardsData = [{
+      pageKey: "fotos-horizontais",
+      titleKey: "horizontal_photos_title",
+      descKey: "horizontal_photos_desc",
+      coverKey: "Fotografias Horizontais",
+    }, {
+      pageKey: "fotos-verticais",
+      titleKey: "vertical_photos_title",
+      descKey: "vertical_photos_desc",
+      coverKey: "Fotografias Verticais",
+    }, {
+      pageKey: "videos-horizontais",
+      titleKey: "horizontal_videos_title",
+      descKey: "horizontal_videos_desc",
+      coverKey: "Vídeos Horizontais",
+    }, {
+      pageKey: "videos-verticais",
+      titleKey: "vertical_videos_title",
+      descKey: "vertical_videos_desc",
+      coverKey: "Vídeos Verticais",
+    }, {
+      pageKey: "designs",
+      titleKey: "designs_title",
+      descKey: "designs_desc",
+      coverKey: "designs",
+    }, {
+      pageKey: "apresentacoes",
+      titleKey: "presentations_title",
+      descKey: "presentations_desc",
+      coverKey: "apresentações",
+    }, ];
     gridContainer.innerHTML = "";
     workCardsData.forEach((cardData) => {
       const cardDiv = document.createElement("div");
       cardDiv.className = "work-item";
-      const cover = covers.find(
-        (c) => c.titles.pt.toLowerCase() === cardData.coverKey.toLowerCase(),
-      );
-      const coverUrl = cover
-        ? cover.url
-        : `${getBasePath()}/imagens/placeholder.png`;
-      const targetFile =
-        pageMap[cardData.pageKey]?.[getCurrentLanguage()] || cardData.pageKey;
+      const cover = covers.find((c) => c.titles.pt.toLowerCase() === cardData.coverKey.toLowerCase());
+      const coverUrl = cover ? cover.url : `${getBasePath()}/imagens/placeholder.png`;
+      const targetFile = (pageMap[cardData.pageKey] && pageMap[cardData.pageKey][getCurrentLanguage()]) || cardData.pageKey;
       cardDiv.innerHTML = `
       <img src="${coverUrl}" alt="${getTranslation(cardData.titleKey)}">
       <h3>${getTranslation(cardData.titleKey)}</h3>
@@ -176,7 +175,6 @@ async function loadWorkCards() {
     gridContainer.innerHTML = `<p style="color: red;">${getTranslation("error_loading_content").replace("{type}", "trabalhos")}</p>`;
   }
 }
-
 async function loadPagePreviews() {
   const previewContainer = document.querySelector(".section-preview-grid");
   if (!previewContainer) return;
@@ -184,35 +182,26 @@ async function loadPagePreviews() {
     const response = await fetch(`${getBasePath()}/data.json`);
     if (!response.ok) throw new Error("Failed to fetch page previews data");
     const data = await response.json();
-    const covers = Object.values(data).filter(
-      (item) => item.url && item.url.includes("/Capas/"),
-    );
+    const covers = Object.values(data).filter((item) => item.url && item.url.includes("/Capas/"));
     const lang = getCurrentLanguage();
-    const previewMap = [
-      {
-        linkSelector: 'a[href*="sobre-mi"], a[href*="about-me"]',
-        coverTitleKey: "sobre mim",
-      },
-      {
-        linkSelector: 'a[href*="contactos"], a[href*="contacts"]',
-        coverTitleKey: "contactos",
-      },
-    ];
+    const previewMap = [{
+      linkSelector: 'a[href*="sobre-mi"], a[href*="about-me"]',
+      coverTitleKey: "sobre mim",
+    }, {
+      linkSelector: 'a[href*="contactos"], a[href*="contacts"]',
+      coverTitleKey: "contactos",
+    }, ];
     previewMap.forEach((item) => {
       const linkElement = previewContainer.querySelector(item.linkSelector);
       if (linkElement) {
-        const coverData = covers.find((c) =>
-          c.titles.pt.toLowerCase().includes(item.coverTitleKey),
-        );
+        const coverData = covers.find((c) => c.titles.pt.toLowerCase().includes(item.coverTitleKey));
         const imgElement = linkElement.querySelector("img");
         if (coverData) {
           imgElement.src = coverData.url;
           const altTextKey = linkElement.querySelector("h3").dataset.langKey;
           imgElement.alt = getTranslation(altTextKey);
         } else {
-          console.warn(
-            `Capa para '${item.coverTitleKey}' não encontrada no data.json`,
-          );
+          console.warn(`Capa para '${item.coverTitleKey}' não encontrada no data.json`);
           imgElement.src = `${getBasePath()}/imagens/placeholder.png`;
         }
       }
@@ -223,34 +212,17 @@ async function loadPagePreviews() {
 }
 
 function initializeMailerLite() {
-  if (
-    document.querySelector(
-      'script[src="https://assets.mailerlite.com/js/universal.js"]',
-    )
-  ) {
+  if (document.querySelector('script[src="https://assets.mailerlite.com/js/universal.js"]')) {
     if (window.ml) {
       window.ml("account", "1677717");
     }
     return;
   }
-  (function (w, d, e, u, f, l, n) {
-    ((w[f] =
-      w[f] ||
-      function () {
-        (w[f].q = w[f].q || []).push(arguments);
-      }),
-      (l = d.createElement(e)),
-      (l.async = 1),
-      (l.src = u),
-      (n = d.getElementsByTagName(e)[0]),
-      n.parentNode.insertBefore(l, n));
-  })(
-    window,
-    document,
-    "script",
-    "https://assets.mailerlite.com/js/universal.js",
-    "ml",
-  );
+  (function(w, d, e, u, f, l, n) {
+    ((w[f] = w[f] || function() {
+      (w[f].q = w[f].q || []).push(arguments);
+    }), (l = d.createElement(e)), (l.async = 1), (l.src = u), (n = d.getElementsByTagName(e)[0]), n.parentNode.insertBefore(l, n));
+  })(window, document, "script", "https://assets.mailerlite.com/js/universal.js", "ml");
   ml("account", "1677717");
 }
 
@@ -260,7 +232,7 @@ function loadNewsletterForm() {
   const formIds = {
     pt: "igOq2z",
     en: "IYWzHx",
-    es: "JgeLNy",
+    es: "JgeLNy"
   };
   const lang = getCurrentLanguage();
   const formId = formIds[lang] || formIds.pt;
@@ -281,9 +253,7 @@ function setupHeader() {
   const menuToggle = document.querySelector(".menu-toggle");
   const navLinks = document.querySelector(".nav-links");
   if (menuToggle && navLinks) {
-    menuToggle.addEventListener("click", () =>
-      navLinks.classList.toggle("active"),
-    );
+    menuToggle.addEventListener("click", () => navLinks.classList.toggle("active"));
   }
   document.querySelectorAll(".main-nav .dropdown > a").forEach((toggle) => {
     toggle.addEventListener("click", (event) => {
@@ -298,14 +268,21 @@ function setupHeader() {
   const selectedButton = dropdown.querySelector(".language-selected");
   const lang = getCurrentLanguage();
   const langData = {
-    pt: { flag: "pt", text: "PT" },
-    en: { flag: "gb", text: "EN" },
-    es: { flag: "es", text: "ES" },
+    pt: {
+      flag: "pt",
+      text: "PT"
+    },
+    en: {
+      flag: "gb",
+      text: "EN"
+    },
+    es: {
+      flag: "es",
+      text: "ES"
+    },
   };
-  selectedButton.querySelector(".fi").className =
-    `fi fi-${langData[lang].flag}`;
-  selectedButton.querySelector("span:not(.fi)").textContent =
-    langData[lang].text;
+  selectedButton.querySelector(".fi").className = `fi fi-${langData[lang].flag}`;
+  selectedButton.querySelector("span:not(.fi)").textContent = langData[lang].text;
   selectedButton.addEventListener("click", (e) => {
     e.stopPropagation();
     dropdown.classList.toggle("open");
@@ -330,7 +307,11 @@ function updateNavigationLinks(lang) {
     const targetFile = pageMap[pageKey]?.[lang] || pageKey;
     link.href = `${basePath}/${lang}/${targetFile}/`;
   });
-  const langNames = { pt: "Português", en: "English", es: "Español" };
+  const langNames = {
+    pt: "Português",
+    en: "English",
+    es: "Español"
+  };
   document.querySelectorAll(".lang-option").forEach((link) => {
     const linkLang = link.dataset.lang;
     const targetFile = pageMap[sourceFile]?.[linkLang] || sourceFile;
@@ -349,8 +330,7 @@ function updateNavigationLinks(lang) {
 
 function onPageLoad() {
   const pathSegments = window.location.pathname.split("/");
-  const lang =
-    pathSegments.find((seg) => ["pt", "en", "es"].includes(seg)) || "pt";
+  const lang = pathSegments.find((seg) => ["pt", "en", "es"].includes(seg)) || "pt";
   setLanguage(lang);
   applyTranslations();
   if (document.querySelector(".hero-carousel")) {
@@ -379,30 +359,26 @@ function onPageLoad() {
       type: "videos",
       orientation: "vertical",
     },
-    designs: { id: "design-gallery", type: "designs" },
-    apresentacoes: { id: "presentation-gallery", type: "apresentacoes" },
+    designs: {
+      id: "design-gallery",
+      type: "designs"
+    },
+    apresentacoes: {
+      id: "presentation-gallery",
+      type: "apresentacoes"
+    },
   };
   const pageKey = getSourcePageFile();
-  const galleryInfo =
-    galleryIdMap[pageKey] ||
-    Object.values(galleryIdMap).find((g) =>
-      window.location.pathname.includes(g.id.split("-gallery")[0]),
-    );
+  const galleryInfo = galleryIdMap[pageKey] || Object.values(galleryIdMap).find((g) => window.location.pathname.includes(g.id.split("-gallery")[0]));
   if (galleryInfo) {
     if (galleryInfo.type === "apresentacoes") {
       loadPresentations();
     } else {
-      loadGalleryContent(
-        galleryInfo.type,
-        galleryInfo.id,
-        galleryInfo.orientation || null,
-      );
+      loadGalleryContent(galleryInfo.type, galleryInfo.id, galleryInfo.orientation || null);
     }
   }
 }
-
 document.addEventListener("DOMContentLoaded", onPageLoad);
-
 const observer = new MutationObserver((mutations, obs) => {
   const header = document.querySelector(".main-header");
   if (header && header.innerHTML.trim() !== "") {
@@ -413,4 +389,7 @@ const observer = new MutationObserver((mutations, obs) => {
     obs.disconnect();
   }
 });
-observer.observe(document.body, { childList: true, subtree: true });
+observer.observe(document.body, {
+  childList: true,
+  subtree: true
+});

@@ -11,13 +11,14 @@ from zoneinfo import ZoneInfo
 import config
 from processors.image_processor import process_image
 from processors.video_processor import process_video
-from processors.pdf_processor import process_pdf
+
 from utils.rclone_handler import sync_rclone
 
 def setup_logging():
   log_formatter = logging.Formatter("%(asctime)s - [%(levelname)s] - %(message)s")
   root_logger = logging.getLogger()
-  if root_logger.hasHandlers(): root_logger.handlers.clear()
+  if root_logger.hasHandlers():
+    root_logger.handlers.clear()
   lisbon_tz = ZoneInfo("Europe/Lisbon")
   logging.Formatter.converter = lambda *args: datetime.now(lisbon_tz).timetuple()
   handler = logging.StreamHandler()
@@ -45,11 +46,9 @@ def main():
   logging.info("--- INÍCIO DO WORKFLOW DE SINCRONIZAÇÃO ---")
   for path in [config.LOCAL_ASSETS_DIR, config.PROCESSED_ASSETS_DIR, config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR]:
     path.mkdir(exist_ok=True)
-  if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar Google Drive"):
+  if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar Google Drive", "--fast-list"):
     return
-  if not sync_rclone(config.R2_REMOTE_PATH, str(config.PROCESSED_ASSETS_DIR), "Sincronizar R2 para local", "--use-server-modtime"):
-    return
-
+  
   logging.info("A obter metadados dos ficheiros existentes no R2...")
   r2_files_metadata = {}
   try:
@@ -61,7 +60,6 @@ def main():
     logging.info(f"Metadados de {len(r2_files_metadata)} ficheiros do R2 obtidos.")
   except Exception as e:
     logging.error(f"Erro ao obter metadados do R2: {e}")
-    # Continue without optimization if error occurs
   drive_stems = {p.stem for p in config.LOCAL_ASSETS_DIR.rglob("*.*")}
   for proc_file in list(config.PROCESSED_ASSETS_DIR.rglob("*.*")):
     if config.THUMBNAIL_DIR.name in proc_file.parts:
@@ -71,31 +69,24 @@ def main():
       proc_file.unlink()
   manifest_entries = []
   failed_files = []
-  for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")),
-                          desc="Processando Ficheiros"):
+  for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
     relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
     if input_path.suffix.lower() in config.PPTX_EXTENSIONS:
       output_path = (config.PROCESSED_ASSETS_DIR / relative_path).with_suffix(".pdf")
     else:
       output_path = config.PROCESSED_ASSETS_DIR / relative_path
     ext = input_path.suffix.lower()
-
-    # --- MODIFIED SKIP LOGIC START ---
     r2_processed_path_str = None
     if ext in config.PPTX_EXTENSIONS:
-        r2_processed_path_str = relative_path.with_suffix(".pdf").as_posix()
+      r2_processed_path_str = relative_path.with_suffix(".pdf").as_posix()
     else:
-        r2_processed_path_str = relative_path.as_posix()
-
+      r2_processed_path_str = relative_path.as_posix()
     google_drive_mtime = datetime.fromtimestamp(input_path.stat().st_mtime, tz=ZoneInfo("Europe/Lisbon")).astimezone(timezone.utc)
-
     if r2_processed_path_str in r2_files_metadata:
-        r2_mtime = r2_files_metadata[r2_processed_path_str]
-        if r2_mtime >= google_drive_mtime:
-            logging.debug(f"Ignorando {relative_path} (já atualizado no R2).")
-            continue # Skip processing this file
-    # --- MODIFIED SKIP LOGIC END ---
-
+      r2_mtime = r2_files_metadata[r2_processed_path_str]
+      if r2_mtime >= google_drive_mtime:
+        logging.info(f"Ignorando {relative_path} (já atualizado no R2).")
+        continue
     output_path.parent.mkdir(parents=True, exist_ok=True)
     parent_folder = relative_path.parts[0] if len(relative_path.parts) > 1 else ""
     should_apply_watermark = parent_folder not in ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name]
@@ -113,16 +104,22 @@ def main():
         str(output_path.parent),
         str(input_path)
       ]
-      if sync_rclone(None, None, f"Converter {input_path.name}", *convert_cmd):
+      try:
+        subprocess.run(convert_cmd, check=True, capture_output=True, text=True, encoding='utf-8', timeout=900)
         logging.info(f"PDF gerado: A comprimir {output_path.name}...")
         compress_pdf_path = output_path.with_name(f"{output_path.stem}_compressed.pdf")
-        process_pdf(output_path, compress_pdf_path)
+        shutil.copy2(output_path, compress_pdf_path)
         shutil.move(compress_pdf_path, output_path)
-      else:
+      except subprocess.CalledProcessError as e:
+        logging.error(f"FALHA ao converter {input_path.name} para PDF: {e.stderr.strip()}")
+        processed_successfully = False
+        failed_files.append(str(relative_path))
+      except Exception as e:
+        logging.error(f"Erro inesperado ao converter {input_path.name} para PDF: {e}")
         processed_successfully = False
         failed_files.append(str(relative_path))
     elif ext in config.PDF_EXTENSIONS:
-      process_pdf(input_path, output_path)
+      shutil.copy2(input_path, output_path)
     elif ext in config.IMAGE_EXTENSIONS:
       process_image(input_path, output_path, apply_watermark_flag=should_apply_watermark)
     elif ext in config.VIDEO_EXTENSIONS:
@@ -139,15 +136,19 @@ def main():
     ext = source_path.suffix.lower()
     if ext in [".gdoc", ".gsheet", ".gslides"]:
       try:
-        with open(source_path, "r", encoding="utf-8") as f: url = json.load(f)["url"]
-        if "presentation" in url: url = url.replace("/edit", "/embed?start=false&loop=false&delayms=3000")
+        with open(source_path, "r", encoding="utf-8") as f:
+          url = json.load(f)["url"]
+        if "presentation" in url:
+          url = url.replace("/edit", "/embed?start=false&loop=false&delayms=3000")
         final_data[source_path.stem] = {"titles": {"pt": source_path.stem, "en": source_path.stem, "es": source_path.stem}, "orientation": "horizontal", "url": url, "is_external": True}
-      except Exception: continue
+      except Exception:
+        continue
     else:
       output_path = config.PROCESSED_ASSETS_DIR / relative_path
       if output_path.exists():
         stem = output_path.stem
-        titles = stem.split("_"); title_pt, title_en, title_es = (titles[0] if titles else stem, titles[1] if len(titles) > 1 else titles[0], titles[2] if len(titles) > 2 else titles[0])
+        titles = stem.split("_")
+        title_pt, title_en, title_es = (titles[0] if titles else stem, titles[1] if len(titles) > 1 else titles[0], titles[2] if len(titles) > 2 else titles[0])
         entry = {"titles": {"pt": title_pt, "en": title_en, "es": title_es}, "orientation": get_media_orientation(output_path), "url": f"{config.R2_PUBLIC_URL}/{relative_path.as_posix()}"}
         if ext in config.VIDEO_EXTENSIONS:
           entry["thumbnail_url"] = f"{config.R2_PUBLIC_URL}/{config.THUMBNAIL_DIR.name}/{stem}_thumb.jpg"

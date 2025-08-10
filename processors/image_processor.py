@@ -6,11 +6,13 @@ import config
 def correct_image_orientation(img: Image.Image) -> Image.Image:
   try:
     exif = img._getexif()
-    if exif is None: return img
+    if exif is None:
+      return img
     for orientation_tag in ExifTags.TAGS.keys():
       if ExifTags.TAGS[orientation_tag] == 'Orientation':
         break
-    else: return img
+    else:
+      return img
     if orientation_tag in exif:
       orientation = exif[orientation_tag]
       if orientation == 3:
