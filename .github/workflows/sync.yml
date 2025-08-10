@@ -36,11 +36,11 @@ jobs:
       #     sudo apt-get install -y ffmpeg libimage-exiftool-perl libblas3 ghostscript libreoffice-impress
       #     sudo ldconfig
 
-      - name: Instalar dependências Python
-        run: |
-          python3 -m venv .venv
-          source .venv/bin/activate
-          pip install -r requirements.txt
+      # - name: Instalar dependências Python
+      #   run: |
+      #     python3 -m venv .venv
+      #     source .venv/bin/activate
+      #     pip install -r requirements.txt
 
       # - name: Instalar rclone
       #   run: curl https://rclone.org/install.sh | sudo bash
@@ -51,7 +51,7 @@ jobs:
           echo "${{ secrets.RCLONE_CONF_BASE64 }}" | base64 --decode > ~/.config/rclone/rclone.conf
 
       - name: Executar script de processamento e sincronização
-        run: .venv/bin/python main.py
+        run: python3 main.py
 
       - name: Sincronizar pasta processada final para o R2
         run: |
@@ -60,7 +60,7 @@ jobs:
 
       - name: Gerar Manifesto de Ficheiros do R2
         run: |
-          rclone lsjson -R ${{ env.R2_REMOTE_FULL_PATH }} | .venv/bin/python format_manifest.py
+          rclone lsjson -R ${{ env.R2_REMOTE_FULL_PATH }} | python3 format_manifest.py
 
       - name: Fazer Commit e Push dos Ficheiros de Dados
         run: |
