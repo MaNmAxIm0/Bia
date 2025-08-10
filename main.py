@@ -68,13 +68,7 @@ def main():
     logging.info(f"Metadados de {len(r2_files_metadata)} ficheiros do R2 obtidos.")
   except Exception as e:
     logging.error(f"Erro ao obter metadados do R2: {e}")
-  drive_stems = {p.stem for p in config.LOCAL_ASSETS_DIR.rglob("*.*")}
-  for proc_file in list(config.PROCESSED_ASSETS_DIR.rglob("*.*")):
-    if config.THUMBNAIL_DIR.name in proc_file.parts:
-      if proc_file.stem.replace("_thumb", "") not in drive_stems:
-        proc_file.unlink()
-    elif proc_file.stem not in drive_stems:
-      proc_file.unlink()
+  
   manifest_entries = []
   failed_files = []
   for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
