@@ -40,5 +40,6 @@ jobs:
             echo "Nenhuma alteração para fazer commit."
           else
             git commit -m "CI: Atualiza data.json e manifesto R2"
+            git pull --rebase
             git push
           fi

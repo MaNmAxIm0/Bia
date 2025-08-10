@@ -176,7 +176,7 @@ def main():
       f.write("".join(failed_files))
     else:
       f.write("Nenhum ficheiro falhou o processamento.")
-  sync_rclone(str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "Sincronizar para R2", "--exclude", f"/{config.THUMBNAIL_DIR.name}/**")
+  sync_rclone(str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "Sincronizar para R2")
   logging.info("--- WORKFLOW CONCLUÍDO ---")
 
 if __name__ == "__main__":
