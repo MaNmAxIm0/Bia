@@ -54,7 +54,7 @@ def main():
   logging.info("--- INÍCIO DO WORKFLOW DE SINCRONIZAÇÃO ---")
   for path in [config.LOCAL_ASSETS_DIR, config.PROCESSED_ASSETS_DIR, config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR]:
     path.mkdir(exist_ok=True)
-  if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar Google Drive", "--fast-list", "--ignore-times"):
+  if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar Google Drive", "--fast-list"):
     return
   
   logging.info("A obter metadados dos ficheiros existentes no R2...")
