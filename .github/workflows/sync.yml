@@ -18,6 +18,11 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
+      - name: Instalar Git
+        run: |
+          apt-get update -y
+          apt-get install -y git
+
       # Python, system dependencies, and rclone are now pre-installed in the Docker image
       # - name: Configurar Python 3.10
       #   uses: actions/setup-python@v5
