@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 from tqdm import tqdm
 from PIL import Image
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 import config
 from processors.image_processor import process_image
@@ -49,6 +49,19 @@ def main():
     return
   if not sync_rclone(config.R2_REMOTE_PATH, str(config.PROCESSED_ASSETS_DIR), "Sincronizar R2 para local", "--use-server-modtime"):
     return
+
+  logging.info("A obter metadados dos ficheiros existentes no R2...")
+  r2_files_metadata = {}
+  try:
+    r2_lsjson_cmd = ["rclone", "lsjson", config.R2_REMOTE_PATH, "--files-only", "--recursive"]
+    result = subprocess.run(r2_lsjson_cmd, capture_output=True, text=True, check=True)
+    r2_json_output = json.loads(result.stdout)
+    for item in r2_json_output:
+      r2_files_metadata[item["Path"]] = datetime.fromisoformat(item["ModTime"].replace('Z', '+00:00'))
+    logging.info(f"Metadados de {len(r2_files_metadata)} ficheiros do R2 obtidos.")
+  except Exception as e:
+    logging.error(f"Erro ao obter metadados do R2: {e}")
+    # Continue without optimization if error occurs
   drive_stems = {p.stem for p in config.LOCAL_ASSETS_DIR.rglob("*.*")}
   for proc_file in list(config.PROCESSED_ASSETS_DIR.rglob("*.*")):
     if config.THUMBNAIL_DIR.name in proc_file.parts:
@@ -66,8 +79,23 @@ def main():
     else:
       output_path = config.PROCESSED_ASSETS_DIR / relative_path
     ext = input_path.suffix.lower()
-    if output_path.exists() and input_path.stat().st_mtime <= output_path.stat().st_mtime:
-      continue
+
+    # --- MODIFIED SKIP LOGIC START ---
+    r2_processed_path_str = None
+    if ext in config.PPTX_EXTENSIONS:
+        r2_processed_path_str = relative_path.with_suffix(".pdf").as_posix()
+    else:
+        r2_processed_path_str = relative_path.as_posix()
+
+    google_drive_mtime = datetime.fromtimestamp(input_path.stat().st_mtime, tz=ZoneInfo("Europe/Lisbon")).astimezone(timezone.utc)
+
+    if r2_processed_path_str in r2_files_metadata:
+        r2_mtime = r2_files_metadata[r2_processed_path_str]
+        if r2_mtime >= google_drive_mtime:
+            logging.debug(f"Ignorando {relative_path} (já atualizado no R2).")
+            continue # Skip processing this file
+    # --- MODIFIED SKIP LOGIC END ---
+
     output_path.parent.mkdir(parents=True, exist_ok=True)
     parent_folder = relative_path.parts[0] if len(relative_path.parts) > 1 else ""
     should_apply_watermark = parent_folder not in ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name]
