@@ -115,7 +115,7 @@ def main():
     for item in google_drive_files:
       f.write(f"- {item}\n")
     f.write(f"- /{config.THUMBNAIL_DIR.name}/**\n")
-    f.write("+ *\n")")} ⏎
+    f.write("+ *\n")
   delete_rclone("r2_keep_list.txt", config.R2_REMOTE_PATH, "Remover ficheiros do R2 que não estão no Google Drive")
   if os.path.exists(config.JSON_OUTPUT_FILE):
       with open(config.JSON_OUTPUT_FILE, "r", encoding="utf-8") as f:
