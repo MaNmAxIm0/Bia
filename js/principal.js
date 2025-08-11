@@ -362,7 +362,6 @@ function onPageLoad() {
   const lang = pathSegments.find((seg) => ["pt", "en", "es"].includes(seg)) || "pt";
   setLanguage(lang);
   applyTranslations();
-  updateStaticImages();
   if (document.querySelector(".hero-carousel")) {
     loadDynamicCarousel();
     loadWorkCards();
@@ -413,6 +412,7 @@ const observer = new MutationObserver((mutations, obs) => {
   const header = document.querySelector(".main-header");
   if (header && header.innerHTML.trim() !== "") {
     setupHeader();
+    updateStaticImages();
     applyTranslations();
     initializeMailerLite();
     loadNewsletterForm();

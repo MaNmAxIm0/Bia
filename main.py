@@ -50,6 +50,33 @@ def get_media_orientation(file_path: Path) -> str:
     return "horizontal"
   return "horizontal"
 
+def compress_pdf(input_path: Path, output_path: Path, quality: str = 'ebook'):
+    """Compresses a PDF file using Ghostscript."""
+    logging.info(f"Comprimindo PDF: {input_path.name} com qualidade '{quality}'...")
+    gs_command = [
+        "gs",
+        "-sDEVICE=pdfwrite",
+        "-dCompatibilityLevel=1.4",
+        f"-dPDFSETTINGS=/{quality}",
+        "-dNOPAUSE",
+        "-dQUIET",
+        "-dBATCH",
+        f"-sOutputFile={output_path}",
+        str(input_path),
+    ]
+    try:
+        subprocess.run(gs_command, check=True, capture_output=True, text=True, timeout=900)
+        logging.info(f"PDF comprimido com sucesso: {output_path.name}")
+        return True
+    except subprocess.CalledProcessError as e:
+        logging.error(f"FALHA ao comprimir {input_path.name}: {e.stderr.strip()}")
+        shutil.copy2(input_path, output_path)
+        return False
+    except Exception as e:
+        logging.error(f"Erro inesperado ao comprimir {input_path.name}: {e}")
+        shutil.copy2(input_path, output_path)
+        return False
+
 def main():
   setup_logging()
   logging.info("--- INÍCIO DO WORKFLOW DE SINCRONIZAÇÃO ---")
@@ -124,10 +151,7 @@ def main():
       ]
       try:
         subprocess.run(convert_cmd, check=True, capture_output=True, text=True, encoding='utf-8', timeout=900)
-        logging.info(f"PDF gerado: A comprimir {output_path.name}...")
-        compress_pdf_path = output_path.with_name(f"{output_path.stem}_compressed.pdf")
-        shutil.copy2(output_path, compress_pdf_path)
-        shutil.move(compress_pdf_path, output_path)
+        compress_pdf(output_path, output_path)
       except subprocess.CalledProcessError as e:
         logging.error(f"FALHA ao converter {input_path.name} para PDF: {e.stderr.strip()}")
         processed_successfully = False
@@ -137,7 +161,7 @@ def main():
         processed_successfully = False
         failed_files.append(str(relative_path))
     elif ext in config.PDF_EXTENSIONS:
-      shutil.copy2(input_path, output_path)
+      compress_pdf(input_path, output_path)
     elif ext in config.IMAGE_EXTENSIONS:
       process_image(input_path, output_path, apply_watermark_flag=should_apply_watermark)
     elif ext in config.VIDEO_EXTENSIONS:

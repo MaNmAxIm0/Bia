@@ -55,18 +55,25 @@ def process_image(file_path: Path, output_path: Path, apply_watermark_flag: bool
   try:
     with Image.open(file_path) as img:
       corrected_img = correct_image_orientation(img)
-      if apply_watermark_flag:
-        final_img = apply_watermark(corrected_img)
+      if file_path.name == "Logo.png":
+        if apply_watermark_flag:
+            final_img = apply_watermark(corrected_img)
+        else:
+            final_img = corrected_img.convert('RGBA')
+        final_img.save(output_path, 'PNG', optimize=True)
       else:
-        final_img = corrected_img.convert('RGBA')
-      final_img = final_img.convert('RGB')
-      final_img.save(
-        output_path,
-        'JPEG',
-        quality=config.IMAGE_QUALITY,
-        optimize=True,
-        progressive=True
-      )
+        if apply_watermark_flag:
+          final_img = apply_watermark(corrected_img)
+        else:
+          final_img = corrected_img.convert('RGBA')
+        final_img = final_img.convert('RGB')
+        final_img.save(
+          output_path,
+          'JPEG',
+          quality=config.IMAGE_QUALITY,
+          optimize=True,
+          progressive=True
+        )
     return True
   except UnidentifiedImageError:
     logging.error(f"FALHA DE FORMATO: Pillow não conseguiu identificar '{file_path.name}'.")

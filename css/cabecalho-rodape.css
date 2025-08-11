@@ -18,6 +18,12 @@
     align-items: center;
 }
 
+.logo {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
 .logo a {
     display: flex;
     align-items: center;

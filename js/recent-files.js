@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 break;
             }
         }
-        const createGalleryItem = (file, isVideo) => {
+        const createGalleryItem = (file, isVideo, allFiles) => {
             const itemDiv = document.createElement("div");
             itemDiv.classList.add(isVideo ? "video-item" : "photo-item");
             itemDiv.classList.add(file.orientation === "horizontal" ? "horizontal-gallery" : "vertical-gallery");
@@ -120,7 +120,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                     imageContainer.appendChild(videoElement);
                     videoElement.focus();
                 } else {
-                    Lightbox.openLightbox(file.url, "image", file.titles[getCurrentLanguage()] || file.fileName);
+                    const imageFiles = allFiles.filter(f => !f.url.endsWith(".mp4"));
+                    const clickedImageIndex = imageFiles.findIndex(f => f.filePath === file.filePath);
+                    const lightboxItems = imageFiles.map(f => ({
+                        src: f.url,
+                        title: f.titles[getCurrentLanguage()] || f.fileName,
+                        type: 'image'
+                    }));
+                    Lightbox.openLightbox(lightboxItems, clickedImageIndex);
                 }
             });
             itemDiv.appendChild(imageContainer);
@@ -129,13 +136,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             itemDiv.appendChild(titleElementBottom);
             return itemDiv;
         };
-        recentHorizontalFiles.forEach((file) => {
+        recentHorizontalFiles.forEach((file, index) => {
             const isVideo = file.url.endsWith(".mp4");
-            recentHorizontalFilesContainer.appendChild(createGalleryItem(file, isVideo));
+            recentHorizontalFilesContainer.appendChild(createGalleryItem(file, isVideo, recentHorizontalFiles));
         });
-        recentVerticalFiles.forEach((file) => {
+        recentVerticalFiles.forEach((file, index) => {
             const isVideo = file.url.endsWith(".mp4");
-            recentVerticalFilesContainer.appendChild(createGalleryItem(file, isVideo));
+            recentVerticalFilesContainer.appendChild(createGalleryItem(file, isVideo, recentVerticalFiles));
         });
     } catch (error) {
         console.error("Error loading recent files:", error);

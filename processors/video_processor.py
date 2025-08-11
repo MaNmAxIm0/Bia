@@ -33,7 +33,7 @@ def process_video(input_path: Path, output_path: Path, apply_watermark_flag: boo
   video_cmd = [
     "ffmpeg", "-i", str(input_path),
     "-vf", filter_complex,
-    "-c:v", "libx264", "-preset", "medium", "-crf", "32",
+    "-c:v", "libx264", "-preset", "medium", "-crf", "35",
     "-c:a", "aac", "-b:a", "128k",
     "-y", str(output_path)
   ]
