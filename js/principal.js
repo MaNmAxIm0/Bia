@@ -163,11 +163,14 @@ async function loadWorkCards() {
       const cover = covers.find((c) => c.titles.pt.toLowerCase() === cardData.coverKey.toLowerCase());
       const coverUrl = cover ? cover.url : `https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/placeholder.png`;
       const targetFile = (pageMap[cardData.pageKey] && pageMap[cardData.pageKey][getCurrentLanguage()]) || cardData.pageKey;
+      const pageHref = `${getBasePath()}/${getCurrentLanguage()}/${targetFile}/`;
       cardDiv.innerHTML = `
-      <img src="${coverUrl}" alt="${getTranslation(cardData.titleKey)}">
-      <h3>${getTranslation(cardData.titleKey)}</h3>
-      <p>${getTranslation(cardData.descKey)}</p>
-      <a href="${getBasePath()}/${getCurrentLanguage()}/${targetFile}/" class="btn">${getTranslation("view_gallery")} <i class="fas fa-arrow-right"></i></a>`;
+        <a href="${pageHref}" class="cover-link" tabindex="-1">
+          <img src="${coverUrl}" alt="${getTranslation(cardData.titleKey)}">
+        </a>
+        <h3>${getTranslation(cardData.titleKey)}</h3>
+        <p>${getTranslation(cardData.descKey)}</p>
+        <a href="${pageHref}" class="btn">${getTranslation("view_gallery")} <i class="fas fa-arrow-right"></i></a>`;
       gridContainer.appendChild(cardDiv);
     });
   } catch (error) {
@@ -335,9 +338,19 @@ async function updateStaticImages() {
     const updateImageSrc = (element, key) => {
       const imageData = data[key];
       if (imageData && imageData.url) {
-        element.src = imageData.url;
+        // Preload the new image, only swap src when loaded
+        const tempImg = new window.Image();
+        tempImg.onload = () => {
+          element.src = imageData.url;
+          element.classList.remove('logo-hidden');
+        };
+        tempImg.onerror = () => {
+          element.classList.remove('logo-hidden'); // fallback remains
+        };
+        tempImg.src = imageData.url;
       } else {
         console.warn(`${key} data not found in data.json`);
+        element.classList.remove('logo-hidden'); // Show fallback if not found
       }
     };
     if (profilePicElement) {

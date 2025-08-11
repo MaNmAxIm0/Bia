@@ -1,3 +1,7 @@
+/* Hide logo image until loaded by JS */
+.logo-hidden {
+    visibility: hidden;
+}
 .main-header {
     background-color: var(--surface-color);
     padding: 15px 0;

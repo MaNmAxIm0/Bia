@@ -176,8 +176,14 @@ async function renderPdfPage(pdfDoc, pageNum, canvas) {
     canvas.renderTask.cancel();
   }
   const page = await pdfDoc.getPage(pageNum);
+  // Detect and auto-rotate if needed (common for scanned PDFs)
+  let rotation = page.rotate;
+  if (pageNum === 1 && (rotation === 90 || rotation === 270)) {
+    rotation = 0;
+  }
   const viewport = page.getViewport({
-    scale: 1.0
+    scale: 1.0,
+    rotation: rotation
   });
   const context = canvas.getContext('2d');
   canvas.height = viewport.height;
@@ -217,9 +223,15 @@ export async function loadPresentations() {
       if (presentation.url.toLowerCase().endsWith('.pdf')) {
         const pdfContainer = document.createElement('div');
         pdfContainer.className = 'pdf-viewer-container';
+        pdfContainer.style.position = 'relative';
         const canvas = document.createElement('canvas');
         canvas.oncontextmenu = () => false;
         pdfContainer.appendChild(canvas);
+        // Watermark overlay
+        const watermark = document.createElement('div');
+        watermark.className = 'pdf-watermark-overlay';
+  watermark.innerText = '© Beatriz Rodrigues';
+        pdfContainer.appendChild(watermark);
         const navButtons = document.createElement('div');
         navButtons.className = 'pdf-nav-buttons';
         const prevButton = document.createElement('button');

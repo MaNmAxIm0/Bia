@@ -2,6 +2,7 @@ class CookieConsent {
   constructor() {
     this.cookieName = "cookie-consent";
     this.cookieExpiry = 365;
+    this.bannerAccepted = false;
     this.translations = {
       pt: {
         title: "Utilizamos Cookies",
@@ -49,14 +50,14 @@ class CookieConsent {
         privacyPolicy: "Política de Privacidad",
       },
     };
-    this.init();
-  }
-  init() {
     if (!this.hasConsent()) {
       this.showBanner();
+    } else {
+      this.hideBanner();
+      this.loadAcceptedCookies();
     }
-    this.loadAcceptedCookies();
   }
+  // init() removido, lógica agora está no construtor
   getCurrentLanguage() {
     const pathLang = window.location.pathname.split("/")[2] || "pt";
     return ["pt", "en", "es"].includes(pathLang) ? pathLang : "pt";
@@ -80,6 +81,8 @@ class CookieConsent {
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
   }
   showBanner() {
+    // Evita banners duplicados
+    if (document.querySelector('.cookie-consent-banner')) return;
     const banner = this.createBanner();
     document.body.appendChild(banner);
     setTimeout(() => {
@@ -269,9 +272,11 @@ class CookieConsent {
     location.reload();
   }
 }
+
 let cookieConsent;
 document.addEventListener("DOMContentLoaded", () => {
   cookieConsent = new CookieConsent();
+  window.cookieConsent = cookieConsent;
   const manageCookiesBtn = document.getElementById("manage-cookies-btn");
   if (manageCookiesBtn) {
     manageCookiesBtn.addEventListener("click", function(event) {
@@ -281,4 +286,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-window.cookieConsent = cookieConsent;
