@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 import json
@@ -12,7 +11,6 @@ from zoneinfo import ZoneInfo
 import config
 from processors.image_processor import process_image
 from processors.video_processor import process_video
-
 from utils.rclone_handler import sync_rclone, delete_rclone
 
 def setup_logging():
@@ -22,17 +20,12 @@ def setup_logging():
     root_logger.handlers.clear()
   lisbon_tz = ZoneInfo("Europe/Lisbon")
   logging.Formatter.converter = lambda *args: datetime.now(lisbon_tz).timetuple()
-  
-  # Console handler
   console_handler = logging.StreamHandler()
   console_handler.setFormatter(log_formatter)
   root_logger.addHandler(console_handler)
-
-  # File handler
   file_handler = logging.FileHandler("workflow.log", encoding="utf-8")
   file_handler.setFormatter(log_formatter)
   root_logger.addHandler(file_handler)
-
   root_logger.setLevel(logging.INFO)
 
 def get_media_orientation(file_path: Path) -> str:
@@ -82,28 +75,6 @@ def main():
   logging.info("--- INÍCIO DO WORKFLOW DE SINCRONIZAÇÃO ---")
   for path in [config.LOCAL_ASSETS_DIR, config.PROCESSED_ASSETS_DIR, config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR]:
     path.mkdir(exist_ok=True)
-
-  # Sincronizar Google Drive para o diretório local
-  if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar Google Drive", "--fast-list"):
-    return
-
-  # Obter lista de ficheiros no Google Drive para exclusão no R2
-  google_drive_files = []
-  for input_path in config.LOCAL_ASSETS_DIR.rglob("*.*"):
-    relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
-    if input_path.suffix.lower() in config.PPTX_EXTENSIONS:
-      google_drive_files.append(relative_path.with_suffix(".pdf").as_posix())
-    else:
-      google_drive_files.append(relative_path.as_posix())
-
-  # Criar um ficheiro temporário com a lista de ficheiros a manter no R2
-  with open("r2_keep_list.txt", "w") as f:
-    for item in google_drive_files:
-      f.write(item + "\n")
-
-  # Remover ficheiros do R2 que não estão mais no Google Drive
-  delete_rclone("r2_keep_list.txt", config.R2_REMOTE_PATH, "Remover ficheiros do R2 que não estão no Google Drive")
-
   logging.info("A obter metadados dos ficheiros existentes no R2...")
   r2_files_metadata = {}
   try:
@@ -115,34 +86,50 @@ def main():
     logging.info(f"Metadados de {len(r2_files_metadata)} ficheiros do R2 obtidos.")
   except Exception as e:
     logging.error(f"Erro ao obter metadados do R2: {e}")
-  
+  logging.info("A obter metadados dos ficheiros existentes no Google Drive...")
+  drive_files_metadata = {}
+  try:
+    drive_lsjson_cmd = ["rclone", "lsjson", config.DRIVE_REMOTE_PATH, "--files-only", "--recursive"]
+    result = subprocess.run(drive_lsjson_cmd, capture_output=True, text=True, check=True)
+    drive_json_output = json.loads(result.stdout)
+    for item in drive_json_output:
+        drive_files_metadata[item["Path"]] = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
+    logging.info(f"Metadados de {len(drive_files_metadata)} ficheiros do Google Drive obtidos.")
+  except Exception as e:
+    logging.error(f"Erro ao obter metadados do Google Drive: {e}")
+    return
+  files_to_download = []
+  for path, drive_mod_time in drive_files_metadata.items():
+      if path not in r2_files_metadata or drive_mod_time > r2_files_metadata.get(path, datetime.fromtimestamp(0, tz=timezone.utc)):
+          files_to_download.append(path)
+  with open("download_list.txt", "w") as f:
+      for item in files_to_download:
+          f.write(f"{item}\n")
+  if files_to_download:
+      if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar ficheiros necessários do Google Drive", "--files-from", "download_list.txt"):
+        return
+  else:
+      logging.info("Nenhum ficheiro para descarregar.")
+  google_drive_files = list(drive_files_metadata.keys())
+  with open("r2_keep_list.txt", "w") as f:
+    for item in google_drive_files:
+      f.write(f"- {item}\n")
+    f.write("+ *\n")
+  delete_rclone("r2_keep_list.txt", config.R2_REMOTE_PATH, "Remover ficheiros do R2 que não estão no Google Drive")
+  if os.path.exists(config.JSON_OUTPUT_FILE):
+      with open(config.JSON_OUTPUT_FILE, "r", encoding="utf-8") as f:
+          final_data = json.load(f)
+  else:
+      final_data = {}
   manifest_entries = []
   failed_files = []
   for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
     relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
-    relative_path_str = relative_path.as_posix()
-    if input_path.suffix.lower() in config.PPTX_EXTENSIONS:
-        relative_path_str = relative_path.with_suffix(".pdf").as_posix()
-
-    if relative_path_str in r2_files_metadata:
-        local_mod_time = datetime.fromtimestamp(input_path.stat().st_mtime, tz=timezone.utc)
-        r2_mod_time = r2_files_metadata[relative_path_str]
-        
-        if r2_mod_time >= local_mod_time:
-            logging.info(f"A ignorar '{relative_path_str}', ficheiro no R2 já está atualizado.")
-            continue
-
     if input_path.suffix.lower() in config.PPTX_EXTENSIONS:
       output_path = (config.PROCESSED_ASSETS_DIR / relative_path).with_suffix(".pdf")
     else:
       output_path = config.PROCESSED_ASSETS_DIR / relative_path
     ext = input_path.suffix.lower()
-    r2_processed_path_str = None
-    if ext in config.PPTX_EXTENSIONS:
-      r2_processed_path_str = relative_path.with_suffix(".pdf").as_posix()
-    else:
-      r2_processed_path_str = relative_path.as_posix()
-
     output_path.parent.mkdir(parents=True, exist_ok=True)
     parent_folder = relative_path.parts[0] if len(relative_path.parts) > 1 else ""
     no_watermark_folders = ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name, ""]
@@ -184,29 +171,19 @@ def main():
       continue
     if processed_successfully:
       manifest_entries.append(f"{relative_path.as_posix()} - {datetime.now().isoformat()}")
-  final_data = {}
-  for source_path in list(config.LOCAL_ASSETS_DIR.rglob("*.*")):
-    relative_path = source_path.relative_to(config.LOCAL_ASSETS_DIR)
-    ext = source_path.suffix.lower()
-    if ext in [".gdoc", ".gsheet", ".gslides"]:
-      try:
-        with open(source_path, "r", encoding="utf-8") as f:
-          url = json.load(f)["url"]
-        if "presentation" in url:
-          url = url.replace("/edit", "/embed?start=false&loop=false&delayms=3000")
-        final_data[source_path.stem] = {"titles": {"pt": source_path.stem, "en": source_path.stem, "es": source_path.stem}, "orientation": "horizontal", "url": url, "is_external": True}
-      except Exception:
-        continue
-    else:
-      output_path = config.PROCESSED_ASSETS_DIR / relative_path
-      if output_path.exists():
-        stem = output_path.stem
-        titles = stem.split("_")
-        title_pt, title_en, title_es = (titles[0] if titles else stem, titles[1] if len(titles) > 1 else titles[0], titles[2] if len(titles) > 2 else titles[0])
-        entry = {"titles": {"pt": title_pt, "en": title_en, "es": title_es}, "orientation": get_media_orientation(output_path), "url": f"{config.R2_PUBLIC_URL}/{relative_path.as_posix()}"}
-        if ext in config.VIDEO_EXTENSIONS:
-          entry["thumbnail_url"] = f"{config.R2_PUBLIC_URL}/{config.THUMBNAIL_DIR.name}/{stem}_thumb.jpg"
-        final_data[output_path.name] = entry
+      stem = output_path.stem
+      titles = stem.split("_")
+      title_pt, title_en, title_es = (titles[0] if titles else stem, titles[1] if len(titles) > 1 else titles[0], titles[2] if len(titles) > 2 else titles[0])
+      entry = {"titles": {"pt": title_pt, "en": title_en, "es": title_es}, "orientation": get_media_orientation(output_path), "url": f"{config.R2_PUBLIC_URL}/{relative_path.as_posix()}"}
+      if ext in config.VIDEO_EXTENSIONS:
+        entry["thumbnail_url"] = f"{config.R2_PUBLIC_URL}/{config.THUMBNAIL_DIR.name}/{stem}_thumb.jpg"
+      final_data[output_path.name] = entry
+  google_drive_filenames = {Path(p).name for p in drive_files_metadata.keys()}
+  final_data = {
+      filename: data
+      for filename, data in final_data.items()
+      if filename in google_drive_filenames
+  }
   with open(config.JSON_OUTPUT_FILE, "w", encoding="utf-8") as f:
     json.dump(final_data, f, indent=2, ensure_ascii=False)
   with open(config.R2_FILE_MANIFEST, "w", encoding="utf-8") as f:
