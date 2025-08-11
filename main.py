@@ -120,6 +120,18 @@ def main():
   failed_files = []
   for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
     relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
+    relative_path_str = relative_path.as_posix()
+    if input_path.suffix.lower() in config.PPTX_EXTENSIONS:
+        relative_path_str = relative_path.with_suffix(".pdf").as_posix()
+
+    if relative_path_str in r2_files_metadata:
+        local_mod_time = datetime.fromtimestamp(input_path.stat().st_mtime, tz=timezone.utc)
+        r2_mod_time = r2_files_metadata[relative_path_str]
+        
+        if r2_mod_time >= local_mod_time:
+            logging.info(f"A ignorar '{relative_path_str}', ficheiro no R2 já está atualizado.")
+            continue
+
     if input_path.suffix.lower() in config.PPTX_EXTENSIONS:
       output_path = (config.PROCESSED_ASSETS_DIR / relative_path).with_suffix(".pdf")
     else:
