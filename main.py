@@ -1,3 +1,4 @@
+
 import os
 import subprocess
 import json
@@ -12,7 +13,7 @@ import config
 from processors.image_processor import process_image
 from processors.video_processor import process_video
 
-from utils.rclone_handler import sync_rclone
+from utils.rclone_handler import sync_rclone, delete_rclone
 
 def setup_logging():
   log_formatter = logging.Formatter("%(asctime)s - [%(levelname)s] - %(message)s")
@@ -21,12 +22,17 @@ def setup_logging():
     root_logger.handlers.clear()
   lisbon_tz = ZoneInfo("Europe/Lisbon")
   logging.Formatter.converter = lambda *args: datetime.now(lisbon_tz).timetuple()
+  
+  # Console handler
   console_handler = logging.StreamHandler()
   console_handler.setFormatter(log_formatter)
   root_logger.addHandler(console_handler)
+
+  # File handler
   file_handler = logging.FileHandler("workflow.log", encoding="utf-8")
   file_handler.setFormatter(log_formatter)
   root_logger.addHandler(file_handler)
+
   root_logger.setLevel(logging.INFO)
 
 def get_media_orientation(file_path: Path) -> str:
@@ -49,8 +55,28 @@ def main():
   logging.info("--- INÍCIO DO WORKFLOW DE SINCRONIZAÇÃO ---")
   for path in [config.LOCAL_ASSETS_DIR, config.PROCESSED_ASSETS_DIR, config.PROCESSED_ASSETS_DIR / config.THUMBNAIL_DIR]:
     path.mkdir(exist_ok=True)
+
+  # Sincronizar Google Drive para o diretório local
   if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar Google Drive", "--fast-list"):
     return
+
+  # Obter lista de ficheiros no Google Drive para exclusão no R2
+  google_drive_files = []
+  for input_path in config.LOCAL_ASSETS_DIR.rglob("*.*"):
+    relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
+    if input_path.suffix.lower() in config.PPTX_EXTENSIONS:
+      google_drive_files.append(relative_path.with_suffix(".pdf").as_posix())
+    else:
+      google_drive_files.append(relative_path.as_posix())
+
+  # Criar um ficheiro temporário com a lista de ficheiros a manter no R2
+  with open("r2_keep_list.txt", "w") as f:
+    for item in google_drive_files:
+      f.write(item + "\n")
+
+  # Remover ficheiros do R2 que não estão mais no Google Drive
+  delete_rclone("r2_keep_list.txt", config.R2_REMOTE_PATH, "Remover ficheiros do R2 que não estão no Google Drive")
+
   logging.info("A obter metadados dos ficheiros existentes no R2...")
   r2_files_metadata = {}
   try:
@@ -58,10 +84,11 @@ def main():
     result = subprocess.run(r2_lsjson_cmd, capture_output=True, text=True, check=True)
     r2_json_output = json.loads(result.stdout)
     for item in r2_json_output:
-      r2_files_metadata[item["Path"]] = datetime.fromisoformat(item["ModTime"].replace('Z', '+00:00'))
+      r2_files_metadata[item["Path"]] = datetime.fromisoformat(item["ModTime"].replace("Z", "+00:00"))
     logging.info(f"Metadados de {len(r2_files_metadata)} ficheiros do R2 obtidos.")
   except Exception as e:
     logging.error(f"Erro ao obter metadados do R2: {e}")
+  
   manifest_entries = []
   failed_files = []
   for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
@@ -76,12 +103,7 @@ def main():
       r2_processed_path_str = relative_path.with_suffix(".pdf").as_posix()
     else:
       r2_processed_path_str = relative_path.as_posix()
-    google_drive_mtime = datetime.fromtimestamp(input_path.stat().st_mtime, tz=ZoneInfo("Europe/Lisbon")).astimezone(timezone.utc)
-    if r2_processed_path_str in r2_files_metadata:
-      r2_mtime = r2_files_metadata[r2_processed_path_str]
-      if r2_mtime >= google_drive_mtime:
-        logging.info(f"Ignorando {relative_path} (já atualizado no R2).")
-        continue
+
     output_path.parent.mkdir(parents=True, exist_ok=True)
     parent_folder = relative_path.parts[0] if len(relative_path.parts) > 1 else ""
     no_watermark_folders = ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name, ""]
