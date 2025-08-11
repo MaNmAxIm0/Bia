@@ -1,11 +1,14 @@
-import { getTranslation, getCurrentLanguage } from "./linguagem.js";
-import { openLightbox } from "./pop-up.js";
+import {
+  getTranslation,
+  getCurrentLanguage
+} from "./linguagem.js";
+import {
+  openLightbox
+} from "./pop-up.js";
 import * as pdfjsLib from './pdfjs/build/pdf.mjs';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `${getBasePath()}/js/pdfjs/build/pdf.worker.mjs`;
-
 const galleryStates = {};
-
 function getBasePath() {
   return window.location.hostname.includes('github.io') ? '/Bia' : '';
 }
@@ -16,51 +19,45 @@ function renderNextBatch(containerId) {
     if (state.observer) state.observer.disconnect();
     return;
   }
-
   const galleryContainer = document.getElementById(containerId);
   if (!galleryContainer) return;
-
   const lang = getCurrentLanguage();
   const itemsToRender = state.allItems.slice(state.currentIndex, state.currentIndex + state.itemsPerLoad);
-
   itemsToRender.forEach(item => {
     const itemDiv = document.createElement('div');
-    const classMap = { 'fotografias': 'photo', 'designs': 'design', 'videos': 'video' };
+    const classMap = {
+      'fotografias': 'photo',
+      'designs': 'design',
+      'videos': 'video'
+    };
     const itemClassName = classMap[state.type] || 'gallery';
     itemDiv.classList.add(`${itemClassName}-item`);
-
     const title = item.titles[lang] || item.titles.pt;
     const isVideo = state.type === 'videos';
     const previewImageUrl = isVideo ? item.thumbnail_url : item.url;
-
     const imageContainer = document.createElement('div');
     imageContainer.classList.add('image-container');
-
     const mediaElement = document.createElement('img');
     mediaElement.src = previewImageUrl;
     mediaElement.alt = title;
     mediaElement.loading = "lazy";
     mediaElement.oncontextmenu = () => false;
     mediaElement.onerror = () => {
-      mediaElement.src = `${getBasePath()}/imagens/placeholder.png`;
+      mediaElement.src = `https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/placeholder.png`;
     };
     imageContainer.appendChild(mediaElement);
-
     if (isVideo) {
       const playIcon = document.createElement('i');
       playIcon.className = 'fas fa-play video-play-icon';
       imageContainer.appendChild(playIcon);
     }
-
     const overlayDiv = document.createElement('div');
     overlayDiv.classList.add(`${itemClassName}-overlay`);
     const titleElement = document.createElement('h3');
     titleElement.textContent = title;
     overlayDiv.appendChild(titleElement);
-
     itemDiv.appendChild(imageContainer);
     itemDiv.appendChild(overlayDiv);
-
     itemDiv.addEventListener('click', () => {
       if (isVideo) {
         if (imageContainer.querySelector('video')) {
@@ -75,7 +72,6 @@ function renderNextBatch(containerId) {
         videoElement.setAttribute('playsinline', '');
         videoElement.setAttribute('webkit-playsinline', '');
         videoElement.setAttribute('x5-playsinline', '');
-
         videoElement.addEventListener('loadedmetadata', () => {
           const isVertical = videoElement.videoHeight > videoElement.videoWidth;
           if (isVertical) {
@@ -84,14 +80,12 @@ function renderNextBatch(containerId) {
             imageContainer.classList.add('horizontal-video');
           }
         });
-
         videoElement.addEventListener('ended', () => {
           imageContainer.innerHTML = '';
           imageContainer.appendChild(mediaElement);
           imageContainer.appendChild(playIcon);
           itemDiv.classList.remove('playing');
         });
-
         imageContainer.innerHTML = '';
         imageContainer.appendChild(videoElement);
         videoElement.focus();
@@ -108,7 +102,6 @@ function renderNextBatch(containerId) {
     });
     galleryContainer.appendChild(itemDiv);
   });
-
   state.currentIndex += itemsToRender.length;
   if (state.currentIndex < state.allItems.length) {
     const lastElement = galleryContainer.lastElementChild;
@@ -123,25 +116,19 @@ function renderNextBatch(containerId) {
 export async function loadGalleryContent(type, containerId, orientationFilter = null) {
   const galleryContainer = document.getElementById(containerId);
   if (!galleryContainer) return;
-
   if (galleryStates[containerId] && galleryStates[containerId].observer) {
     galleryStates[containerId].observer.disconnect();
   }
-
   if (orientationFilter === 'horizontal') {
     galleryContainer.classList.add('horizontal-gallery');
-  }
-  else {
+  } else {
     galleryContainer.classList.remove('horizontal-gallery');
   }
-
   galleryContainer.innerHTML = `<p style="text-align: center;">${getTranslation('loading_content')}</p>`;
-
   try {
     const response = await fetch(`${getBasePath()}/data.json`);
     if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
     const data = await response.json();
-
     let allFilteredItems = Object.values(data).filter(item => {
       if (!item.url) return false;
       if (type === 'fotografias' && item.url.includes('/Fotografias/')) return true;
@@ -149,18 +136,14 @@ export async function loadGalleryContent(type, containerId, orientationFilter = 
       if (type === 'designs' && item.url.includes('/Designs/')) return true;
       return false;
     });
-
     if (orientationFilter) {
       allFilteredItems = allFilteredItems.filter(item => item.orientation === orientationFilter);
     }
-
     galleryContainer.innerHTML = '';
-
     if (allFilteredItems.length === 0) {
       galleryContainer.innerHTML = `<p>${getTranslation('no_content_found').replace('{type}', getTranslation(type))}</p>`;
       return;
     }
-
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -171,8 +154,9 @@ export async function loadGalleryContent(type, containerId, orientationFilter = 
           }
         }
       });
-    }, { rootMargin: "500px" });
-
+    }, {
+      rootMargin: "500px"
+    });
     galleryStates[containerId] = {
       allItems: allFilteredItems,
       currentIndex: 0,
@@ -180,9 +164,7 @@ export async function loadGalleryContent(type, containerId, orientationFilter = 
       type: type,
       observer: observer
     };
-
     renderNextBatch(containerId);
-
   } catch (error) {
     console.error(`Erro ao carregar ${type}:`, error);
     galleryContainer.innerHTML = `<p style="color: red;">${getTranslation('error_loading_content').replace('{type}', getTranslation(type))}</p>`;
@@ -194,16 +176,16 @@ async function renderPdfPage(pdfDoc, pageNum, canvas) {
     canvas.renderTask.cancel();
   }
   const page = await pdfDoc.getPage(pageNum);
-  const viewport = page.getViewport({ scale: 1.0 });
+  const viewport = page.getViewport({
+    scale: 1.0
+  });
   const context = canvas.getContext('2d');
   canvas.height = viewport.height;
   canvas.width = viewport.width;
-
   const renderContext = {
     canvasContext: context,
     viewport: viewport,
   };
-
   canvas.renderTask = page.render(renderContext);
   await canvas.renderTask.promise;
   canvas.renderTask = null;
@@ -212,69 +194,53 @@ async function renderPdfPage(pdfDoc, pageNum, canvas) {
 export async function loadPresentations() {
   const gallery = document.getElementById("presentation-gallery");
   if (!gallery) return;
-
   gallery.innerHTML = `<p style="text-align: center;">${getTranslation('loading_presentations')}</p>`;
-
   try {
     const response = await fetch(`${getBasePath()}/data.json`);
     const data = await response.json();
-
     const presentations = Object.values(data).filter(item => {
       const url = item.url.toLowerCase();
       return item.is_external || url.endsWith('.pdf');
     });
-
     const lang = getCurrentLanguage();
-
     gallery.innerHTML = '';
-
     if (presentations.length === 0) {
       gallery.innerHTML = `<p>${getTranslation('no_presentations_found')}</p>`;
       return;
     }
-
     presentations.forEach(presentation => {
       const div = document.createElement("div");
       div.className = "presentation-item";
-
       const titleElement = document.createElement("h3");
       titleElement.textContent = presentation.titles[lang] || presentation.titles['pt'];
       div.appendChild(titleElement);
-
       if (presentation.url.toLowerCase().endsWith('.pdf')) {
         const pdfContainer = document.createElement('div');
         pdfContainer.className = 'pdf-viewer-container';
         const canvas = document.createElement('canvas');
         canvas.oncontextmenu = () => false;
         pdfContainer.appendChild(canvas);
-
         const navButtons = document.createElement('div');
         navButtons.className = 'pdf-nav-buttons';
-
         const prevButton = document.createElement('button');
         prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
         prevButton.className = 'pdf-nav-button prev';
-
         const nextButton = document.createElement('button');
         nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
         nextButton.className = 'pdf-nav-button next';
-
         navButtons.appendChild(prevButton);
         navButtons.appendChild(nextButton);
         pdfContainer.appendChild(navButtons);
-
         div.appendChild(pdfContainer);
 
         pdfjsLib.getDocument(presentation.url).promise.then(pdfDoc => {
           let currentPageNum = 1;
           renderPdfPage(pdfDoc, currentPageNum, canvas);
-
           prevButton.addEventListener('click', () => {
             if (currentPageNum <= 1) return;
             currentPageNum--;
             renderPdfPage(pdfDoc, currentPageNum, canvas);
           });
-
           nextButton.addEventListener('click', () => {
             if (currentPageNum >= pdfDoc.numPages) return;
             currentPageNum++;

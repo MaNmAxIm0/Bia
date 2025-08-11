@@ -161,7 +161,7 @@ async function loadWorkCards() {
       const cardDiv = document.createElement("div");
       cardDiv.className = "work-item";
       const cover = covers.find((c) => c.titles.pt.toLowerCase() === cardData.coverKey.toLowerCase());
-      const coverUrl = cover ? cover.url : `${getBasePath()}/imagens/placeholder.png`;
+      const coverUrl = cover ? cover.url : `https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/placeholder.png`;
       const targetFile = (pageMap[cardData.pageKey] && pageMap[cardData.pageKey][getCurrentLanguage()]) || cardData.pageKey;
       cardDiv.innerHTML = `
       <img src="${coverUrl}" alt="${getTranslation(cardData.titleKey)}">
@@ -202,7 +202,7 @@ async function loadPagePreviews() {
           imgElement.alt = getTranslation(altTextKey);
         } else {
           console.warn(`Capa para '${item.coverTitleKey}' não encontrada no data.json`);
-          imgElement.src = `${getBasePath()}/imagens/placeholder.png`;
+          imgElement.src = `https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/placeholder.png`;
         }
       }
     });
@@ -245,7 +245,6 @@ function loadNewsletterForm() {
 }
 
 function setupHeader() {
-  
   const menuToggle = document.querySelector(".menu-toggle");
   const navLinks = document.querySelector(".nav-links");
   if (menuToggle && navLinks) {
@@ -329,12 +328,10 @@ async function updateStaticImages() {
   const logoImage = document.querySelector(".logo img");
   const ogImageMeta = document.querySelector('meta[property="og:image"]');
   const twitterImageMeta = document.querySelector('meta[name="twitter:image"]');
-
   try {
     const response = await fetch(`${getBasePath()}/data.json`);
     if (!response.ok) throw new Error("Failed to fetch data.json for static images");
     const data = await response.json();
-
     const updateImageSrc = (element, key) => {
       const imageData = data[key];
       if (imageData && imageData.url) {
@@ -343,20 +340,18 @@ async function updateStaticImages() {
         console.warn(`${key} data not found in data.json`);
       }
     };
-
     if (profilePicElement) {
-      updateImageSrc(profilePicElement, "profile_picture.png");
+      updateImageSrc(profilePicElement, "Foto de perfil.png");
     }
     if (logoImage) {
-      updateImageSrc(logoImage, "logo.png");
+      updateImageSrc(logoImage, "Logo.png");
     }
     if (ogImageMeta) {
-      updateImageSrc(ogImageMeta, "banner.png");
+      updateImageSrc(ogImageMeta, "Banner.png");
     }
     if (twitterImageMeta) {
-      updateImageSrc(twitterImageMeta, "banner.png");
+      updateImageSrc(twitterImageMeta, "Banner.png");
     }
-
   } catch (error) {
     console.error("Error loading static images:", error);
   }
@@ -367,7 +362,7 @@ function onPageLoad() {
   const lang = pathSegments.find((seg) => ["pt", "en", "es"].includes(seg)) || "pt";
   setLanguage(lang);
   applyTranslations();
-  updateStaticImages(); // Call the new function here
+  updateStaticImages();
   if (document.querySelector(".hero-carousel")) {
     loadDynamicCarousel();
     loadWorkCards();

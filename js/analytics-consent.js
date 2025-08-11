@@ -20,7 +20,9 @@ class AnalyticsConsent {
     }
   }
   handleConsentChange(detail) {
-    const { preferences } = detail;
+    const {
+      preferences
+    } = detail;
     if (preferences.analytics && !this.isLoaded) {
       this.loadAnalytics();
     } else if (!preferences.analytics && this.isLoaded) {
@@ -60,7 +62,9 @@ class AnalyticsConsent {
   disableAnalytics() {
     if (!this.isLoaded) return;
     if (window.gtag) {
-      gtag("consent", "update", { analytics_storage: "denied" });
+      gtag("consent", "update", {
+        analytics_storage: "denied"
+      });
     }
     this.removeAnalyticsCookies();
     this.consentGiven = false;
@@ -161,124 +165,124 @@ class AnalyticsConsent {
         (window.scrollY /
           (document.documentElement.scrollHeight - window.innerHeight)) *
           100,
-      );
-      if (scrollPercent > maxScroll) {
-        maxScroll = scrollPercent;
-        scrollThresholds.forEach((threshold) => {
-          if (
-            scrollPercent >= threshold &&
-            !thresholdsPassed.includes(threshold)
-          ) {
-            thresholdsPassed.push(threshold);
-            gtag("event", "scroll", {
-              event_category: "engagement",
-              event_label: `${threshold}%`,
-              value: threshold,
-            });
-          }
-        });
-      }
-    });
+        );
+        if (scrollPercent > maxScroll) {
+          maxScroll = scrollPercent;
+          scrollThresholds.forEach((threshold) => {
+            if (
+              scrollPercent >= threshold &&
+              !thresholdsPassed.includes(threshold)
+            ) {
+              thresholdsPassed.push(threshold);
+              gtag("event", "scroll", {
+                event_category: "engagement",
+                event_label: `${threshold}%`,
+                value: threshold,
+              });
+            }
+          });
+        }
+      });
+    }
+    trackEvent(eventName, parameters = {}) {
+      if (!this.consentGiven || !window.gtag) return;
+      gtag("event", eventName, {
+        event_category: parameters.category || "custom",
+        event_label: parameters.label || "",
+        value: parameters.value || 0,
+        ...parameters,
+      });
+    }
+    trackPageView(pagePath = null) {
+      if (!this.consentGiven || !window.gtag) return;
+      gtag("config", this.measurementId, {
+        page_path: pagePath || window.location.pathname,
+      });
+    }
+    trackConversion(conversionId, conversionLabel = "") {
+      if (!this.consentGiven || !window.gtag) return;
+      gtag("event", "conversion", {
+        send_to: `${conversionId}/${conversionLabel}`,
+      });
+    }
+    trackPurchase(transactionId, items, value, currency = "EUR") {
+      if (!this.consentGiven || !window.gtag) return;
+      gtag("event", "purchase", {
+        transaction_id: transactionId,
+        value: value,
+        currency: currency,
+        items: items,
+      });
+    }
+    getAnalyticsStatus() {
+      return {
+        isLoaded: this.isLoaded,
+        consentGiven: this.consentGiven,
+        measurementId: this.measurementId,
+        gtagAvailable: typeof window.gtag !== "undefined",
+      };
+    }
   }
-  trackEvent(eventName, parameters = {}) {
-    if (!this.consentGiven || !window.gtag) return;
-    gtag("event", eventName, {
-      event_category: parameters.category || "custom",
-      event_label: parameters.label || "",
-      value: parameters.value || 0,
-      ...parameters,
-    });
+  class BeatrizAnalytics extends AnalyticsConsent {
+    constructor() {
+      super("G-ZW5DLGF7RF");
+      this.setupPortfolioTracking();
+    }
+    setupPortfolioTracking() {
+      this.trackPortfolioViews();
+      this.trackGalleryInteractions();
+      this.trackContactFormSubmissions();
+    }
+    trackPortfolioViews() {
+      const sections = ["presentations", "designs", "photos", "videos"];
+      sections.forEach((section) => {
+        if (window.location.pathname.includes(section)) {
+          this.trackEvent("portfolio_view", {
+            category: "portfolio",
+            label: section,
+          });
+        }
+      });
+    }
+    trackGalleryInteractions() {
+      document.addEventListener("click", (event) => {
+        if (!this.consentGiven) return;
+        const galleryItem = event.target.closest(".gallery-item, .work-item");
+        if (galleryItem) {
+          this.trackEvent("gallery_interaction", {
+            category: "engagement",
+            label: "gallery_item_click",
+          });
+        }
+        const carouselBtn = event.target.closest(".carousel-btn");
+        if (carouselBtn) {
+          this.trackEvent("carousel_interaction", {
+            category: "engagement",
+            label: carouselBtn.classList.contains("next") ? "next" : "prev",
+          });
+        }
+      });
+    }
+    trackContactFormSubmissions() {
+      document.addEventListener("submit", (event) => {
+        if (!this.consentGiven) return;
+        const form = event.target;
+        if (
+          form.id === "contact-form" ||
+          form.classList.contains("contact-form")
+        ) {
+          this.trackEvent("form_submit", {
+            category: "contact",
+            label: "contact_form",
+          });
+        }
+      });
+    }
   }
-  trackPageView(pagePath = null) {
-    if (!this.consentGiven || !window.gtag) return;
-    gtag("config", this.measurementId, {
-      page_path: pagePath || window.location.pathname,
-    });
-  }
-  trackConversion(conversionId, conversionLabel = "") {
-    if (!this.consentGiven || !window.gtag) return;
-    gtag("event", "conversion", {
-      send_to: `${conversionId}/${conversionLabel}`,
-    });
-  }
-  trackPurchase(transactionId, items, value, currency = "EUR") {
-    if (!this.consentGiven || !window.gtag) return;
-    gtag("event", "purchase", {
-      transaction_id: transactionId,
-      value: value,
-      currency: currency,
-      items: items,
-    });
-  }
-  getAnalyticsStatus() {
-    return {
-      isLoaded: this.isLoaded,
-      consentGiven: this.consentGiven,
-      measurementId: this.measurementId,
-      gtagAvailable: typeof window.gtag !== "undefined",
-    };
-  }
-}
-class BeatrizAnalytics extends AnalyticsConsent {
-  constructor() {
-    super("G-ZW5DLGF7RF");
-    this.setupPortfolioTracking();
-  }
-  setupPortfolioTracking() {
-    this.trackPortfolioViews();
-    this.trackGalleryInteractions();
-    this.trackContactFormSubmissions();
-  }
-  trackPortfolioViews() {
-    const sections = ["presentations", "designs", "photos", "videos"];
-    sections.forEach((section) => {
-      if (window.location.pathname.includes(section)) {
-        this.trackEvent("portfolio_view", {
-          category: "portfolio",
-          label: section,
-        });
-      }
-    });
-  }
-  trackGalleryInteractions() {
-    document.addEventListener("click", (event) => {
-      if (!this.consentGiven) return;
-      const galleryItem = event.target.closest(".gallery-item, .work-item");
-      if (galleryItem) {
-        this.trackEvent("gallery_interaction", {
-          category: "engagement",
-          label: "gallery_item_click",
-        });
-      }
-      const carouselBtn = event.target.closest(".carousel-btn");
-      if (carouselBtn) {
-        this.trackEvent("carousel_interaction", {
-          category: "engagement",
-          label: carouselBtn.classList.contains("next") ? "next" : "prev",
-        });
-      }
-    });
-  }
-  trackContactFormSubmissions() {
-    document.addEventListener("submit", (event) => {
-      if (!this.consentGiven) return;
-      const form = event.target;
-      if (
-        form.id === "contact-form" ||
-        form.classList.contains("contact-form")
-      ) {
-        this.trackEvent("form_submit", {
-          category: "contact",
-          label: "contact_form",
-        });
-      }
-    });
-  }
-}
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    window.beatrizAnalytics = new BeatrizAnalytics();
-  }, 1000);
-});
-window.AnalyticsConsent = AnalyticsConsent;
-window.BeatrizAnalytics = BeatrizAnalytics;
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      window.beatrizAnalytics = new BeatrizAnalytics();
+    }, 1000);
+  });
+  window.AnalyticsConsent = AnalyticsConsent;
+  window.BeatrizAnalytics = BeatrizAnalytics;

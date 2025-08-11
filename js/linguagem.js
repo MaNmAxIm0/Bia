@@ -1,4 +1,6 @@
-import { translations } from "./traducao.js";
+import {
+  translations
+} from "./traducao.js";
 
 let currentLanguage = "pt";
 

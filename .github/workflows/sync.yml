@@ -16,7 +16,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Adicionar diretório seguro para Git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      
       - name: Configurar rclone
         run: |
           mkdir -p ~/.config/rclone

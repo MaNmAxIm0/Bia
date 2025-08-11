@@ -111,7 +111,52 @@ class CookieConsent {
     const marketingChecked = currentPreferences.marketing ? "checked" : "";
     const modal = document.createElement("div");
     modal.className = "cookie-settings-modal";
-    modal.innerHTML = `    <div class="cookie-settings-overlay" onclick="cookieConsent.closeSettings()"></div>    <div class="cookie-settings-content">    <div class="cookie-settings-header">    <h3>${this.getTranslation("settings")}</h3>    <button class="cookie-settings-close" onclick="cookieConsent.closeSettings()">×</button>    </div>    <div class="cookie-settings-body">    <div class="cookie-category">    <div class="cookie-category-header">    <label class="cookie-switch">    <input type="checkbox" id="necessary-cookies" checked disabled>    <span class="cookie-slider"></span>    </label>    <h4>${this.getTranslation("necessary")}</h4>    </div>    <p>${this.getTranslation("necessaryDesc")}</p>    </div>    <div class="cookie-category">    <div class="cookie-category-header">    <label class="cookie-switch">    <input type="checkbox" id="analytics-cookies" ${analyticsChecked}>    <span class="cookie-slider"></span>    </label>    <h4>${this.getTranslation("analytics")}</h4>    </div>    <p>${this.getTranslation("analyticsDesc")}</p>    </div>    <div class="cookie-category">    <div class="cookie-category-header">    <label class="cookie-switch">    <input type="checkbox" id="marketing-cookies" ${marketingChecked}>    <span class="cookie-slider"></span>    </label>    <h4>${this.getTranslation("marketing")}</h4>    </div>    <p>${this.getTranslation("marketingDesc")}</p>    </div>    </div>    <div class="cookie-settings-footer">    <button class="cookie-btn cookie-btn-save" onclick="cookieConsent.savePreferences()">    ${this.getTranslation("save")}    </button>    </div>    </div>    `;
+    modal.innerHTML = `
+      <div class="cookie-settings-overlay" onclick="cookieConsent.closeSettings()"></div>
+      <div class="cookie-settings-content">
+        <div class="cookie-settings-header">
+          <h3>${this.getTranslation("settings")}</h3>
+          <button class="cookie-settings-close" onclick="cookieConsent.closeSettings()">×</button>
+        </div>
+        <div class="cookie-settings-body">
+          <div class="cookie-category">
+            <div class="cookie-category-header">
+              <label class="cookie-switch">
+                <input type="checkbox" id="necessary-cookies" checked disabled />
+                <span class="cookie-slider"></span>
+              </label>
+              <h4>${this.getTranslation("necessary")}</h4>
+            </div>
+            <p>${this.getTranslation("necessaryDesc")}</p>
+          </div>
+          <div class="cookie-category">
+            <div class="cookie-category-header">
+              <label class="cookie-switch">
+                <input type="checkbox" id="analytics-cookies" ${analyticsChecked} />
+                <span class="cookie-slider"></span>
+              </label>
+              <h4>${this.getTranslation("analytics")}</h4>
+            </div>
+            <p>${this.getTranslation("analyticsDesc")}</p>
+          </div>
+          <div class="cookie-category">
+            <div class="cookie-category-header">
+              <label class="cookie-switch">
+                <input type="checkbox" id="marketing-cookies" ${marketingChecked} />
+                <span class="cookie-slider"></span>
+              </label>
+              <h4>${this.getTranslation("marketing")}</h4>
+            </div>
+            <p>${this.getTranslation("marketingDesc")}</p>
+          </div>
+        </div>
+        <div class="cookie-settings-footer">
+          <button class="cookie-btn cookie-btn-save" onclick="cookieConsent.savePreferences()">
+            ${this.getTranslation("save")}
+          </button>
+        </div>
+      </div>
+    `;
     return modal;
   }
   closeSettings() {

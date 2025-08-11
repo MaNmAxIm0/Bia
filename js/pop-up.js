@@ -16,7 +16,7 @@ export function openLightbox(items, index) {
   contentWrapper.className = "lightbox-content";
   if (item.type === "image") {
     const img = new Image();
-    img.onload = function () {
+    img.onload = function() {
       contentWrapper.appendChild(img);
       addControls(lightbox, contentWrapper, item.title);
       lightbox.appendChild(contentWrapper);
@@ -75,8 +75,8 @@ function showNext() {
 
 function showPrev() {
   currentIndex =
-    (currentIndex - 1 + currentGalleryItems.length) %
-    currentGalleryItems.length;
+  (currentIndex - 1 + currentGalleryItems.length) %
+  currentGalleryItems.length;
   openLightbox(currentGalleryItems, currentIndex);
 }
 
@@ -91,14 +91,14 @@ function closeLightbox() {
 }
 
 function setupLightboxEventListeners() {
-  document.body.addEventListener("click", function (e) {
+  document.body.addEventListener("click", function(e) {
     if (e.target.matches("#lightbox")) {
       e.preventDefault();
       e.stopPropagation();
       closeLightbox();
     }
   });
-  document.addEventListener("keydown", function (e) {
+  document.addEventListener("keydown", function(e) {
     const lightbox = document.getElementById("lightbox");
     if (!lightbox?.classList.contains("active")) return;
     if (e.key === "Escape") {

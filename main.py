@@ -21,17 +21,12 @@ def setup_logging():
     root_logger.handlers.clear()
   lisbon_tz = ZoneInfo("Europe/Lisbon")
   logging.Formatter.converter = lambda *args: datetime.now(lisbon_tz).timetuple()
-  
-  # Console handler
   console_handler = logging.StreamHandler()
   console_handler.setFormatter(log_formatter)
   root_logger.addHandler(console_handler)
-
-  # File handler
   file_handler = logging.FileHandler("workflow.log", encoding="utf-8")
   file_handler.setFormatter(log_formatter)
   root_logger.addHandler(file_handler)
-
   root_logger.setLevel(logging.INFO)
 
 def get_media_orientation(file_path: Path) -> str:
@@ -56,7 +51,6 @@ def main():
     path.mkdir(exist_ok=True)
   if not sync_rclone(config.DRIVE_REMOTE_PATH, str(config.LOCAL_ASSETS_DIR), "Sincronizar Google Drive", "--fast-list"):
     return
-  
   logging.info("A obter metadados dos ficheiros existentes no R2...")
   r2_files_metadata = {}
   try:
@@ -68,7 +62,6 @@ def main():
     logging.info(f"Metadados de {len(r2_files_metadata)} ficheiros do R2 obtidos.")
   except Exception as e:
     logging.error(f"Erro ao obter metadados do R2: {e}")
-  
   manifest_entries = []
   failed_files = []
   for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
