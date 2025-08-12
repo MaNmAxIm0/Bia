@@ -126,7 +126,12 @@ def main():
   failed_files = []
   # Lógica para copiar Banner, Logo e Foto de perfil SEM marca de água e apenas se não existirem ou se o Drive for mais recente
   imagens_dir = Path("imagens")
-  imagens_dir.mkdir(exist_ok=True)
+  # Garante que a pasta imagens existe e está no repositório
+  if not imagens_dir.exists():
+    imagens_dir.mkdir(exist_ok=True)
+    # Cria um arquivo .gitkeep para garantir que a pasta seja versionada
+    with open(imagens_dir / ".gitkeep", "w") as f:
+      f.write("")
   for special_name in ["Logo.png", "Banner.png", "Foto de perfil.png"]:
     drive_path = next((Path(p) for p in drive_files_metadata if Path(p).name == special_name), None)
     if drive_path:
@@ -138,6 +143,10 @@ def main():
         if src.exists():
           # Comprimir SEM marca de água
           process_image(src, local_path, apply_watermark_flag=False)
+          # Garante que o arquivo será adicionado ao git se não existir
+          if not (imagens_dir / ".gitkeep").exists():
+            with open(imagens_dir / ".gitkeep", "w") as f:
+              f.write("")
         else:
           logging.warning(f"Arquivo especial {special_name} não encontrado em {src}")
       # Atualizar data.json para apontar para /imagens/NOME.png
