@@ -246,6 +246,3 @@
 2025-08-11 21:07:57 Fotografias/315.JPG
 2025-08-11 21:07:56 Fotografias/332.JPG
 2025-08-11 21:07:56 Fotografias/305.JPG
-2025-08-11 21:07:55 Logo.png
-2025-08-11 21:07:55 Foto de perfil.png
-2025-08-11 21:07:55 Banner.png

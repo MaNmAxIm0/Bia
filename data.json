@@ -1,6 +1,5 @@
 {
   "Banner.png": {
-  "Banner.png": {
     "titles": {
       "pt": "Banner",
       "en": "Banner",
@@ -8,32 +7,6 @@
     },
     "orientation": "horizontal",
     "url": "/imagens/Banner.png"
-  },
-  "Foto de perfil.png": {
-    "titles": {
-      "pt": "Foto de perfil",
-      "en": "Profile picture",
-      "es": "Foto de perfil"
-    },
-    "orientation": "square",
-    "url": "/imagens/Foto de perfil.png"
-  },
-  "Logo.png": {
-    "titles": {
-      "pt": "Logo",
-      "en": "Logo",
-      "es": "Logo"
-    },
-    "orientation": "square",
-    "url": "/imagens/Logo.png"
-  },
-    "titles": {
-      "pt": "332",
-      "en": "332",
-      "es": "332"
-    },
-    "orientation": "vertical",
-    "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Fotografias/332.JPG"
   },
   "305.JPG": {
     "titles": {
@@ -2145,5 +2118,23 @@
     },
     "orientation": "horizontal",
     "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Designs/1752175793688.jpeg"
+  },
+  "Logo.png": {
+    "titles": {
+      "pt": "Logo",
+      "en": "Logo",
+      "es": "Logo"
+    },
+    "orientation": "horizontal",
+    "url": "/imagens/Logo.png"
+  },
+  "Foto de perfil.png": {
+    "titles": {
+      "pt": "Foto de perfil",
+      "en": "Foto de perfil",
+      "es": "Foto de perfil"
+    },
+    "orientation": "horizontal",
+    "url": "/imagens/Foto de perfil.png"
   }
 }
