@@ -1,21 +1,22 @@
 {
   "Banner.png": {
+  "Banner.png": {
     "titles": {
       "pt": "Banner",
       "en": "Banner",
       "es": "Banner"
     },
     "orientation": "horizontal",
-    "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Banner.png"
+    "url": "/imagens/Banner.png"
   },
   "Foto de perfil.png": {
     "titles": {
       "pt": "Foto de perfil",
-      "en": "Foto de perfil",
+      "en": "Profile picture",
       "es": "Foto de perfil"
     },
-    "orientation": "horizontal",
-    "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Foto de perfil.png"
+    "orientation": "square",
+    "url": "/imagens/Foto de perfil.png"
   },
   "Logo.png": {
     "titles": {
@@ -23,10 +24,9 @@
       "en": "Logo",
       "es": "Logo"
     },
-    "orientation": "horizontal",
-    "url": "https://pub-ff3d4811ffc342b7800d644cf981e731.r2.dev/Logo.png"
+    "orientation": "square",
+    "url": "/imagens/Logo.png"
   },
-  "332.JPG": {
     "titles": {
       "pt": "332",
       "en": "332",

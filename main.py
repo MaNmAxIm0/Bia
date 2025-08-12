@@ -124,8 +124,34 @@ def main():
       final_data = {}
   manifest_entries = []
   failed_files = []
+  # Lógica para copiar Banner, Logo e Foto de perfil SEM marca de água e apenas se não existirem ou se o Drive for mais recente
+  imagens_dir = Path("imagens")
+  imagens_dir.mkdir(exist_ok=True)
+  for special_name in ["Logo.png", "Banner.png", "Foto de perfil.png"]:
+    drive_path = next((Path(p) for p in drive_files_metadata if Path(p).name == special_name), None)
+    if drive_path:
+      local_path = imagens_dir / special_name
+      drive_mod = drive_files_metadata[str(drive_path)]
+      if not local_path.exists() or drive_mod > datetime.fromtimestamp(local_path.stat().st_mtime, tz=timezone.utc):
+        # Copiar do Drive para local_assets se necessário
+        src = config.LOCAL_ASSETS_DIR / drive_path
+        if src.exists():
+          # Comprimir SEM marca de água
+          process_image(src, local_path, apply_watermark_flag=False)
+        else:
+          logging.warning(f"Arquivo especial {special_name} não encontrado em {src}")
+      # Atualizar data.json para apontar para /imagens/NOME.png
+      stem = local_path.stem
+      titles = stem.split("_")
+      title_pt, title_en, title_es = (titles[0] if titles else stem, titles[1] if len(titles) > 1 else titles[0], titles[2] if len(titles) > 2 else titles[0])
+      entry = {"titles": {"pt": title_pt, "en": title_en, "es": title_es}, "orientation": get_media_orientation(local_path), "url": f"/imagens/{special_name}"}
+      final_data[special_name] = entry
+
+  # Processamento normal dos outros ficheiros
   for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
     relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
+    if input_path.name in ["Logo.png", "Banner.png", "Foto de perfil.png"]:
+      continue
     if input_path.suffix.lower() in config.PPTX_EXTENSIONS:
       output_path = (config.PROCESSED_ASSETS_DIR / relative_path).with_suffix(".pdf")
     else:
@@ -136,6 +162,49 @@ def main():
     no_watermark_folders = ["Melhores", "Capas", "Apresentações", config.THUMBNAIL_DIR.name, ""]
     should_apply_watermark = parent_folder not in no_watermark_folders
     processed_successfully = True
+    if ext in [".gdoc", ".gsheet", ".gslides"]:
+      shutil.copy2(input_path, output_path)
+    elif ext in config.PPTX_EXTENSIONS:
+      logging.info(f"Convertendo {input_path.name} para PDF...")
+      convert_cmd = [
+        "libreoffice",
+        "--headless",
+        "--convert-to",
+        "pdf",
+        "--outdir",
+        str(output_path.parent),
+        str(input_path)
+      ]
+      try:
+        subprocess.run(convert_cmd, check=True, capture_output=True, text=True, encoding='utf-8', timeout=900)
+        compress_pdf(output_path, output_path)
+      except subprocess.CalledProcessError as e:
+        logging.error(f"FALHA ao converter {input_path.name} para PDF: {e.stderr.strip()}")
+        processed_successfully = False
+        failed_files.append(str(relative_path))
+      except Exception as e:
+        logging.error(f"Erro inesperado ao converter {input_path.name} para PDF: {e}")
+        processed_successfully = False
+        failed_files.append(str(relative_path))
+    elif ext in config.PDF_EXTENSIONS:
+      compress_pdf(input_path, output_path)
+    elif ext in config.IMAGE_EXTENSIONS:
+      process_image(input_path, output_path, apply_watermark_flag=should_apply_watermark)
+    elif ext in config.VIDEO_EXTENSIONS:
+      if not process_video(input_path, output_path, apply_watermark_flag=should_apply_watermark):
+        processed_successfully = False
+        failed_files.append(str(relative_path))
+    else:
+      continue
+    if processed_successfully:
+      manifest_entries.append(f"{relative_path.as_posix()} - {datetime.now().isoformat()}")
+      stem = output_path.stem
+      titles = stem.split("_")
+      title_pt, title_en, title_es = (titles[0] if titles else stem, titles[1] if len(titles) > 1 else titles[0], titles[2] if len(titles) > 2 else titles[0])
+      entry = {"titles": {"pt": title_pt, "en": title_en, "es": title_es}, "orientation": get_media_orientation(output_path), "url": f"{config.R2_PUBLIC_URL}/{relative_path.as_posix()}"}
+      if ext in config.VIDEO_EXTENSIONS:
+        entry["thumbnail_url"] = f"{config.R2_PUBLIC_URL}/{config.THUMBNAIL_DIR.name}/{stem}_thumb.jpg"
+      final_data[output_path.name] = entry
     if ext in [".gdoc", ".gsheet", ".gslides"]:
       shutil.copy2(input_path, output_path)
     elif ext in config.PPTX_EXTENSIONS:
