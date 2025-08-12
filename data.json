@@ -6,7 +6,7 @@
       "es": "Banner"
     },
     "orientation": "horizontal",
-    "url": "/imagens/Banner.png"
+    "url": "https://manmaxim0.github.io/Bia/imagens/Banner.png"
   },
   "305.JPG": {
     "titles": {
@@ -2126,7 +2126,7 @@
       "es": "Logo"
     },
     "orientation": "horizontal",
-    "url": "/imagens/Logo.png"
+    "url": "https://manmaxim0.github.io/Bia/imagens/Logo.png"
   },
   "Foto de perfil.png": {
     "titles": {
@@ -2135,6 +2135,6 @@
       "es": "Foto de perfil"
     },
     "orientation": "horizontal",
-    "url": "/imagens/Foto de perfil.png"
+    "url": "https://manmaxim0.github.io/Bia/imagens/Foto%20de%20perfil.png"
   }
 }

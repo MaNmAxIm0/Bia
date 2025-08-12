@@ -338,19 +338,25 @@ async function updateStaticImages() {
     const updateImageSrc = (element, key) => {
       const imageData = data[key];
       if (imageData && imageData.url) {
-        // Preload the new image, only swap src when loaded
-        const tempImg = new window.Image();
-        tempImg.onload = () => {
-          element.src = imageData.url;
-          element.classList.remove('logo-hidden');
-        };
-        tempImg.onerror = () => {
-          element.classList.remove('logo-hidden'); // fallback remains
-        };
-        tempImg.src = imageData.url;
+        if (element.tagName === 'META') {
+          element.content = imageData.url;
+        } else {
+          // Preload the new image, only swap src when loaded
+          const tempImg = new window.Image();
+          tempImg.onload = () => {
+            element.src = imageData.url;
+            element.classList.remove('logo-hidden');
+          };
+          tempImg.onerror = () => {
+            element.classList.remove('logo-hidden'); // fallback remains
+          };
+          tempImg.src = imageData.url;
+        }
       } else {
         console.warn(`${key} data not found in data.json`);
-        element.classList.remove('logo-hidden'); // Show fallback if not found
+        if (element.tagName !== 'META') {
+          element.classList.remove('logo-hidden'); // Show fallback if not found
+        }
       }
     };
     if (profilePicElement) {
