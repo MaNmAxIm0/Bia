@@ -124,39 +124,30 @@ def main():
       final_data = {}
   manifest_entries = []
   failed_files = []
-  # Lógica para copiar Banner, Logo e Foto de perfil SEM marca de água e apenas se não existirem ou se o Drive for mais recente
   imagens_dir = Path("imagens")
-  # Garante que a pasta imagens existe e está no repositório
   if not imagens_dir.exists():
     imagens_dir.mkdir(exist_ok=True)
-    # Cria um arquivo .gitkeep para garantir que a pasta seja versionada
     with open(imagens_dir / ".gitkeep", "w") as f:
       f.write("")
   for special_name in ["Logo.png", "Banner.png", "Foto de perfil.png"]:
     drive_path = next((Path(p) for p in drive_files_metadata if Path(p).name == special_name), None)
     if drive_path:
-      local_path = imagens_dir / special_name
+      src = config.LOCAL_ASSETS_DIR / drive_path
+      dest = imagens_dir / special_name
       drive_mod = drive_files_metadata[str(drive_path)]
-      if not local_path.exists() or drive_mod > datetime.fromtimestamp(local_path.stat().st_mtime, tz=timezone.utc):
-        # Copiar do Drive para local_assets se necessário
-        src = config.LOCAL_ASSETS_DIR / drive_path
-        if src.exists():
-          # Comprimir SEM marca de água
-          process_image(src, local_path, apply_watermark_flag=False)
-          # Garante que o arquivo será adicionado ao git se não existir
-          if not (imagens_dir / ".gitkeep").exists():
-            with open(imagens_dir / ".gitkeep", "w") as f:
-              f.write("")
-        else:
-          logging.warning(f"Arquivo especial {special_name} não encontrado em {src}")
-      # Atualizar data.json para apontar para /imagens/NOME.png
-      stem = local_path.stem
+      if src.exists() and (not dest.exists() or drive_mod > datetime.fromtimestamp(dest.stat().st_mtime, tz=timezone.utc)):
+        process_image(src, dest, apply_watermark_flag=False)
+        if not (imagens_dir / ".gitkeep").exists():
+          with open(imagens_dir / ".gitkeep", "w") as f:
+            f.write("")
+      elif not src.exists():
+        logging.warning(f"Arquivo especial {special_name} não encontrado em {src}")
+      stem = dest.stem
       titles = stem.split("_")
       title_pt, title_en, title_es = (titles[0] if titles else stem, titles[1] if len(titles) > 1 else titles[0], titles[2] if len(titles) > 2 else titles[0])
-      entry = {"titles": {"pt": title_pt, "en": title_en, "es": title_es}, "orientation": get_media_orientation(local_path), "url": f"/imagens/{special_name}"}
+      entry = {"titles": {"pt": title_pt, "en": title_en, "es": title_es}, "orientation": get_media_orientation(dest), "url": f"/imagens/{special_name}"}
       final_data[special_name] = entry
 
-  # Processamento normal dos outros ficheiros
   for input_path in tqdm(list(config.LOCAL_ASSETS_DIR.rglob("*.*")), desc="Processando Ficheiros"):
     relative_path = input_path.relative_to(config.LOCAL_ASSETS_DIR)
     if input_path.name in ["Logo.png", "Banner.png", "Foto de perfil.png"]:
@@ -280,6 +271,22 @@ def main():
       f.write("Nenhum ficheiro falhou o processamento.")
   sync_rclone(str(config.PROCESSED_ASSETS_DIR), config.R2_REMOTE_PATH, "Sincronizar para R2")
   logging.info("--- WORKFLOW CONCLUÍDO ---")
+
+  try:
+    import subprocess
+    imagens_dir = Path("imagens")
+    subprocess.run(["git", "add", str(imagens_dir / "*")], check=False)
+    subprocess.run(["git", "add", str(imagens_dir / ".gitkeep")], check=False)
+    commit_msg = "Adiciona/atualiza Banner, Logo e Foto de perfil na pasta imagens (automático)"
+    result = subprocess.run(["git", "status", "--porcelain", str(imagens_dir)], capture_output=True, text=True)
+    if result.stdout.strip():
+      subprocess.run(["git", "commit", "-m", commit_msg], check=False)
+      subprocess.run(["git", "push"], check=False)
+      logging.info("Alterações na pasta imagens enviadas para o GitHub.")
+    else:
+      logging.info("Nenhuma alteração na pasta imagens para enviar ao GitHub.")
+  except Exception as e:
+    logging.error(f"Erro ao tentar automatizar git add/commit/push para imagens: {e}")
 
 if __name__ == "__main__":
   main()
