@@ -273,7 +273,6 @@ def main():
   logging.info("--- WORKFLOW CONCLUÍDO ---")
 
   try:
-    import subprocess
     imagens_dir = Path("imagens")
     subprocess.run(["git", "add", str(imagens_dir / "*")], check=False)
     subprocess.run(["git", "add", str(imagens_dir / ".gitkeep")], check=False)
